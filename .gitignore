@@ -1,3 +1,8 @@
+
+#Project files and folders
+*.sdf
+ipch
+
 # Compiled Object files
 *.slo
 *.lo
