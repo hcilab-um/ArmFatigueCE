@@ -2,6 +2,11 @@
 #Project files and folders
 *.sdf
 ipch
+*.opensdf
+bin
+obj
+Debug
+Release
 
 # Compiled Object files
 *.slo
