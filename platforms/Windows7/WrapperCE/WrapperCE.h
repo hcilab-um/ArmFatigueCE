@@ -2,12 +2,23 @@
 
 #pragma once
 
+#include "ArmFatigueCE.h"
+#include "InterOp.h"
+
 using namespace System;
 
-namespace WrapperCE {
-
-	public ref class Class1
+namespace WrapperCE 
+{
+	public ref class EngineCE
 	{
-		// TODO: Add your methods for this class here.
+	private:
+		FatigueEngine* engineCE;
+		Point3D Convert(WrapperCE::InterOp::Point3D source);
+
+	public:
+		EngineCE();
+		~EngineCE();
+
+		WrapperCE::InterOp::ArmFatigueUpdate ProcessNewSkeletonData(WrapperCE::InterOp::SkeletonData armsData);
 	};
 }
