@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{1873A84D-73E1-4667-BB0A-4D0003F83C44}</ProjectGuid>
+    <ProjectGuid>{A4F7B417-E943-4953-9A5A-09490C53B633}</ProjectGuid>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>WrapperCE</RootNamespace>

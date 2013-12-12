@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{E0F96B61-BCCB-473C-B2A1-9BC1209956AB}</ProjectGuid>
+    <ProjectGuid>{39DB7D4D-DDFA-4B17-8A11-F9330B376C6D}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DemoCE</RootNamespace>
