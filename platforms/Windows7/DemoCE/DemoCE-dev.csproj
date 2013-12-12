@@ -108,6 +108,12 @@
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WrapperCE\WrapperCE-dev.vcxproj">
+      <Project>{1873A84D-73E1-4667-BB0A-4D0003F83C44}</Project>
+      <Name>WrapperCE-dev</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

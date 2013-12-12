@@ -164,6 +164,11 @@
   <ItemGroup>
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\ArmText\Src\ArmFatigueCE\ArmFatigueCE-dynamic.vcxproj">
+      <Project>{28c1a85d-50e7-4f2b-aba2-ca59b3c4cc04}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
