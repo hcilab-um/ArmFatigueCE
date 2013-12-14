@@ -18,6 +18,7 @@ namespace WrapperCE
 
 	WrapperCE::InterOp::ArmFatigueUpdate EngineCE::ProcessNewSkeletonData(WrapperCE::InterOp::SkeletonData armsData)
 	{
+		//general.h SkeletonData
 		SkeletonData input;
 		input.rightShoulderCms = Convert(armsData.rightShoulderCms);
 		input.rightElbowCms = Convert(armsData.rightElbowCms);
@@ -29,13 +30,12 @@ namespace WrapperCE
 
 		WrapperCE::InterOp::ArmFatigueUpdate interOp = WrapperCE::InterOp::ArmFatigueUpdate();
 		interOp.LeftArm.Theta = update.LeftArm.Theta;
-
 		return interOp;
 	}
 
-	Point3D EngineCE::Convert(WrapperCE::InterOp::Point3D source)
+	Vector3D EngineCE::Convert(WrapperCE::InterOp::Vector3D source)
 	{
-		return Point3D(source.X, source.Y, source.Z);
+		return Vector3D(source.X, source.Y, source.Z);
 	}
 }
 

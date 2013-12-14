@@ -6,7 +6,7 @@ namespace WrapperCE
 
 		public enum Arm { LeftArm, RightArm };
 
-		public value struct Point3D
+		public value struct Vector3D
 		{
 		public:
 			double X;
@@ -14,15 +14,13 @@ namespace WrapperCE
 			double Z;
 		};
 
-		#define Vector3D Point3D
-
 		public value struct FatigueData
 		{
 		public:
 			Arm TargetArm;
 
 			double Theta;
-			Point3D CenterOfMass;
+			Vector3D CenterOfMass;
 			Vector3D Displacement;
 			Vector3D Velocity;
 			Vector3D Acceleration;
@@ -47,12 +45,12 @@ namespace WrapperCE
 
 		public value struct SkeletonData
 		{
-			Point3D rightShoulderCms;
-			Point3D rightElbowCms;
-			Point3D rightHandCms;
-			Point3D leftShoulderCms;
-			Point3D leftElbowCms;
-			Point3D leftHandCms;
+			Vector3D rightShoulderCms;
+			Vector3D rightElbowCms;
+			Vector3D rightHandCms;
+			Vector3D leftShoulderCms;
+			Vector3D leftElbowCms;
+			Vector3D leftHandCms;
 		};
 	}
 }

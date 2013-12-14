@@ -144,13 +144,13 @@ namespace DemoCE
 			}
 		}
 
-		private WrapperCE.InterOp.Point3D Convert(SkeletonPoint trackedPoint)
+		private WrapperCE.InterOp.Vector3D Convert(SkeletonPoint trackedPoint)
 		{
-			WrapperCE.InterOp.Point3D point3D;
-			point3D.X = trackedPoint.X;
-			point3D.Y = trackedPoint.Y;
-			point3D.Z = trackedPoint.Z;
-			return point3D;
+			WrapperCE.InterOp.Vector3D vector3D;
+			vector3D.X = trackedPoint.X;
+			vector3D.Y = trackedPoint.Y;
+			vector3D.Z = trackedPoint.Z;
+			return vector3D;
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;

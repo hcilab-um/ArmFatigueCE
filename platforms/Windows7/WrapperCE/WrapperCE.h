@@ -13,7 +13,7 @@ namespace WrapperCE
 	{
 	private:
 		FatigueEngine* engineCE;
-		Point3D Convert(WrapperCE::InterOp::Point3D source);
+		Vector3D Convert(WrapperCE::InterOp::Vector3D source);
 
 	public:
 		EngineCE();
