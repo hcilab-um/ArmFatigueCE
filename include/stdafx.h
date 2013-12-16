@@ -7,7 +7,7 @@
 
 #include "targetver.h"
 
-#ifdef WINDOWS
+#ifdef _WINDOWS
 
 #if ARMFATIGUECE_EXPORTS
 #define EXPORT_OR_IMPORT __declspec(dllexport)

@@ -1,10 +1,20 @@
+#pragma once
+
 namespace WrapperCE
 {
-	namespace InterOp {
-
+	namespace InterOp 
+	{
 		public enum UserGender { Male, Female };
 
 		public enum Arm { LeftArm, RightArm };
+
+		public value struct Point3D
+		{
+		public:
+			double X;
+			double Y;
+			double Z;
+		};
 
 		public value struct Vector3D
 		{
@@ -17,15 +27,16 @@ namespace WrapperCE
 		public value struct FatigueData
 		{
 		public:
-			Arm TargetArm;
+			InterOp::Arm TargetArm;
 
 			double Theta;
-			Vector3D CenterOfMass;
-			Vector3D Displacement;
-			Vector3D Velocity;
-			Vector3D Acceleration;
-			Vector3D AngularAcceleration;
-			Vector3D InertialTorque;
+			InterOp::Point3D CenterOfMass;
+
+			InterOp::Vector3D Displacement;
+			InterOp::Vector3D Velocity;
+			InterOp::Vector3D Acceleration;
+			InterOp::Vector3D AngularAcceleration;
+			InterOp::Vector3D InertialTorque;
 
 			double ShoulderTorque;
 			double Endurance;
@@ -39,18 +50,19 @@ namespace WrapperCE
 		public value struct ArmFatigueUpdate
 		{
 		public:
-			FatigueData LeftArm;
-			FatigueData RightArm;
+			InterOp::FatigueData LeftArm;
+			InterOp::FatigueData RightArm;
 		};
 
 		public value struct SkeletonData
 		{
-			Vector3D rightShoulderCms;
-			Vector3D rightElbowCms;
-			Vector3D rightHandCms;
-			Vector3D leftShoulderCms;
-			Vector3D leftElbowCms;
-			Vector3D leftHandCms;
+		public:
+			InterOp::Point3D RightShoulderCms;
+			InterOp::Point3D RightElbowCms;
+			InterOp::Point3D RightHandCms;
+			InterOp::Point3D LeftShoulderCms;
+			InterOp::Point3D LeftElbowCms;
+			InterOp::Point3D LeftHandCms;
 		};
 	}
 }

@@ -109,9 +109,9 @@ namespace DemoCE
 			{
 				WrapperCE.EngineCE engine = new WrapperCE.EngineCE();
 				WrapperCE.InterOp.SkeletonData measuredArms = new WrapperCE.InterOp.SkeletonData();
-				measuredArms.rightShoulderCms = Convert(validSkeleton.Joints[JointType.ShoulderRight].Position);
-				measuredArms.rightElbowCms = Convert(validSkeleton.Joints[JointType.ElbowRight].Position);
-				measuredArms.rightHandCms = Convert(validSkeleton.Joints[JointType.HandRight].Position);
+				measuredArms.RightShoulderCms = Convert(validSkeleton.Joints[JointType.ShoulderRight].Position);
+				measuredArms.RightElbowCms = Convert(validSkeleton.Joints[JointType.ElbowRight].Position);
+				measuredArms.RightHandCms = Convert(validSkeleton.Joints[JointType.HandRight].Position);
 				WrapperCE.InterOp.ArmFatigueUpdate armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms);
 
 			}
@@ -144,13 +144,13 @@ namespace DemoCE
 			}
 		}
 
-		private WrapperCE.InterOp.Vector3D Convert(SkeletonPoint trackedPoint)
+		private WrapperCE.InterOp.Point3D Convert(SkeletonPoint trackedPoint)
 		{
-			WrapperCE.InterOp.Vector3D vector3D;
-			vector3D.X = trackedPoint.X;
-			vector3D.Y = trackedPoint.Y;
-			vector3D.Z = trackedPoint.Z;
-			return vector3D;
+			WrapperCE.InterOp.Point3D point3D;
+      point3D.X = trackedPoint.X;
+      point3D.Y = trackedPoint.Y;
+      point3D.Z = trackedPoint.Z;
+      return point3D;
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;

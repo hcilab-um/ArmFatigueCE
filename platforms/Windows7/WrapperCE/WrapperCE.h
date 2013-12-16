@@ -13,12 +13,12 @@ namespace WrapperCE
 	{
 	private:
 		FatigueEngine* engineCE;
-		Vector3D Convert(WrapperCE::InterOp::Vector3D source);
+		Vector3D ConvertPV(InterOp::Point3D source);
 
 	public:
 		EngineCE();
 		~EngineCE();
 
-		WrapperCE::InterOp::ArmFatigueUpdate ProcessNewSkeletonData(WrapperCE::InterOp::SkeletonData armsData);
+		WrapperCE::InterOp::ArmFatigueUpdate ProcessNewSkeletonData(InterOp::SkeletonData armsData);
 	};
 }

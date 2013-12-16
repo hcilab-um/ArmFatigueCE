@@ -9,6 +9,23 @@ enum UserGender { Male, Female };
 
 enum Arm { LeftArm, RightArm };
 
+struct Point3D
+{
+public:
+	Point3D() {}
+
+	Point3D(double x, double y, double z)
+	{
+		X = x;
+		Y = y;
+		Z = z;
+	}
+
+	double X;
+	double Y;
+	double Z;
+};
+
 struct FatigueData
 {
 public:
@@ -44,10 +61,10 @@ public:
 	SkeletonData() 
 	{ }
 
-	Vector3D rightShoulderCms;
-	Vector3D rightElbowCms;
-	Vector3D rightHandCms;
-	Vector3D leftShoulderCms;
-	Vector3D leftElbowCms;
-	Vector3D leftHandCms;
+	Vector3D RightShoulderCms;
+	Vector3D RightElbowCms;
+	Vector3D RightHandCms;
+	Vector3D LeftShoulderCms;
+	Vector3D LeftElbowCms;
+	Vector3D LeftHandCms;
 };

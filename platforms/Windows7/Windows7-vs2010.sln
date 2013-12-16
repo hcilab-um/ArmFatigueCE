@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WrapperCE-dev", "WrapperCE\WrapperCE-dev.vcxproj", "{1873A84D-73E1-4667-BB0A-4D0003F83C44}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WrapperCE", "WrapperCE\WrapperCE.vcxproj", "{1873A84D-73E1-4667-BB0A-4D0003F83C44}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoCE-dev", "DemoCE\DemoCE-dev.csproj", "{E0F96B61-BCCB-473C-B2A1-9BC1209956AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoCE", "DemoCE\DemoCE.csproj", "{E0F96B61-BCCB-473C-B2A1-9BC1209956AB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArmFatigueCE-dynamic", "..\..\..\ArmText\Src\ArmFatigueCE\ArmFatigueCE-dynamic.vcxproj", "{28C1A85D-50E7-4F2B-ABA2-CA59B3C4CC04}"
 EndProject
