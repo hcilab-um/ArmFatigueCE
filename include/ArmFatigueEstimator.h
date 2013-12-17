@@ -38,7 +38,7 @@
 
 #define MALE_MAX_FORCE      101.6
 #define FEMALE_MAX_FORCE    87.2
-#define INFINITE            DBL_MAX
+#define CE_INFINITE            DBL_MAX
 
 class EXPORT_OR_IMPORT ArmFatigueEstimator
 {
@@ -46,7 +46,7 @@ class EXPORT_OR_IMPORT ArmFatigueEstimator
 private:
 
 	static const Vector3D GRAVITY_VECTOR;
-
+	FatigueData currentFatigueData;
 	FatigueData lastFatigueData;
 	double armMass;
 	double maxForce;
@@ -68,7 +68,7 @@ public:
 	~ArmFatigueEstimator(void);
 
 	void SetGenderValue(UserGender gender);
-	FatigueData EstimateEffort(SkeletonData skeleton, double deltaTime, double totalTime);
+	FatigueData EstimateEffort(SkeletonData skeleton, Arm targetArm, double deltaTimeInSeconds, double totalTimeInSeconds);
 
 	void Reset();
 	

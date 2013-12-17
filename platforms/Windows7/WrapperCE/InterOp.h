@@ -4,7 +4,7 @@ namespace WrapperCE
 {
 	namespace InterOp 
 	{
-		public enum UserGender { Male, Female };
+		public enum class UserGender { Male, Female };
 
 		public enum Arm { LeftArm, RightArm };
 
@@ -35,7 +35,7 @@ namespace WrapperCE
 			InterOp::Vector3D Displacement;
 			InterOp::Vector3D Velocity;
 			InterOp::Vector3D Acceleration;
-			InterOp::Vector3D AngularAcceleration;
+			double AngularAcceleration;
 			InterOp::Vector3D InertialTorque;
 
 			double ShoulderTorque;

@@ -27,7 +27,7 @@ namespace DemoCE
 		private WriteableBitmap colorBitmap;
 		private byte[] colorPixels;
 		private SkeletonDrawer skeletonDrawer;
-
+		private long lastUpdate = -1;
 		private bool isKinectConnected = false;
 		public bool IsKinectConnected
 		{
@@ -107,13 +107,21 @@ namespace DemoCE
 
 			if (validSkeleton != null)
 			{
+				double deltaTimeInSeconds = (currentTimeMilliseconds - lastUpdate) / 1000;
+				if (lastUpdate == -1)
+					deltaTimeInSeconds = 0;
+				lastUpdate = currentTimeMilliseconds;
+
 				WrapperCE.EngineCE engine = new WrapperCE.EngineCE();
 				WrapperCE.InterOp.SkeletonData measuredArms = new WrapperCE.InterOp.SkeletonData();
 				measuredArms.RightShoulderCms = Convert(validSkeleton.Joints[JointType.ShoulderRight].Position);
 				measuredArms.RightElbowCms = Convert(validSkeleton.Joints[JointType.ElbowRight].Position);
 				measuredArms.RightHandCms = Convert(validSkeleton.Joints[JointType.HandRight].Position);
-				WrapperCE.InterOp.ArmFatigueUpdate armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms);
-
+				measuredArms.LeftShoulderCms = Convert(validSkeleton.Joints[JointType.ShoulderRight].Position);
+				measuredArms.LeftElbowCms = Convert(validSkeleton.Joints[JointType.ElbowRight].Position);
+				measuredArms.LeftHandCms = Convert(validSkeleton.Joints[JointType.HandRight].Position);
+				engine.SetGender(WrapperCE.InterOp.UserGender.Male);
+				WrapperCE.InterOp.ArmFatigueUpdate armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTimeInSeconds);
 			}
 
 			using (ColorImageFrame colorFrame = e.OpenColorImageFrame())

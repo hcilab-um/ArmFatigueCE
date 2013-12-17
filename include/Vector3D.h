@@ -1,6 +1,9 @@
 #pragma once
 
 #include "stdafx.h"
+#include <cmath>
+
+#define CE_PI 2*acos(0.0);
 
 class EXPORT_OR_IMPORT Vector3D
 {

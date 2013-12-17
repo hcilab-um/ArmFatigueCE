@@ -7,6 +7,7 @@
 WrapperCE::EngineCE::EngineCE()
 {
 	engineCE = new FatigueEngine();
+	engineCE->SetGender(Male);
 }
 
 WrapperCE::EngineCE::~EngineCE()
@@ -14,12 +15,17 @@ WrapperCE::EngineCE::~EngineCE()
 	delete engineCE;
 }
 
+void WrapperCE::EngineCE::SetGender(WrapperCE::InterOp::UserGender gender)
+{
+	engineCE->SetGender((UserGender)gender);
+}
+
 Vector3D WrapperCE::EngineCE::ConvertPV(InterOp::Point3D source)
 {
 	return Vector3D(source.X, source.Y, source.Z);
 }
 
-WrapperCE::InterOp::ArmFatigueUpdate WrapperCE::EngineCE::ProcessNewSkeletonData(InterOp::SkeletonData armsData)
+WrapperCE::InterOp::ArmFatigueUpdate WrapperCE::EngineCE::ProcessNewSkeletonData(InterOp::SkeletonData armsData, double deltaTimeInSeconds)
 {
 	//general.h SkeletonData
 	SkeletonData input;
@@ -29,7 +35,7 @@ WrapperCE::InterOp::ArmFatigueUpdate WrapperCE::EngineCE::ProcessNewSkeletonData
 	input.LeftShoulderCms =		this->ConvertPV(armsData.LeftShoulderCms);
 	input.LeftElbowCms =			this->ConvertPV(armsData.LeftElbowCms);
 	input.LeftHandCms =				this->ConvertPV(armsData.LeftHandCms);
-	ArmFatigueUpdate update = engineCE->ProcessNewSkeletonData(input, 0);
+	ArmFatigueUpdate update = engineCE->ProcessNewSkeletonData(input, deltaTimeInSeconds);
 
 	InterOp::ArmFatigueUpdate interOp = InterOp::ArmFatigueUpdate();
 	interOp.LeftArm.Theta = update.LeftArm.Theta;

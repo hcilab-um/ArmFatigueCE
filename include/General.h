@@ -9,7 +9,7 @@ enum UserGender { Male, Female };
 
 enum Arm { LeftArm, RightArm };
 
-struct Point3D
+struct EXPORT_OR_IMPORT Point3D
 {
 public:
 	Point3D() {}
@@ -26,9 +26,28 @@ public:
 	double Z;
 };
 
-struct FatigueData
+struct EXPORT_OR_IMPORT FatigueData
 {
 public:
+	FatigueData()
+	{
+		TargetArm = LeftArm;
+
+		Theta = 0;
+		CenterOfMass = Vector3D();
+		Displacement = Vector3D();
+		Velocity = Vector3D();
+		Acceleration = Vector3D();
+		InertialTorque = Vector3D();
+		AngularAcceleration = 0;
+		ShoulderTorque = 0;
+		Endurance = 0;
+		AvgShoulderTorque = 0;
+		AvgEndurance = 0;
+		ConsumedEndurance = 0;
+		
+	}
+
 	Arm TargetArm;
 
 	double Theta;
@@ -48,14 +67,14 @@ public:
 	double ConsumedEndurance;
 };
 
-struct ArmFatigueUpdate
+struct EXPORT_OR_IMPORT ArmFatigueUpdate
 {
 public:
 	FatigueData LeftArm;
 	FatigueData RightArm;
 };
 
-struct SkeletonData
+struct EXPORT_OR_IMPORT SkeletonData
 {
 public:
 	SkeletonData() 

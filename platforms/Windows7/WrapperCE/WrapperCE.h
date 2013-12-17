@@ -18,7 +18,8 @@ namespace WrapperCE
 	public:
 		EngineCE();
 		~EngineCE();
+		void SetGender(WrapperCE::InterOp::UserGender gender);
 
-		WrapperCE::InterOp::ArmFatigueUpdate ProcessNewSkeletonData(InterOp::SkeletonData armsData);
+		WrapperCE::InterOp::ArmFatigueUpdate ProcessNewSkeletonData(InterOp::SkeletonData armsData, double deltaTimeInSeconds);
 	};
 }

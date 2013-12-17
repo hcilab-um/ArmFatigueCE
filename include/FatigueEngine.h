@@ -17,7 +17,8 @@ public:
 
 	void SetGender(UserGender newGender);
 	UserGender GetGender();
+	void Reset();
 
-	ArmFatigueUpdate ProcessNewSkeletonData(SkeletonData skeleton, double deltaTime);
+	ArmFatigueUpdate ProcessNewSkeletonData(SkeletonData skeleton, double deltaTimeInSeconds);
 };
 
