@@ -30,7 +30,7 @@ namespace WrapperCE
 			InterOp::Arm TargetArm;
 
 			double Theta;
-			InterOp::Point3D CenterOfMass;
+			InterOp::Vector3D CenterOfMass;
 
 			InterOp::Vector3D Displacement;
 			InterOp::Vector3D Velocity;

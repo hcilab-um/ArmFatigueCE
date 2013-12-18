@@ -14,6 +14,8 @@ using System.Windows.Shapes;
 using Microsoft.Kinect;
 using System.ComponentModel;
 using System.Windows.Media.Effects;
+using DemoCE.Playback;
+using DemoCE.Properties;
 
 namespace DemoCE
 {
@@ -22,6 +24,9 @@ namespace DemoCE
 	/// </summary>
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
+		public event EventHandler<ColorImageReadyArgs> ColorImageReady;
+
+		#region Private Variable
 
 		private KinectSensor kinectSensor = null;
 		private WriteableBitmap colorBitmap;
@@ -29,6 +34,21 @@ namespace DemoCE
 		private SkeletonDrawer skeletonDrawer;
 		private long lastUpdate = -1;
 		private bool isKinectConnected = false;
+		private WrapperCE.EngineCE engine;
+		private WrapperCE.InterOp.UserGender gender;
+		private WrapperCE.InterOp.ArmFatigueUpdate armFatigueUpdate;
+		private double consumedEndurance;
+		private double deltaTimeInSeconds;	
+		
+		#endregion
+
+		#region Property
+		
+		public SkeletonRecorder Recorder { get; set; }
+		public SkeletonPlayer Player { get; set; }
+		
+		public bool PlayBackFromFile { get; set; }
+
 		public bool IsKinectConnected
 		{
 			get { return isKinectConnected; }
@@ -39,13 +59,59 @@ namespace DemoCE
 			}
 		}
 
+		public WrapperCE.InterOp.UserGender Gender
+		{
+			get { return gender; }
+			set
+			{
+				gender = value;
+				OnPropertyChanged("Gender");
+			}
+		}
+
+		public double ConsumedEndurance
+		{
+			get { return consumedEndurance; }
+			set
+			{
+				consumedEndurance = value;
+				OnPropertyChanged("ConsumedEndurance");
+			}
+
+		}
+		
+		public bool IsEngineRunning
+		{
+			get { return engine.CheckStarted(); }
+		}
+
+		public double DeltaTimeInSeconds
+		{
+			get { return deltaTimeInSeconds; }
+			set
+			{
+				deltaTimeInSeconds = value;
+				OnPropertyChanged("DeltaTimeInSeconds");
+			}
+
+		}
+		#endregion
+
 		public MainWindow()
 		{
+			engine = new WrapperCE.EngineCE();
+			Gender = WrapperCE.InterOp.UserGender.Male;
+			armFatigueUpdate = new WrapperCE.InterOp.ArmFatigueUpdate();
+			ConsumedEndurance = 0;
+			DeltaTimeInSeconds = 0;
 			InitializeComponent();
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+			Recorder = new SkeletonRecorder(Settings.Default.RecordFolder);
+			Player = new SkeletonPlayer(Settings.Default.PlayerBufferSize, Dispatcher);
+			Player.SkeletonFrameReady += new EventHandler<PlayerSkeletonFrameReadyEventArgs>(player_SkeletonFrameReady);
 			if (KinectSensor.KinectSensors.Count == 0)
 			{
 				IsKinectConnected = false;
@@ -72,6 +138,28 @@ namespace DemoCE
 					skeletonDrawer = new SkeletonDrawer(kinectSensor);
 				}
 			}
+			this.ColorImageReady += MainWindow_ColorImageReady;
+		}
+
+		private void MainWindow_ColorImageReady(object sender, ColorImageReadyArgs e)
+		{
+ 			ImageSource colorFrame = e.Frame;
+			if (colorFrame == null)
+				return;
+			iSkeleton.Source = colorFrame;
+		}
+
+		private void player_SkeletonFrameReady(object sender, PlayerSkeletonFrameReadyEventArgs e)
+		{
+			Skeleton skeleton = e.FrameSkeleton;
+			DeltaTimeInSeconds = e.Delay;
+			RunFatigueEngine(skeleton, DeltaTimeInSeconds);
+			//We paint the skeleton and send the image over to the UI
+			if (ColorImageReady != null)
+			{
+				DrawingImage imageCanvas = DrawSkeleton(skeleton, null);
+				ColorImageReady(this, new ColorImageReadyArgs() { Frame = imageCanvas });
+			}
 		}
 
 		private void Window_Closing(object sender, CancelEventArgs e)
@@ -79,10 +167,13 @@ namespace DemoCE
 			if (null != kinectSensor)
 			{
 				kinectSensor.Stop();
+				kinectSensor.Dispose();
 			}
+			this.ColorImageReady -= MainWindow_ColorImageReady;
+			Recorder.Stop(false, true, Gender);
 		}
 
-		void kinectSensor_AllFramesReady(object sender, AllFramesReadyEventArgs e)
+		private void kinectSensor_AllFramesReady(object sender, AllFramesReadyEventArgs e)
 		{
 			long currentTimeMilliseconds = -1;
 			Skeleton[] skeletons = null;
@@ -107,21 +198,12 @@ namespace DemoCE
 
 			if (validSkeleton != null)
 			{
-				double deltaTimeInSeconds = (currentTimeMilliseconds - lastUpdate) / 1000;
+				DeltaTimeInSeconds = (double)(currentTimeMilliseconds - lastUpdate)/1000;
 				if (lastUpdate == -1)
-					deltaTimeInSeconds = 0;
+					DeltaTimeInSeconds = 0;
 				lastUpdate = currentTimeMilliseconds;
-
-				WrapperCE.EngineCE engine = new WrapperCE.EngineCE();
-				WrapperCE.InterOp.SkeletonData measuredArms = new WrapperCE.InterOp.SkeletonData();
-				measuredArms.RightShoulderCms = Convert(validSkeleton.Joints[JointType.ShoulderRight].Position);
-				measuredArms.RightElbowCms = Convert(validSkeleton.Joints[JointType.ElbowRight].Position);
-				measuredArms.RightHandCms = Convert(validSkeleton.Joints[JointType.HandRight].Position);
-				measuredArms.LeftShoulderCms = Convert(validSkeleton.Joints[JointType.ShoulderRight].Position);
-				measuredArms.LeftElbowCms = Convert(validSkeleton.Joints[JointType.ElbowRight].Position);
-				measuredArms.LeftHandCms = Convert(validSkeleton.Joints[JointType.HandRight].Position);
-				engine.SetGender(WrapperCE.InterOp.UserGender.Male);
-				WrapperCE.InterOp.ArmFatigueUpdate armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTimeInSeconds);
+				RunFatigueEngine(validSkeleton, DeltaTimeInSeconds);
+				Recorder.ProcessNewSkeletonData(validSkeleton, DeltaTimeInSeconds);
 			}
 
 			using (ColorImageFrame colorFrame = e.OpenColorImageFrame())
@@ -136,20 +218,64 @@ namespace DemoCE
 
 					if (validSkeleton != null)
 					{
-						DrawingGroup dGroup = new DrawingGroup();
-						using (DrawingContext dc = dGroup.Open())
-						{
-							dc.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Black, 0.5), new Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
-							skeletonDrawer.DrawSkeleton(validSkeleton, dc);
-						}
-						DrawingImage dImageSource = new DrawingImage(dGroup);
-						dGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
-						iSkeleton.Source = dImageSource;
+						iSkeleton.Source = DrawSkeleton(validSkeleton, colorBitmap);
 					}
 					else
 						iSkeleton.Source = null;
 				}
 			}
+		}
+
+		private DrawingImage DrawSkeleton(Skeleton skeleton, WriteableBitmap bitMap)
+		{
+			DrawingGroup dGroup = new DrawingGroup();
+			using (DrawingContext dc = dGroup.Open())
+			{
+				dc.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Black, 0.5), new Rect(0, 0, bitMap.PixelWidth, bitMap.PixelHeight));
+				skeletonDrawer.DrawSkeleton(skeleton, dc);
+			}
+			DrawingImage dImageSource = new DrawingImage(dGroup);
+			dGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, bitMap.PixelWidth, bitMap.PixelHeight));
+			return dImageSource;
+		}
+
+		private void RunFatigueEngine(Skeleton skeleton, double deltaTime)
+		{
+			if (!engine.CheckStarted())
+				return;
+			WrapperCE.InterOp.SkeletonData measuredArms = new WrapperCE.InterOp.SkeletonData();
+			measuredArms.RightShoulderCms = Convert(skeleton.Joints[JointType.ShoulderRight].Position);
+			measuredArms.RightElbowCms = Convert(skeleton.Joints[JointType.ElbowRight].Position);
+			measuredArms.RightHandCms = Convert(skeleton.Joints[JointType.HandRight].Position);
+			measuredArms.LeftShoulderCms = Convert(skeleton.Joints[JointType.ShoulderLeft].Position);
+			measuredArms.LeftElbowCms = Convert(skeleton.Joints[JointType.ElbowLeft].Position);
+			measuredArms.LeftHandCms = Convert(skeleton.Joints[JointType.HandLeft].Position);
+			armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTime);
+			ConsumedEndurance = armFatigueUpdate.RightArm.ConsumedEndurance;
+		}
+
+		private EventHandler playbackHandler;
+
+		public void PlayBack(string fileName, EventHandler pbFinished, bool useDelay)
+		{
+			if (playbackHandler != null)
+				Player.PlaybackFinished -= playbackHandler;
+			playbackHandler = pbFinished;
+			Player.UseDelay = useDelay;
+			Player.PlaybackFinished += playbackHandler;
+			Player.Load(fileName);
+			Player.Start();
+
+			PlayBackFromFile = true;
+		}
+
+		private void MainW_ColorImageReady(object sender, ColorImageReadyArgs e)
+		{
+			ImageSource colorFrame = e.Frame;
+			if (colorFrame == null)
+				return;
+
+			iSkeleton.Source = colorFrame;
 		}
 
 		private WrapperCE.InterOp.Point3D Convert(SkeletonPoint trackedPoint)
@@ -162,10 +288,26 @@ namespace DemoCE
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
+
 		private void OnPropertyChanged(String name)
 		{
 			if (PropertyChanged != null)
 				PropertyChanged(this, new PropertyChangedEventArgs(name));
 		}
+
+		private void BtStartMeasure_Click(object sender, RoutedEventArgs e)
+		{
+			Recorder.Start();
+			engine.Start(Gender);
+			OnPropertyChanged("IsEngineRunning");
+		}
+
+		private void BtStopMeasure_Click(object sender, RoutedEventArgs e)
+		{
+			Recorder.Stop(true, false, Gender);
+			engine.Stop();
+			OnPropertyChanged("IsEngineRunning");
+		}
+
 	}
 }

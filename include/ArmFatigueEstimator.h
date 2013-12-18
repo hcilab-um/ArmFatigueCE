@@ -61,7 +61,6 @@ private:
 	Vector3D CalculateInertialTorque(Vector3D displacement, Vector3D armCM, double angularAcc);
 
 	double CalculateEndurance(double shoulderTorquePercent);
-
 public:
 
 	ArmFatigueEstimator(void);

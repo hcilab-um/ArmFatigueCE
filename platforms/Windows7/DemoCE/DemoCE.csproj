@@ -72,7 +72,22 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ColorImageReadyArgs.cs" />
+    <Compile Include="Controls\TimelineControl.xaml.cs">
+      <DependentUpon>TimelineControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\BoolGenderConverter.cs" />
+    <Compile Include="Converters\HeightMarginConverter.cs" />
+    <Compile Include="Converters\NegateBooleanConverter.cs" />
+    <Compile Include="PlayBack\PlayerSkeletonFrameReadyEventArgs.cs" />
+    <Compile Include="PlayBack\SkeletonPlayer.cs" />
+    <Compile Include="PlayBack\SkeletonRecorder.cs" />
+    <Compile Include="SkeletonCapture.cs" />
     <Compile Include="SkeletonDrawer.cs" />
+    <Page Include="Controls\TimelineControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -104,6 +119,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

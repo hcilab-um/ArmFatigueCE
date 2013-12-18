@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="DemoCE.Controls.TimelineControl" x:Name="tcControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converters="clr-namespace:DemoCE.Converters"
+             mc:Ignorable="d" Focusable="True"
+             d:DesignHeight="200" d:DesignWidth="600" Background="SkyBlue">
+
+  <UserControl.Resources>
+    <converters:HeightMarginConverter x:Key="hmConverter"/>
+  </UserControl.Resources>
+
+	<Grid RenderOptions.EdgeMode="Aliased">
+		<Line x:Name="lAxisY" Stroke="Black" StrokeThickness="1.5" HorizontalAlignment="Left" Margin="30,10" X1="0" Y1="0" X2="0" Y2="{Binding ElementName=tcControl, Path=ActualHeight}"/>
+		<Line x:Name="lAxisX" Stroke="Black" StrokeThickness="1.5" VerticalAlignment="Bottom" Margin="10,30" X1="0" Y1="0" X2="{Binding ElementName=tcControl, Path=ActualWidth}" Y2="0"/>
+
+		<Grid x:Name="gGraphContent" VerticalAlignment="Bottom" HorizontalAlignment="Left"
+          Width="{Binding ElementName=tcControl, Path=ActualWidth}" Height="{Binding ElementName=tcControl, Path=ActualHeight}">
+			<Grid.RenderTransform>
+				<TransformGroup>
+					<TranslateTransform Y="{Binding ElementName=tcControl, Path=ActualHeight, Converter={StaticResource ResourceKey=hmConverter}, ConverterParameter=-30}" X="30"/>
+					<ScaleTransform ScaleY="-1" CenterY="{Binding ElementName=tcControl, Path=ActualHeight}"/>
+				</TransformGroup>
+			</Grid.RenderTransform>
+			<Canvas x:Name="cGraphContent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Visible" />
+		</Grid>
+	</Grid>
+</UserControl>
