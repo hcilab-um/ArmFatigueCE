@@ -5,25 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:converters="clr-namespace:DemoCE.Converters"
              mc:Ignorable="d" Focusable="True"
-             d:DesignHeight="200" d:DesignWidth="600" Background="SkyBlue">
+             d:DesignHeight="230" d:DesignWidth="630" Background="SkyBlue">
 
-  <UserControl.Resources>
-    <converters:HeightMarginConverter x:Key="hmConverter"/>
-  </UserControl.Resources>
-
+	<UserControl.Resources>
+		<converters:HeightMarginConverter x:Key="hmConverter"/>
+	</UserControl.Resources>
 	<Grid RenderOptions.EdgeMode="Aliased">
-		<Line x:Name="lAxisY" Stroke="Black" StrokeThickness="1.5" HorizontalAlignment="Left" Margin="30,10" X1="0" Y1="0" X2="0" Y2="{Binding ElementName=tcControl, Path=ActualHeight}"/>
-		<Line x:Name="lAxisX" Stroke="Black" StrokeThickness="1.5" VerticalAlignment="Bottom" Margin="10,30" X1="0" Y1="0" X2="{Binding ElementName=tcControl, Path=ActualWidth}" Y2="0"/>
-
-		<Grid x:Name="gGraphContent" VerticalAlignment="Bottom" HorizontalAlignment="Left"
-          Width="{Binding ElementName=tcControl, Path=ActualWidth}" Height="{Binding ElementName=tcControl, Path=ActualHeight}">
-			<Grid.RenderTransform>
-				<TransformGroup>
-					<TranslateTransform Y="{Binding ElementName=tcControl, Path=ActualHeight, Converter={StaticResource ResourceKey=hmConverter}, ConverterParameter=-30}" X="30"/>
-					<ScaleTransform ScaleY="-1" CenterY="{Binding ElementName=tcControl, Path=ActualHeight}"/>
-				</TransformGroup>
-			</Grid.RenderTransform>
+		<Line x:Name="lAxisY" Stroke="Black" StrokeThickness="1.5" HorizontalAlignment="Left" Margin="30,0" X1="0" Y1="0" X2="0" Y2="{Binding ElementName=tcControl, Path=ActualHeight}"/>
+		<Line x:Name="lAxisX" Stroke="Black" StrokeThickness="1.5" VerticalAlignment="Bottom" Margin="0,30" X1="0" Y1="0" X2="{Binding ElementName=tcControl, Path=ActualWidth}" Y2="0"/>
+		<Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="30" Margin="10,0" Content="Delete" Click="Button_Click"/>
+		<Grid x:Name="gGraphContent" VerticalAlignment="Bottom" Margin="30,0,0,30" HorizontalAlignment="Left"
+					Width="{Binding ElementName=tcControl, Path=ActualWidth}" Height="{Binding ElementName=tcControl, Path=ActualHeight}">
 			<Canvas x:Name="cGraphContent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Visible" />
+			<Line x:Name="lCEMax" Stroke="Red" StrokeThickness="1.5" StrokeDashArray="3" VerticalAlignment="Bottom" Margin="0,0,0,100" X1="0" Y1="0" X2="{Binding ElementName=tcControl, Path=ActualWidth}" Y2="0" />
 		</Grid>
 	</Grid>
 </UserControl>

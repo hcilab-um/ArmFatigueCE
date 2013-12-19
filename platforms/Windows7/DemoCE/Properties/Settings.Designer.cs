@@ -25,7 +25,7 @@ namespace DemoCE.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\xiang\\Desktop\\")]
+        [global::System.Configuration.DefaultSettingValueAttribute("..\\..\\..\\..\\..\\Data")]
         public string RecordFolder {
             get {
                 return ((string)(this["RecordFolder"]));

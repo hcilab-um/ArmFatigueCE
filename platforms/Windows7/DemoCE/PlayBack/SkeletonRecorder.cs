@@ -80,15 +80,15 @@ namespace DemoCE.Playback
       formatter = new BinaryFormatter();
     }
 
-    public void ProcessNewSkeletonData(Skeleton stableSkeleton, double deltaTimeMilliseconds)
+    public void ProcessNewSkeletonData(Skeleton skeleton, double deltaTimeMilliseconds)
     {
-      if (!isRecording)
+			if (!isRecording)
         return;
 
       Delta = deltaTimeMilliseconds / 1000.000;
       TotalTime += Delta;
 
-      SkeletonCapture capture = new SkeletonCapture() { Delay = deltaTimeMilliseconds, Skeleton = stableSkeleton };
+      SkeletonCapture capture = new SkeletonCapture() { Delay = deltaTimeMilliseconds, Skeleton = skeleton };
       try
       {
         MemoryStream memTmp = new MemoryStream();
@@ -133,7 +133,7 @@ namespace DemoCE.Playback
       writer.Flush();
       writer.Close();
 
-      if (saveFile)
+      if (saveFile && FramesRecorded != 0)
       {
         String qualifiedName = String.Format("{0}-{1}",
 					DateTime.Now.ToString("MMddyy-HHmmss"), gender.ToString().ToLower());

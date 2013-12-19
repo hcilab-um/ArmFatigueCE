@@ -4,29 +4,98 @@
 				xmlns:controls="clr-namespace:DemoCE.Controls"
 				xmlns:converter="clr-namespace:DemoCE.Converters"
 				x:Name="mainW" Title="Arm Consumed Endurance (CE)"
-				SizeToContent="WidthAndHeight" Loaded="Window_Loaded" Closing="Window_Closing">
+				SizeToContent="WidthAndHeight" ResizeMode="NoResize" 
+				Loaded="Window_Loaded" Closing="Window_Closing">
 	<Window.Resources>
 		<converter:NegateBooleanConverter x:Key="nbConverter"/>
+		<converter:BooleanGenderConverter x:Key="bgConverter"/>
+		<converter:DoubleFormatConverter x:Key="DFConverter" />
 	</Window.Resources>
 	<DockPanel>
-		<controls:TimelineControl DockPanel.Dock="Right" Width="400" Height="200" ValueOneVisible="Visible"															
-															LenghtInMinutes="1" DynamicLenght="False" MaxValue="100"
-															Delta="{Binding ElementName=mainW, Path=DeltaTimeInSeconds}"
-															GraphValueOne="{Binding ElementName=mainW, Path=ConsumedEndurance}"
-															IsEngineRunning="{Binding ElementName=mainW, Path=IsEngineRunning}"/>
-		<Grid DockPanel.Dock="Top" Width="640" Height="480">
+		<DockPanel DockPanel.Dock="Right" LastChildFill="True">
+			<StackPanel x:Name="spFatigueInfo" DockPanel.Dock="Bottom">
+				<StackPanel x:Name="Time" Orientation="Horizontal">
+					<Label Width="150">Time</Label>
+					<Label Content="{Binding ElementName=mainW, Path=TotalTimeInSeconds,  FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+					<Label Padding="0,5">Sec</Label>
+				</StackPanel>
+				<StackPanel x:Name="Arm" Orientation="Horizontal">
+					<Label Width="150">Arm</Label>
+					<StackPanel Orientation="Horizontal">
+						<Label Content="Left" Width="125"/>
+					</StackPanel>
+					<Label Content="Right" Width="125"/>
+				</StackPanel>
+				<StackPanel x:Name="angleData" Orientation="Horizontal">
+					<Label Width="150">Ø (degree):</Label>
+					<StackPanel x:Name="angleLeft" Width="125">
+						<Label Content="{Binding ElementName=mainW, Path=CurrentFatigueInfo.LeftArmAngle,  FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+					</StackPanel>
+					<Label Content="{Binding ElementName=mainW, Path=CurrentFatigueInfo.RightArmAngle,  FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<Label Width="150">Torque (Nm):</Label>
+					<StackPanel Width="125" Orientation="Horizontal">
+						<Label Content="{Binding ElementName=mainW, Path=CurrentFatigueInfo.LeftArmTorque, FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+						<Label Padding="0,5">Nm</Label>
+					</StackPanel>
+					<Label Content="{Binding ElementName=mainW, Path=CurrentFatigueInfo.RightArmTorque, FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+					<Label Padding="0,5">Nm</Label>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<Label Width="150">Avg Torque (Nm):</Label>
+					<StackPanel Width="125" Orientation="Horizontal">
+						<Label Content="{Binding ElementName=mainW, Path=CurrentFatigueInfo.LeftArmAvgTorque, FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+						<Label Padding="0,5">Nm</Label>
+					</StackPanel>
+					<Label Content="{Binding ElementName=mainW, Path=CurrentFatigueInfo.RightArmAvgTorque, FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+					<Label Padding="0,5">Nm</Label>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<Label Width="150">Avg Endurance (s):</Label>
+					<StackPanel Width="125" Orientation="Horizontal">
+						<Label Content="{Binding ElementName=mainW, Path=CurrentFatigueInfo.LeftArmAvgEndurance, FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+						<Label Padding="0,5">s</Label>
+					</StackPanel>
+					<Label Content="{Binding ElementName=mainW, Path=CurrentFatigueInfo.RightArmAvgEndurance, FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+					<Label Padding="0,5">s</Label>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<Label Width="150" FontWeight="Bold">Consumed Endurance</Label>
+					<StackPanel Width="125" Orientation="Horizontal">
+						<Label Content="{Binding ElementName=mainW, Path=CurrentFatigueInfo.LeftArmConsumedEndurance, FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+						<Label Padding="0,5">%</Label>
+					</StackPanel>
+					<Label Content="{Binding ElementName=mainW, Path=CurrentFatigueInfo.RightArmConsumedEndurance, FallbackValue=0, Converter={StaticResource ResourceKey=DFConverter}, ConverterParameter=2}"/>
+					<Label Padding="0,5">%</Label>
+				</StackPanel>
+			</StackPanel>
+			<ListBox x:Name="lbTimeLines" Height="350" DockPanel.Dock="Top" ScrollViewer.VerticalScrollBarVisibility="Visible" SelectedItem="{Binding ElementName=mainW, Path=CurrentFatigueInfo}"
+																										ItemsSource="{Binding ElementName=mainW, Path=FatigueInfoCollection}">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<controls:TimelineControl Margin="0,0,0,5" Width="410" Height="200" LenghtInSeconds="60" MaxValue="200"
+															LeftArmCE="{Binding Path=LeftArmConsumedEndurance}"
+															RightArmCE="{Binding Path=RightArmConsumedEndurance}"
+															IsEngineRunning="{Binding ElementName=mainW, Path=IsEngineRunning}"
+															Delta="{Binding ElementName=mainW, Path=DeltaTimeInSeconds}"/>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</DockPanel>
+		<Grid x:Name="gImage" DockPanel.Dock="Top" Width="640" Height="480">
 			<Image Name="iKinectCapture"/>
 			<Image Name="iSkeleton" VerticalAlignment="Top"/>
 		</Grid>
-		<StackPanel DockPanel.Dock="Bottom" Background="White" >
+		<StackPanel x:Name="spControl" DockPanel.Dock="Bottom" Background="White" >
 			<StackPanel Name="spGender" Orientation="Horizontal" Margin="0,0,0,5">
 				<Label Width="200" Content="Gender:"/>
-				<ComboBox x:Name="cbGender" Text="Gender" Width="430" Margin="10,0,0,0">
-					<ComboBoxItem Tag="M" Content="Male" IsSelected="true"/>
-					<ComboBoxItem Tag="F" Content="Female"/>
+				<ComboBox x:Name="cbGender" Text="Gender" Width="430" Margin="10,0,0,0" IsEnabled="{Binding ElementName=mainW, Path=IsEngineRunning, Converter={StaticResource ResourceKey=nbConverter}}">
+					<ComboBoxItem Content="Male" IsSelected="{Binding ElementName=mainW, Path=Gender, Converter={StaticResource ResourceKey=bgConverter}, ConverterParameter=Male}"/>
+					<ComboBoxItem Content="Female" IsSelected="{Binding ElementName=mainW, Path=Gender, Converter={StaticResource ResourceKey=bgConverter}, ConverterParameter=Female}"/>
 				</ComboBox>
 			</StackPanel>
-			<StackPanel Name="spControl">
+			<StackPanel>
 				<StackPanel Orientation="Horizontal">
 					<Label Width="200" Content="Fatigue Measure:"/>
 					<Button Name="btStartMeasure" Content="Start" Width="210" Margin="10,0,0,0" Click="BtStartMeasure_Click"

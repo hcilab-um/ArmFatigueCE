@@ -77,8 +77,10 @@
       <DependentUpon>TimelineControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\BoolGenderConverter.cs" />
+    <Compile Include="Converters\DoubleFormatConverter.cs" />
     <Compile Include="Converters\HeightMarginConverter.cs" />
     <Compile Include="Converters\NegateBooleanConverter.cs" />
+    <Compile Include="FatigueInfo.cs" />
     <Compile Include="PlayBack\PlayerSkeletonFrameReadyEventArgs.cs" />
     <Compile Include="PlayBack\SkeletonPlayer.cs" />
     <Compile Include="PlayBack\SkeletonRecorder.cs" />

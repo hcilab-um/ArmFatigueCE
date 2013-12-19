@@ -6,7 +6,7 @@ namespace WrapperCE
 	{
 		public enum class UserGender { Male, Female };
 
-		public enum Arm { LeftArm, RightArm };
+		public enum class Arm { LeftArm, RightArm };
 
 		public value struct Point3D
 		{

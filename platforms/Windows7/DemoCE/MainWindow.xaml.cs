@@ -16,6 +16,8 @@ using System.ComponentModel;
 using System.Windows.Media.Effects;
 using DemoCE.Playback;
 using DemoCE.Properties;
+using WrapperCE.InterOp;
+using System.Collections.ObjectModel;
 
 namespace DemoCE
 {
@@ -35,11 +37,13 @@ namespace DemoCE
 		private long lastUpdate = -1;
 		private bool isKinectConnected = false;
 		private WrapperCE.EngineCE engine;
-		private WrapperCE.InterOp.UserGender gender;
-		private WrapperCE.InterOp.ArmFatigueUpdate armFatigueUpdate;
-		private double consumedEndurance;
-		private double deltaTimeInSeconds;	
 		
+		private UserGender gender;
+
+		private ArmFatigueUpdate armFatigueUpdate;
+
+		private double deltaTimeInSeconds;
+		private double totalTimeInSeconds;
 		#endregion
 
 		#region Property
@@ -47,6 +51,8 @@ namespace DemoCE
 		public SkeletonRecorder Recorder { get; set; }
 		public SkeletonPlayer Player { get; set; }
 		
+		public ObservableCollection<FatigueInfo> FatigueInfoCollection { get; set; }
+
 		public bool PlayBackFromFile { get; set; }
 
 		public bool IsKinectConnected
@@ -59,7 +65,7 @@ namespace DemoCE
 			}
 		}
 
-		public WrapperCE.InterOp.UserGender Gender
+		public UserGender Gender
 		{
 			get { return gender; }
 			set
@@ -69,17 +75,6 @@ namespace DemoCE
 			}
 		}
 
-		public double ConsumedEndurance
-		{
-			get { return consumedEndurance; }
-			set
-			{
-				consumedEndurance = value;
-				OnPropertyChanged("ConsumedEndurance");
-			}
-
-		}
-		
 		public bool IsEngineRunning
 		{
 			get { return engine.CheckStarted(); }
@@ -95,15 +90,33 @@ namespace DemoCE
 			}
 
 		}
+
+		public double TotalTimeInSeconds
+		{
+			get { return totalTimeInSeconds; }
+			set
+			{
+				totalTimeInSeconds = value;
+				OnPropertyChanged("TotalTimeInSeconds");
+			}
+
+		}
+
+		public FatigueInfo CurrentFatigueInfo { get; set; }
+
 		#endregion
 
 		public MainWindow()
 		{
 			engine = new WrapperCE.EngineCE();
-			Gender = WrapperCE.InterOp.UserGender.Male;
-			armFatigueUpdate = new WrapperCE.InterOp.ArmFatigueUpdate();
-			ConsumedEndurance = 0;
+			Gender = UserGender.Male;
+			armFatigueUpdate = new ArmFatigueUpdate();
+			CurrentFatigueInfo = new FatigueInfo();
+			
 			DeltaTimeInSeconds = 0;
+			TotalTimeInSeconds = 0;
+			FatigueInfoCollection = new ObservableCollection<DemoCE.FatigueInfo>();
+			FatigueInfoCollection.Add(CurrentFatigueInfo);
 			InitializeComponent();
 		}
 
@@ -157,7 +170,7 @@ namespace DemoCE
 			//We paint the skeleton and send the image over to the UI
 			if (ColorImageReady != null)
 			{
-				DrawingImage imageCanvas = DrawSkeleton(skeleton, null);
+				DrawingImage imageCanvas = DrawSkeleton(skeleton);
 				ColorImageReady(this, new ColorImageReadyArgs() { Frame = imageCanvas });
 			}
 		}
@@ -195,17 +208,17 @@ namespace DemoCE
 					}
 				}
 			}
-
 			if (validSkeleton != null)
 			{
-				DeltaTimeInSeconds = (double)(currentTimeMilliseconds - lastUpdate)/1000;
 				if (lastUpdate == -1)
 					DeltaTimeInSeconds = 0;
+				else
+					DeltaTimeInSeconds = (double)(currentTimeMilliseconds - lastUpdate)/1000;				
 				lastUpdate = currentTimeMilliseconds;
 				RunFatigueEngine(validSkeleton, DeltaTimeInSeconds);
 				Recorder.ProcessNewSkeletonData(validSkeleton, DeltaTimeInSeconds);
 			}
-
+			
 			using (ColorImageFrame colorFrame = e.OpenColorImageFrame())
 			{
 				if (colorFrame != null)
@@ -213,12 +226,11 @@ namespace DemoCE
 					colorFrame.CopyPixelDataTo(colorPixels);
 					this.colorBitmap.WritePixels(
 							new Int32Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight),
-							colorPixels, colorBitmap.PixelWidth * sizeof(int),
-							0);
+							colorPixels, colorBitmap.PixelWidth * sizeof(int), 0);
 
 					if (validSkeleton != null)
 					{
-						iSkeleton.Source = DrawSkeleton(validSkeleton, colorBitmap);
+						iSkeleton.Source = DrawSkeleton(validSkeleton);
 					}
 					else
 						iSkeleton.Source = null;
@@ -226,16 +238,16 @@ namespace DemoCE
 			}
 		}
 
-		private DrawingImage DrawSkeleton(Skeleton skeleton, WriteableBitmap bitMap)
+		private DrawingImage DrawSkeleton(Skeleton skeleton)
 		{
 			DrawingGroup dGroup = new DrawingGroup();
 			using (DrawingContext dc = dGroup.Open())
 			{
-				dc.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Black, 0.5), new Rect(0, 0, bitMap.PixelWidth, bitMap.PixelHeight));
+				dc.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Black, 0.5), new Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
 				skeletonDrawer.DrawSkeleton(skeleton, dc);
 			}
 			DrawingImage dImageSource = new DrawingImage(dGroup);
-			dGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, bitMap.PixelWidth, bitMap.PixelHeight));
+			dGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
 			return dImageSource;
 		}
 
@@ -243,7 +255,8 @@ namespace DemoCE
 		{
 			if (!engine.CheckStarted())
 				return;
-			WrapperCE.InterOp.SkeletonData measuredArms = new WrapperCE.InterOp.SkeletonData();
+			TotalTimeInSeconds += deltaTime;
+			SkeletonData measuredArms = new SkeletonData();
 			measuredArms.RightShoulderCms = Convert(skeleton.Joints[JointType.ShoulderRight].Position);
 			measuredArms.RightElbowCms = Convert(skeleton.Joints[JointType.ElbowRight].Position);
 			measuredArms.RightHandCms = Convert(skeleton.Joints[JointType.HandRight].Position);
@@ -251,7 +264,19 @@ namespace DemoCE
 			measuredArms.LeftElbowCms = Convert(skeleton.Joints[JointType.ElbowLeft].Position);
 			measuredArms.LeftHandCms = Convert(skeleton.Joints[JointType.HandLeft].Position);
 			armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTime);
-			ConsumedEndurance = armFatigueUpdate.RightArm.ConsumedEndurance;
+
+			CurrentFatigueInfo.LeftArmAngle = armFatigueUpdate.LeftArm.Theta;
+			CurrentFatigueInfo.LeftArmAvgEndurance = armFatigueUpdate.LeftArm.AvgEndurance;
+			CurrentFatigueInfo.LeftArmAvgTorque = armFatigueUpdate.LeftArm.AvgShoulderTorque;
+			CurrentFatigueInfo.LeftArmConsumedEndurance = armFatigueUpdate.LeftArm.ConsumedEndurance;
+			CurrentFatigueInfo.LeftArmTorque = armFatigueUpdate.LeftArm.ShoulderTorque;
+
+			CurrentFatigueInfo.RightArmAngle = armFatigueUpdate.RightArm.Theta;
+			CurrentFatigueInfo.RightArmAvgEndurance = armFatigueUpdate.RightArm.AvgEndurance;
+			CurrentFatigueInfo.RightArmAvgTorque = armFatigueUpdate.RightArm.AvgShoulderTorque;
+			CurrentFatigueInfo.RightArmConsumedEndurance = armFatigueUpdate.RightArm.ConsumedEndurance;
+			CurrentFatigueInfo.RightArmTorque = armFatigueUpdate.RightArm.ShoulderTorque;
+
 		}
 
 		private EventHandler playbackHandler;
@@ -278,9 +303,9 @@ namespace DemoCE
 			iSkeleton.Source = colorFrame;
 		}
 
-		private WrapperCE.InterOp.Point3D Convert(SkeletonPoint trackedPoint)
+		private Point3D Convert(SkeletonPoint trackedPoint)
 		{
-			WrapperCE.InterOp.Point3D point3D;
+			Point3D point3D;
       point3D.X = trackedPoint.X;
       point3D.Y = trackedPoint.Y;
       point3D.Z = trackedPoint.Z;
@@ -299,13 +324,19 @@ namespace DemoCE
 		{
 			Recorder.Start();
 			engine.Start(Gender);
+			TotalTimeInSeconds = 0;
 			OnPropertyChanged("IsEngineRunning");
 		}
 
 		private void BtStopMeasure_Click(object sender, RoutedEventArgs e)
 		{
-			Recorder.Stop(true, false, Gender);
+			CurrentFatigueInfo.FatigueFileName = Recorder.Stop(true, false, Gender);
 			engine.Stop();
+			if (CurrentFatigueInfo.FatigueFileName != string.Empty)
+			{
+				CurrentFatigueInfo = new FatigueInfo();
+				FatigueInfoCollection.Insert(0, CurrentFatigueInfo);
+			}
 			OnPropertyChanged("IsEngineRunning");
 		}
 

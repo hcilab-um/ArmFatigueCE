@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="RecordFolder" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\Users\xiang\Desktop\</Value>
+      <Value Profile="(Default)">..\..\..\..\..\Data</Value>
     </Setting>
     <Setting Name="PlayerBufferSize" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
