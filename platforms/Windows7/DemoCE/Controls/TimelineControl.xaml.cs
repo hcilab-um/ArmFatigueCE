@@ -21,17 +21,32 @@ namespace DemoCE.Controls
   /// </summary>
   public partial class TimelineControl : UserControl
   {
+		public static readonly RoutedEvent DeleteFatigueInfoEvent = EventManager.RegisterRoutedEvent("DeleteFatigueInfo", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(TimelineControl));
+		public static readonly RoutedEvent ReplayFatigueEvent = EventManager.RegisterRoutedEvent("ReplayFatigue", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(TimelineControl));
+
 		public static readonly DependencyProperty DeltaProperty = DependencyProperty.Register("Delta", typeof(double), typeof(TimelineControl));
+		public static readonly DependencyProperty FatigueInfoProperty = DependencyProperty.Register("FatigueInfo", typeof(FatigueInfo), typeof(TimelineControl));
 		public static readonly DependencyProperty LeftArmCEProperty = DependencyProperty.Register("LeftArmCE", typeof(double), typeof(TimelineControl));
 		public static readonly DependencyProperty RightArmCEProperty = DependencyProperty.Register("RightArmCE", typeof(double), typeof(TimelineControl));
 		public static readonly DependencyProperty MaxValueProperty = DependencyProperty.Register("MaxValue", typeof(double), typeof(TimelineControl));
 		public static readonly DependencyProperty LenghtInSecondsProperty = DependencyProperty.Register("LenghtInSeconds", typeof(double), typeof(TimelineControl));
-		public static readonly DependencyProperty GraphValueReferenceProperty = DependencyProperty.Register("GraphValueReference", typeof(double), typeof(TimelineControl));
 		public static readonly DependencyProperty CurrentFrameProperty = DependencyProperty.Register("CurrentFrame", typeof(int), typeof(TimelineControl));
 		public static readonly DependencyProperty ValueOneVisibleProperty = DependencyProperty.Register("ValueOneVisible", typeof(Visibility), typeof(TimelineControl));
 		public static readonly DependencyProperty IsEngineRunningProperty = DependencyProperty.Register("IsEngineRunning", typeof(bool), typeof(TimelineControl));
 		
 		private double elapsedTime = 0;
+
+		public event RoutedEventHandler DeleteFatigueInfo
+		{
+			add { AddHandler(DeleteFatigueInfoEvent, value); }
+			remove { RemoveHandler(DeleteFatigueInfoEvent, value); }
+		}
+
+		public event RoutedEventHandler ReplayFatigue
+		{
+			add { AddHandler(ReplayFatigueEvent, value); }
+			remove { RemoveHandler(ReplayFatigueEvent, value); }
+		}
 
 		public bool IsEngineRunning
 		{
@@ -43,6 +58,12 @@ namespace DemoCE.Controls
 		{
 			get { return (double)GetValue(DeltaProperty); }
 			set { SetValue(DeltaProperty, value); }
+		}
+
+		public FatigueInfo FatigueInfo
+		{
+			get { return (FatigueInfo)GetValue(FatigueInfoProperty); }
+			set { SetValue(FatigueInfoProperty, value); }
 		}
 
 		public double LeftArmCE
@@ -67,12 +88,6 @@ namespace DemoCE.Controls
 		{
 			get { return (double)GetValue(LenghtInSecondsProperty); }
 			set { SetValue(LenghtInSecondsProperty, value); }
-		}
-
-		public double GraphValueReference
-		{
-			get { return (double)GetValue(GraphValueReferenceProperty); }
-			set { SetValue(GraphValueReferenceProperty, value); }
 		}
 
 		public int CurrentFrame
@@ -109,14 +124,6 @@ namespace DemoCE.Controls
 			{
 				double axisLenght = lAxisX.ActualWidth - lAxisY.Margin.Left;
 			}
-			else if (e.Property == TimelineControl.IsEngineRunningProperty)
-			{
-				bool engineRunning = (bool)e.NewValue;
-				if (!engineRunning)
-					return;
-				cGraphContent.Children.Clear();
-				elapsedTime = 0;
-			}
 		}
 
 		private void InsertNewDataPoint(double value, WrapperCE.InterOp.Arm arm, Brush colorBrush)
@@ -131,10 +138,18 @@ namespace DemoCE.Controls
 			newPoint.ToolTip = new ToolTip() { Content = String.Format("Arm: {0}\nValue: {1}", arm, value) };
 		}
 
-		private void Button_Click(object sender, RoutedEventArgs e)
+		private void BtDeleteClick(object sender, RoutedEventArgs e)
 		{
-
+			RaiseEvent(new RoutedEventArgs(TimelineControl.DeleteFatigueInfoEvent, this));
 		}
+
+		private void BtReplayClick(object sender, RoutedEventArgs e)
+		{
+			cGraphContent.Children.Clear();
+			elapsedTime = 0;
+			RaiseEvent(new RoutedEventArgs(TimelineControl.ReplayFatigueEvent, this));
+		}
+
   }
 
 }

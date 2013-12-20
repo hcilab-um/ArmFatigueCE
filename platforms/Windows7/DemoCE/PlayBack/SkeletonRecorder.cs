@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using Microsoft.Kinect;
+using WrapperCE.InterOp;
 
 namespace DemoCE.Playback
 {
@@ -120,7 +121,7 @@ namespace DemoCE.Playback
       TotalTime = 0;
     }
 
-    public String Stop(bool saveFile, bool shutdown, WrapperCE.InterOp.UserGender gender)
+		public String Stop(bool saveFile, bool shutdown, UserGender gender)
     {
       if (!isRecording)
       {

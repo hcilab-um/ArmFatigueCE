@@ -10,6 +10,8 @@ namespace DemoCE
 	{
 		#region Private Value
 		private string fatigueFileName;
+		private WrapperCE.InterOp.UserGender gender;
+
 		private double leftArmAngle = 0;
 		private double rightArmAngle = 0;
 
@@ -34,6 +36,16 @@ namespace DemoCE
 			{
 				fatigueFileName = value;
 				OnPropertyChanged("FatigueFileName");
+			}
+		}
+
+		public WrapperCE.InterOp.UserGender Gender
+		{
+			get { return gender; }
+			set
+			{
+				gender = value;
+				OnPropertyChanged("Gender");
 			}
 		}
 

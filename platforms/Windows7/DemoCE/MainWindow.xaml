@@ -4,7 +4,9 @@
 				xmlns:controls="clr-namespace:DemoCE.Controls"
 				xmlns:converter="clr-namespace:DemoCE.Converters"
 				x:Name="mainW" Title="Arm Consumed Endurance (CE)"
-				SizeToContent="WidthAndHeight" ResizeMode="NoResize" 
+				SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+				controls:TimelineControl.DeleteFatigueInfo="DeleteFatigueInfo"
+				controls:TimelineControl.ReplayFatigue="ReplayFatigue"
 				Loaded="Window_Loaded" Closing="Window_Closing">
 	<Window.Resources>
 		<converter:NegateBooleanConverter x:Key="nbConverter"/>
@@ -75,10 +77,9 @@
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<controls:TimelineControl Margin="0,0,0,5" Width="410" Height="200" LenghtInSeconds="60" MaxValue="200"
-															LeftArmCE="{Binding Path=LeftArmConsumedEndurance}"
-															RightArmCE="{Binding Path=RightArmConsumedEndurance}"
-															IsEngineRunning="{Binding ElementName=mainW, Path=IsEngineRunning}"
-															Delta="{Binding ElementName=mainW, Path=DeltaTimeInSeconds}"/>
+															LeftArmCE="{Binding Path=LeftArmConsumedEndurance}" RightArmCE="{Binding Path=RightArmConsumedEndurance}"
+															FatigueInfo="{Binding}" Delta="{Binding ElementName=mainW, Path=DeltaTimeInSeconds}"
+															IsEngineRunning="{Binding ElementName=mainW, Path=IsEngineRunning}"/>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
@@ -91,8 +92,8 @@
 			<StackPanel Name="spGender" Orientation="Horizontal" Margin="0,0,0,5">
 				<Label Width="200" Content="Gender:"/>
 				<ComboBox x:Name="cbGender" Text="Gender" Width="430" Margin="10,0,0,0" IsEnabled="{Binding ElementName=mainW, Path=IsEngineRunning, Converter={StaticResource ResourceKey=nbConverter}}">
-					<ComboBoxItem Content="Male" IsSelected="{Binding ElementName=mainW, Path=Gender, Converter={StaticResource ResourceKey=bgConverter}, ConverterParameter=Male}"/>
-					<ComboBoxItem Content="Female" IsSelected="{Binding ElementName=mainW, Path=Gender, Converter={StaticResource ResourceKey=bgConverter}, ConverterParameter=Female}"/>
+					<ComboBoxItem Content="Male" IsSelected="{Binding ElementName=mainW, Path=CurrentFatigueInfo.Gender, Converter={StaticResource ResourceKey=bgConverter}, ConverterParameter=Male}"/>
+					<ComboBoxItem Content="Female" IsSelected="{Binding ElementName=mainW, Path=CurrentFatigueInfo.Gender, Converter={StaticResource ResourceKey=bgConverter}, ConverterParameter=Female}"/>
 				</ComboBox>
 			</StackPanel>
 			<StackPanel>

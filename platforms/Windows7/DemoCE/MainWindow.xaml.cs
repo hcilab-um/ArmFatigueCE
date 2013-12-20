@@ -18,6 +18,7 @@ using DemoCE.Playback;
 using DemoCE.Properties;
 using WrapperCE.InterOp;
 using System.Collections.ObjectModel;
+using DemoCE.Controls;
 
 namespace DemoCE
 {
@@ -26,34 +27,30 @@ namespace DemoCE
 	/// </summary>
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
-		public event EventHandler<ColorImageReadyArgs> ColorImageReady;
-
 		#region Private Variable
-
 		private KinectSensor kinectSensor = null;
 		private WriteableBitmap colorBitmap;
 		private byte[] colorPixels;
 		private SkeletonDrawer skeletonDrawer;
 		private long lastUpdate = -1;
 		private bool isKinectConnected = false;
+
 		private WrapperCE.EngineCE engine;
-		
-		private UserGender gender;
 
 		private ArmFatigueUpdate armFatigueUpdate;
 
 		private double deltaTimeInSeconds;
 		private double totalTimeInSeconds;
+		private FatigueInfo currentFatigueInfo;
+		private bool playBackFromFile; 
 		#endregion
 
 		#region Property
-		
+
 		public SkeletonRecorder Recorder { get; set; }
 		public SkeletonPlayer Player { get; set; }
-		
-		public ObservableCollection<FatigueInfo> FatigueInfoCollection { get; set; }
 
-		public bool PlayBackFromFile { get; set; }
+		public ObservableCollection<FatigueInfo> FatigueInfoCollection { get; set; }
 
 		public bool IsKinectConnected
 		{
@@ -62,16 +59,6 @@ namespace DemoCE
 			{
 				isKinectConnected = value;
 				OnPropertyChanged("IsKinectConnected");
-			}
-		}
-
-		public UserGender Gender
-		{
-			get { return gender; }
-			set
-			{
-				gender = value;
-				OnPropertyChanged("Gender");
 			}
 		}
 
@@ -88,7 +75,6 @@ namespace DemoCE
 				deltaTimeInSeconds = value;
 				OnPropertyChanged("DeltaTimeInSeconds");
 			}
-
 		}
 
 		public double TotalTimeInSeconds
@@ -99,25 +85,67 @@ namespace DemoCE
 				totalTimeInSeconds = value;
 				OnPropertyChanged("TotalTimeInSeconds");
 			}
-
 		}
 
-		public FatigueInfo CurrentFatigueInfo { get; set; }
+		public FatigueInfo CurrentFatigueInfo 
+		{
+			get { return currentFatigueInfo; }
+			set
+			{
+				currentFatigueInfo = value;
+				OnPropertyChanged("CurrentFatigueInfo");
+			}
+		}
+
+		public bool PlayBackFromFile
+		{
+			get { return playBackFromFile; }
+			set
+			{
+				playBackFromFile = value;
+				OnPropertyChanged("PlayBackFromFile");
+			}
+		}
 
 		#endregion
+
+		private EventHandler playbackHandler;
+		public event EventHandler<ColorImageReadyArgs> ColorImageReady;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		public MainWindow()
 		{
 			engine = new WrapperCE.EngineCE();
-			Gender = UserGender.Male;
 			armFatigueUpdate = new ArmFatigueUpdate();
 			CurrentFatigueInfo = new FatigueInfo();
-			
-			DeltaTimeInSeconds = 0;
+			CurrentFatigueInfo.Gender = UserGender.Male;
 			TotalTimeInSeconds = 0;
 			FatigueInfoCollection = new ObservableCollection<DemoCE.FatigueInfo>();
-			FatigueInfoCollection.Add(CurrentFatigueInfo);
 			InitializeComponent();
+		}
+
+		private void DeleteFatigueInfo(object sender, RoutedEventArgs e)
+		{
+			TimelineControl tlControl = (TimelineControl)e.OriginalSource;
+			FatigueInfoCollection.Remove(tlControl.FatigueInfo);
+		}
+
+		private void ReplayFatigue(object sender, RoutedEventArgs e)
+		{
+			TimelineControl tlControl = (TimelineControl)e.OriginalSource;
+			engine.Start(tlControl.FatigueInfo.Gender);
+			OnPropertyChanged("IsEngineRunning");
+			PlayBack(tlControl.FatigueInfo.FatigueFileName, Player_PlaybackFinished, true);
+		}
+
+		public void Player_PlaybackFinished(object sender, EventArgs e)
+		{
+			PlayBackFromFile = false;
+			if (engine.CheckStarted())
+			{
+				engine.Stop();
+				OnPropertyChanged("IsEngineRunning");
+			}
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -165,12 +193,12 @@ namespace DemoCE
 		private void player_SkeletonFrameReady(object sender, PlayerSkeletonFrameReadyEventArgs e)
 		{
 			Skeleton skeleton = e.FrameSkeleton;
-			DeltaTimeInSeconds = e.Delay;
-			RunFatigueEngine(skeleton, DeltaTimeInSeconds);
+
+			RunFatigueEngine(skeleton, e.Delay);
 			//We paint the skeleton and send the image over to the UI
 			if (ColorImageReady != null)
 			{
-				DrawingImage imageCanvas = DrawSkeleton(skeleton);
+				DrawingImage imageCanvas = DrawSkeleton(skeleton, Brushes.Black);
 				ColorImageReady(this, new ColorImageReadyArgs() { Frame = imageCanvas });
 			}
 		}
@@ -183,11 +211,13 @@ namespace DemoCE
 				kinectSensor.Dispose();
 			}
 			this.ColorImageReady -= MainWindow_ColorImageReady;
-			Recorder.Stop(false, true, Gender);
+			Recorder.Stop(false, true, UserGender.Male);
 		}
 
 		private void kinectSensor_AllFramesReady(object sender, AllFramesReadyEventArgs e)
 		{
+			if (PlayBackFromFile)
+				return;
 			long currentTimeMilliseconds = -1;
 			Skeleton[] skeletons = null;
 			Skeleton validSkeleton = null;
@@ -208,15 +238,16 @@ namespace DemoCE
 					}
 				}
 			}
+
 			if (validSkeleton != null)
 			{
+				double deltaTimeMilliseconds = (currentTimeMilliseconds - lastUpdate);
 				if (lastUpdate == -1)
-					DeltaTimeInSeconds = 0;
-				else
-					DeltaTimeInSeconds = (double)(currentTimeMilliseconds - lastUpdate)/1000;				
+					deltaTimeMilliseconds = 0;
+				DeltaTimeInSeconds = deltaTimeMilliseconds / 1000;
 				lastUpdate = currentTimeMilliseconds;
 				RunFatigueEngine(validSkeleton, DeltaTimeInSeconds);
-				Recorder.ProcessNewSkeletonData(validSkeleton, DeltaTimeInSeconds);
+				Recorder.ProcessNewSkeletonData(validSkeleton, deltaTimeMilliseconds);
 			}
 			
 			using (ColorImageFrame colorFrame = e.OpenColorImageFrame())
@@ -230,7 +261,7 @@ namespace DemoCE
 
 					if (validSkeleton != null)
 					{
-						iSkeleton.Source = DrawSkeleton(validSkeleton);
+						iSkeleton.Source = DrawSkeleton(validSkeleton, Brushes.Transparent);
 					}
 					else
 						iSkeleton.Source = null;
@@ -238,12 +269,12 @@ namespace DemoCE
 			}
 		}
 
-		private DrawingImage DrawSkeleton(Skeleton skeleton)
+		private DrawingImage DrawSkeleton(Skeleton skeleton, SolidColorBrush brush)
 		{
 			DrawingGroup dGroup = new DrawingGroup();
 			using (DrawingContext dc = dGroup.Open())
 			{
-				dc.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Black, 0.5), new Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
+				dc.DrawRectangle(brush, new Pen(Brushes.Black, 0.5), new Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
 				skeletonDrawer.DrawSkeleton(skeleton, dc);
 			}
 			DrawingImage dImageSource = new DrawingImage(dGroup);
@@ -251,11 +282,11 @@ namespace DemoCE
 			return dImageSource;
 		}
 
-		private void RunFatigueEngine(Skeleton skeleton, double deltaTime)
+		private void RunFatigueEngine(Skeleton skeleton, double deltaTimeInSeconds)
 		{
 			if (!engine.CheckStarted())
 				return;
-			TotalTimeInSeconds += deltaTime;
+			TotalTimeInSeconds += deltaTimeInSeconds;
 			SkeletonData measuredArms = new SkeletonData();
 			measuredArms.RightShoulderCms = Convert(skeleton.Joints[JointType.ShoulderRight].Position);
 			measuredArms.RightElbowCms = Convert(skeleton.Joints[JointType.ElbowRight].Position);
@@ -263,7 +294,7 @@ namespace DemoCE
 			measuredArms.LeftShoulderCms = Convert(skeleton.Joints[JointType.ShoulderLeft].Position);
 			measuredArms.LeftElbowCms = Convert(skeleton.Joints[JointType.ElbowLeft].Position);
 			measuredArms.LeftHandCms = Convert(skeleton.Joints[JointType.HandLeft].Position);
-			armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTime);
+			armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTimeInSeconds);
 
 			CurrentFatigueInfo.LeftArmAngle = armFatigueUpdate.LeftArm.Theta;
 			CurrentFatigueInfo.LeftArmAvgEndurance = armFatigueUpdate.LeftArm.AvgEndurance;
@@ -276,12 +307,9 @@ namespace DemoCE
 			CurrentFatigueInfo.RightArmAvgTorque = armFatigueUpdate.RightArm.AvgShoulderTorque;
 			CurrentFatigueInfo.RightArmConsumedEndurance = armFatigueUpdate.RightArm.ConsumedEndurance;
 			CurrentFatigueInfo.RightArmTorque = armFatigueUpdate.RightArm.ShoulderTorque;
-
 		}
 
-		private EventHandler playbackHandler;
-
-		public void PlayBack(string fileName, EventHandler pbFinished, bool useDelay)
+		private void PlayBack(string fileName, EventHandler pbFinished, bool useDelay)
 		{
 			if (playbackHandler != null)
 				Player.PlaybackFinished -= playbackHandler;
@@ -312,8 +340,6 @@ namespace DemoCE
       return point3D;
 		}
 
-		public event PropertyChangedEventHandler PropertyChanged;
-
 		private void OnPropertyChanged(String name)
 		{
 			if (PropertyChanged != null)
@@ -322,21 +348,21 @@ namespace DemoCE
 
 		private void BtStartMeasure_Click(object sender, RoutedEventArgs e)
 		{
+			CurrentFatigueInfo = new FatigueInfo();
+			FatigueInfoCollection.Insert(0, CurrentFatigueInfo);
 			Recorder.Start();
-			engine.Start(Gender);
-			TotalTimeInSeconds = 0;
+			engine.Start(CurrentFatigueInfo.Gender);
 			OnPropertyChanged("IsEngineRunning");
+			TotalTimeInSeconds = 0;
+			
 		}
 
 		private void BtStopMeasure_Click(object sender, RoutedEventArgs e)
 		{
-			CurrentFatigueInfo.FatigueFileName = Recorder.Stop(true, false, Gender);
+			CurrentFatigueInfo.FatigueFileName = Recorder.Stop(true, false, CurrentFatigueInfo.Gender);
 			engine.Stop();
-			if (CurrentFatigueInfo.FatigueFileName != string.Empty)
-			{
-				CurrentFatigueInfo = new FatigueInfo();
-				FatigueInfoCollection.Insert(0, CurrentFatigueInfo);
-			}
+			if (CurrentFatigueInfo.FatigueFileName == string.Empty)
+				FatigueInfoCollection.Remove(CurrentFatigueInfo);
 			OnPropertyChanged("IsEngineRunning");
 		}
 
