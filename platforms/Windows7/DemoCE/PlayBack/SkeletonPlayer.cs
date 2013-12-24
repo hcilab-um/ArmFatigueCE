@@ -79,17 +79,17 @@ namespace DemoCE.Playback
       foreach (SkeletonCapture capture in loadedCaptures)
       {
         if(UseDelay)
-          System.Threading.Thread.Sleep((int)capture.Delay);
+          System.Threading.Thread.Sleep((int)capture.DelayInMilliSeconds);
         if (uiDispatcher != null)
         {
           uiDispatcher.Invoke((Action)delegate
           {
-            SkeletonFrameReady(this, new PlayerSkeletonFrameReadyEventArgs() { Delay = capture.Delay, FrameSkeleton = capture.Skeleton });
+            SkeletonFrameReady(this, new PlayerSkeletonFrameReadyEventArgs() { DelayInMilliSeconds = capture.DelayInMilliSeconds, FrameSkeleton = capture.Skeleton });
           }, null);
         }
         if (uiDispatcher == null)
         {
-          SkeletonFrameReady(this, new PlayerSkeletonFrameReadyEventArgs() { Delay = capture.Delay, FrameSkeleton = capture.Skeleton });
+          SkeletonFrameReady(this, new PlayerSkeletonFrameReadyEventArgs() { DelayInMilliSeconds = capture.DelayInMilliSeconds, FrameSkeleton = capture.Skeleton });
         }
       }
     }

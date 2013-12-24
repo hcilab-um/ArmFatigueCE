@@ -8,7 +8,7 @@ namespace DemoCE.Playback
 {
   public class PlayerSkeletonFrameReadyEventArgs : EventArgs
   {
-    public double Delay { get; set; }
+    public double DelayInMilliSeconds { get; set; }
     public Skeleton FrameSkeleton { get; set; }
   }
 }

@@ -24,8 +24,8 @@ namespace DemoCE.Playback
     private FileStream recordFile = null;
     private BinaryWriter writer = null;
     private bool isRecording = false;
-
-    private double delta = 0;
+		private int framesRecorded = 0;
+    private double deltaTimeInSeconds = 0;
     private double totalTime = 0;
 
     public bool IsRecording
@@ -35,16 +35,9 @@ namespace DemoCE.Playback
       {
         isRecording = value;
         OnPropertyChanged("IsRecording");
-        OnPropertyChanged("IsNotRecording");
       }
     }
 
-    public bool IsNotRecording
-    {
-      get { return !isRecording; }
-    }
-
-    private int framesRecorded = 0;
     public int FramesRecorded
     {
       get { return framesRecorded; }
@@ -65,12 +58,12 @@ namespace DemoCE.Playback
       }
     }
 
-    public double Delta
+    public double DeltaTimeInSeconds
     {
-      get { return delta; }
+      get { return deltaTimeInSeconds; }
       set
       {
-        delta = value;
+        deltaTimeInSeconds = value;
         OnPropertyChanged("Delta");
       }
     }
@@ -83,13 +76,13 @@ namespace DemoCE.Playback
 
     public void ProcessNewSkeletonData(Skeleton skeleton, double deltaTimeMilliseconds)
     {
-			if (!isRecording)
+			if (!IsRecording)
         return;
 
-      Delta = deltaTimeMilliseconds / 1000.000;
-      TotalTime += Delta;
+      DeltaTimeInSeconds = deltaTimeMilliseconds / 1000.000;
+      TotalTime += DeltaTimeInSeconds;
 
-      SkeletonCapture capture = new SkeletonCapture() { Delay = deltaTimeMilliseconds, Skeleton = skeleton };
+      SkeletonCapture capture = new SkeletonCapture() { DelayInMilliSeconds = deltaTimeMilliseconds, Skeleton = skeleton };
       try
       {
         MemoryStream memTmp = new MemoryStream();
@@ -109,26 +102,22 @@ namespace DemoCE.Playback
 
     public void Start()
     {
-      if (isRecording)
-        throw new Exception("The system is already recording, therefore cannot be started");
+			if (IsRecording)
+				return;
 
       tmpFileName = System.IO.Path.GetTempFileName().Replace(".tmp", ".kr");
       recordFile = File.Open(tmpFileName, FileMode.CreateNew, FileAccess.ReadWrite);
       writer = new BinaryWriter(recordFile);
 
       IsRecording = true;
-      Delta = 0;
+      DeltaTimeInSeconds = 0;
       TotalTime = 0;
     }
 
 		public String Stop(bool saveFile, bool shutdown, UserGender gender)
     {
-      if (!isRecording)
-      {
-        if (shutdown)
-          return String.Empty;
-        throw new Exception("The system is not recording, therefore cannot be stopped");
-      }
+			if (!IsRecording || shutdown)
+				return String.Empty;
 
       IsRecording = false;
       writer.Flush();

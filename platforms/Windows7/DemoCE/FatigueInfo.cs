@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using WrapperCE.InterOp;
 
 namespace DemoCE
 {
 	public class FatigueInfo : INotifyPropertyChanged
 	{
 		#region Private Value
+		private double totalTimeInSeconds;
 		private string fatigueFileName;
 		private WrapperCE.InterOp.UserGender gender;
 
@@ -29,6 +31,17 @@ namespace DemoCE
 		#endregion
 
 		#region Property
+
+		public double TotalTimeInSeconds
+		{
+			get { return totalTimeInSeconds; }
+			set
+			{
+				totalTimeInSeconds = value;
+				OnPropertyChanged("TotalTimeInSeconds");
+			}
+		}
+
 		public string FatigueFileName
 		{
 			get { return fatigueFileName; }
@@ -39,7 +52,7 @@ namespace DemoCE
 			}
 		}
 
-		public WrapperCE.InterOp.UserGender Gender
+		public UserGender Gender
 		{
 			get { return gender; }
 			set
@@ -152,9 +165,30 @@ namespace DemoCE
 
 		public FatigueInfo()
 		{
-
+			FatigueFileName = string.Empty;
+			Gender = UserGender.Male;
+			Reset();
 		}
 
+		public void Reset()
+		{
+			TotalTimeInSeconds = 0;
+			LeftArmAngle = 0;
+			RightArmAngle = 0;
+
+			LeftArmTorque = 0;
+			RightArmTorque = 0;
+
+			LeftArmAvgTorque = 0;
+			RightArmAvgTorque = 0;
+
+			LeftArmAvgEndurance = 0;
+			RightArmAvgEndurance = 0;
+
+			LeftArmConsumedEndurance = 0;
+			RightArmConsumedEndurance = 0;
+		}
+		
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void OnPropertyChanged(String name)
 		{

@@ -15,7 +15,8 @@
 		<Line x:Name="lAxisY" Stroke="Black" StrokeThickness="1.5" HorizontalAlignment="Left" Margin="30,0" X1="0" Y1="0" X2="0" Y2="{Binding ElementName=tcControl, Path=ActualHeight}"/>
 		<Line x:Name="lAxisX" Stroke="Black" StrokeThickness="1.5" VerticalAlignment="Bottom" Margin="0,30" X1="0" Y1="0" X2="{Binding ElementName=tcControl, Path=ActualWidth}" Y2="0"/>
 		<Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="30" Margin="10,0" Content="Delete" Click="BtDeleteClick"/>
-		<Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="30" Margin="60,0" Content="Replay" IsEnabled="{Binding ElementName=tcControl, Path=IsEngineRunning, Converter={StaticResource ResourceKey=nbConverter}}" Click="BtReplayClick"/>
+		<Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="30" Margin="60,0" Content="Replay" Click="BtReplayClick"
+						IsEnabled="{Binding ElementName=tcControl, Path=IsEngineRunning, Converter={StaticResource ResourceKey=nbConverter}}"/>
 		<Grid x:Name="gGraphContent" VerticalAlignment="Bottom" Margin="30,0,0,30" HorizontalAlignment="Left"
 					Width="{Binding ElementName=tcControl, Path=ActualWidth}" Height="{Binding ElementName=tcControl, Path=ActualHeight}">
 			<Canvas x:Name="cGraphContent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Visible" />

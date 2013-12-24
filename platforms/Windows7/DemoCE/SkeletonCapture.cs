@@ -9,7 +9,7 @@ namespace DemoCE
   [Serializable]
   public class SkeletonCapture
   {
-    public double Delay { get; set; }
+    public double DelayInMilliSeconds { get; set; }
     public Skeleton Skeleton { get; set; }
 
     [NonSerialized]

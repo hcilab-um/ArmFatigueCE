@@ -40,9 +40,8 @@ namespace DemoCE
 		private ArmFatigueUpdate armFatigueUpdate;
 
 		private double deltaTimeInSeconds;
-		private double totalTimeInSeconds;
 		private FatigueInfo currentFatigueInfo;
-		private bool playBackFromFile; 
+		private bool playBackFromFile;
 		#endregion
 
 		#region Property
@@ -77,17 +76,7 @@ namespace DemoCE
 			}
 		}
 
-		public double TotalTimeInSeconds
-		{
-			get { return totalTimeInSeconds; }
-			set
-			{
-				totalTimeInSeconds = value;
-				OnPropertyChanged("TotalTimeInSeconds");
-			}
-		}
-
-		public FatigueInfo CurrentFatigueInfo 
+		public FatigueInfo CurrentFatigueInfo
 		{
 			get { return currentFatigueInfo; }
 			set
@@ -117,25 +106,28 @@ namespace DemoCE
 		{
 			engine = new WrapperCE.EngineCE();
 			armFatigueUpdate = new ArmFatigueUpdate();
+			
 			CurrentFatigueInfo = new FatigueInfo();
 			CurrentFatigueInfo.Gender = UserGender.Male;
-			TotalTimeInSeconds = 0;
+			
 			FatigueInfoCollection = new ObservableCollection<DemoCE.FatigueInfo>();
+
 			InitializeComponent();
 		}
 
 		private void DeleteFatigueInfo(object sender, RoutedEventArgs e)
 		{
 			TimelineControl tlControl = (TimelineControl)e.OriginalSource;
-			FatigueInfoCollection.Remove(tlControl.FatigueInfo);
+			FatigueInfoCollection.Remove((FatigueInfo)tlControl.DataContext);
 		}
 
 		private void ReplayFatigue(object sender, RoutedEventArgs e)
 		{
 			TimelineControl tlControl = (TimelineControl)e.OriginalSource;
-			engine.Start(tlControl.FatigueInfo.Gender);
-			OnPropertyChanged("IsEngineRunning");
-			PlayBack(tlControl.FatigueInfo.FatigueFileName, Player_PlaybackFinished, true);
+			CurrentFatigueInfo = (FatigueInfo)tlControl.DataContext;
+			CurrentFatigueInfo.Reset();
+			StartMeasure(CurrentFatigueInfo.Gender);
+			PlayBack(CurrentFatigueInfo.FatigueFileName, Player_PlaybackFinished, true);
 		}
 
 		public void Player_PlaybackFinished(object sender, EventArgs e)
@@ -143,9 +135,24 @@ namespace DemoCE
 			PlayBackFromFile = false;
 			if (engine.CheckStarted())
 			{
-				engine.Stop();
-				OnPropertyChanged("IsEngineRunning");
+				StopMeasure();
 			}
+		}
+
+		private void StartMeasure(UserGender gender)
+		{
+			if (engine.CheckStarted())
+				return;
+			engine.Start(gender);
+			OnPropertyChanged("IsEngineRunning");
+		}
+
+		private void StopMeasure()
+		{
+			if (!engine.CheckStarted())
+				return;
+			engine.Stop();
+			OnPropertyChanged("IsEngineRunning");
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -184,7 +191,7 @@ namespace DemoCE
 
 		private void MainWindow_ColorImageReady(object sender, ColorImageReadyArgs e)
 		{
- 			ImageSource colorFrame = e.Frame;
+			ImageSource colorFrame = e.Frame;
 			if (colorFrame == null)
 				return;
 			iSkeleton.Source = colorFrame;
@@ -194,7 +201,7 @@ namespace DemoCE
 		{
 			Skeleton skeleton = e.FrameSkeleton;
 
-			RunFatigueEngine(skeleton, e.Delay);
+			RunFatigueEngine(skeleton, e.DelayInMilliSeconds/1000);
 			//We paint the skeleton and send the image over to the UI
 			if (ColorImageReady != null)
 			{
@@ -249,7 +256,7 @@ namespace DemoCE
 				RunFatigueEngine(validSkeleton, DeltaTimeInSeconds);
 				Recorder.ProcessNewSkeletonData(validSkeleton, deltaTimeMilliseconds);
 			}
-			
+
 			using (ColorImageFrame colorFrame = e.OpenColorImageFrame())
 			{
 				if (colorFrame != null)
@@ -286,7 +293,7 @@ namespace DemoCE
 		{
 			if (!engine.CheckStarted())
 				return;
-			TotalTimeInSeconds += deltaTimeInSeconds;
+			CurrentFatigueInfo.TotalTimeInSeconds += deltaTimeInSeconds;
 			SkeletonData measuredArms = new SkeletonData();
 			measuredArms.RightShoulderCms = Convert(skeleton.Joints[JointType.ShoulderRight].Position);
 			measuredArms.RightElbowCms = Convert(skeleton.Joints[JointType.ElbowRight].Position);
@@ -334,10 +341,10 @@ namespace DemoCE
 		private Point3D Convert(SkeletonPoint trackedPoint)
 		{
 			Point3D point3D;
-      point3D.X = trackedPoint.X;
-      point3D.Y = trackedPoint.Y;
-      point3D.Z = trackedPoint.Z;
-      return point3D;
+			point3D.X = trackedPoint.X;
+			point3D.Y = trackedPoint.Y;
+			point3D.Z = trackedPoint.Z;
+			return point3D;
 		}
 
 		private void OnPropertyChanged(String name)
@@ -348,22 +355,19 @@ namespace DemoCE
 
 		private void BtStartMeasure_Click(object sender, RoutedEventArgs e)
 		{
+			Recorder.Start();
 			CurrentFatigueInfo = new FatigueInfo();
 			FatigueInfoCollection.Insert(0, CurrentFatigueInfo);
-			Recorder.Start();
-			engine.Start(CurrentFatigueInfo.Gender);
-			OnPropertyChanged("IsEngineRunning");
-			TotalTimeInSeconds = 0;
-			
+			StartMeasure(CurrentFatigueInfo.Gender);
 		}
 
 		private void BtStopMeasure_Click(object sender, RoutedEventArgs e)
 		{
 			CurrentFatigueInfo.FatigueFileName = Recorder.Stop(true, false, CurrentFatigueInfo.Gender);
-			engine.Stop();
+			StopMeasure();
 			if (CurrentFatigueInfo.FatigueFileName == string.Empty)
 				FatigueInfoCollection.Remove(CurrentFatigueInfo);
-			OnPropertyChanged("IsEngineRunning");
+			CurrentFatigueInfo = new FatigueInfo();
 		}
 
 	}
