@@ -14,9 +14,29 @@
 	<Grid RenderOptions.EdgeMode="Aliased">
 		<Line x:Name="lAxisY" Stroke="Black" StrokeThickness="1.5" HorizontalAlignment="Left" Margin="30,0" X1="0" Y1="0" X2="0" Y2="{Binding ElementName=tcControl, Path=ActualHeight}"/>
 		<Line x:Name="lAxisX" Stroke="Black" StrokeThickness="1.5" VerticalAlignment="Bottom" Margin="0,30" X1="0" Y1="0" X2="{Binding ElementName=tcControl, Path=ActualWidth}" Y2="0"/>
-		<Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="30" Margin="10,0" Content="Delete" Click="BtDeleteClick"/>
-		<Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="30" Margin="60,0" Content="Replay" Click="BtReplayClick"
-						IsEnabled="{Binding ElementName=tcControl, Path=IsEngineRunning, Converter={StaticResource ResourceKey=nbConverter}}"/>
+		<Button HorizontalAlignment="Right" VerticalAlignment="Top" Height="Auto" Width="25"  Click="BtDeleteClick">
+			<Button.Template>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Image Source="/DemoCE;component/CloseButton.png" />
+						<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+					</Grid>
+				</ControlTemplate>
+			</Button.Template>
+		</Button>
+		<Button Opacity="0.1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="70" Height="70" 
+						Margin="0,0" MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave" Click="BtReplayClick"
+						IsEnabled="{Binding ElementName=tcControl, Path=IsEngineRunning, Converter={StaticResource ResourceKey=nbConverter}}">
+			<Button.Template>
+				<ControlTemplate TargetType="Button">
+					<Grid>
+						<Image Source="/DemoCE;component/PlayButton.png" />
+						<ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+					</Grid>
+				</ControlTemplate>
+			</Button.Template>
+		</Button>		
 		<Grid x:Name="gGraphContent" VerticalAlignment="Bottom" Margin="30,0,0,30" HorizontalAlignment="Left"
 					Width="{Binding ElementName=tcControl, Path=ActualWidth}" Height="{Binding ElementName=tcControl, Path=ActualHeight}">
 			<Canvas x:Name="cGraphContent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Visible" />

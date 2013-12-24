@@ -145,6 +145,18 @@ namespace DemoCE.Controls
 			RaiseEvent(new RoutedEventArgs(TimelineControl.ReplayFatigueEvent, this));
 		}
 
+		private void Button_MouseEnter(object sender, MouseEventArgs e)
+		{
+			Button button = (Button)sender;
+			button.Opacity = 1;
+		}
+
+		private void Button_MouseLeave(object sender, MouseEventArgs e)
+		{
+			Button button = (Button)sender;
+			button.Opacity = 0.1;
+		}
+
   }
 
 }
