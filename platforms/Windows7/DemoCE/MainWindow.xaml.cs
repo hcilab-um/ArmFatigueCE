@@ -19,6 +19,7 @@ using DemoCE.Properties;
 using WrapperCE.InterOp;
 using System.Collections.ObjectModel;
 using DemoCE.Controls;
+using System.IO;
 
 namespace DemoCE
 {
@@ -117,7 +118,10 @@ namespace DemoCE
 
 		private void DeleteFatigueInfo(object sender, RoutedEventArgs e)
 		{
+			if (engine.CheckStarted())
+				return;
 			TimelineControl tlControl = (TimelineControl)e.OriginalSource;
+			FatigueInfo fatigueInfo = (FatigueInfo)tlControl.DataContext;
 			FatigueInfoCollection.Remove((FatigueInfo)tlControl.DataContext);
 		}
 
@@ -217,7 +221,14 @@ namespace DemoCE
 				kinectSensor.Stop();
 				kinectSensor.Dispose();
 			}
+
 			this.ColorImageReady -= MainWindow_ColorImageReady;
+			
+			foreach (FatigueInfo fatigueInfo in FatigueInfoCollection)
+			{
+				File.Delete(fatigueInfo.FatigueFileName);
+			}
+
 			Recorder.Stop(false, true, UserGender.Male);
 		}
 
@@ -355,6 +366,8 @@ namespace DemoCE
 
 		private void BtStartMeasure_Click(object sender, RoutedEventArgs e)
 		{
+			if (PlayBackFromFile)
+				return;
 			Recorder.Start();
 			CurrentFatigueInfo = new FatigueInfo();
 			FatigueInfoCollection.Insert(0, CurrentFatigueInfo);
@@ -363,6 +376,8 @@ namespace DemoCE
 
 		private void BtStopMeasure_Click(object sender, RoutedEventArgs e)
 		{
+			if (PlayBackFromFile)
+				return;
 			CurrentFatigueInfo.FatigueFileName = Recorder.Stop(true, false, CurrentFatigueInfo.Gender);
 			StopMeasure();
 			if (CurrentFatigueInfo.FatigueFileName == string.Empty)
