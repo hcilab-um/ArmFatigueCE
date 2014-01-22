@@ -20,6 +20,7 @@ using WrapperCE.InterOp;
 using System.Collections.ObjectModel;
 using DemoCE.Controls;
 using System.IO;
+using log4net.Appender;
 
 namespace DemoCE
 {
@@ -28,7 +29,11 @@ namespace DemoCE
 	/// </summary>
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
+
 		#region Private Variable
+		private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainWindow));
+
+		private const double TORQUE_MODIFIER = 2d;
 		private KinectSensor kinectSensor = null;
 		private WriteableBitmap colorBitmap;
 		private byte[] colorPixels;
@@ -106,11 +111,7 @@ namespace DemoCE
 		public MainWindow()
 		{
 			engine = new WrapperCE.EngineCE();
-			armFatigueUpdate = new ArmFatigueUpdate();
-			
-			CurrentFatigueInfo = new FatigueInfo();
-			CurrentFatigueInfo.Gender = UserGender.Male;
-			
+
 			FatigueInfoCollection = new ObservableCollection<DemoCE.FatigueInfo>();
 
 			InitializeComponent();
@@ -205,7 +206,7 @@ namespace DemoCE
 		{
 			Skeleton skeleton = e.FrameSkeleton;
 
-			RunFatigueEngine(skeleton, e.DelayInMilliSeconds/1000);
+			RunFatigueEngine(skeleton, e.DelayInMilliSeconds / 1000);
 			//We paint the skeleton and send the image over to the UI
 			if (ColorImageReady != null)
 			{
@@ -223,11 +224,6 @@ namespace DemoCE
 			}
 
 			this.ColorImageReady -= MainWindow_ColorImageReady;
-			
-			foreach (FatigueInfo fatigueInfo in FatigueInfoCollection)
-			{
-				File.Delete(fatigueInfo.FatigueFileName);
-			}
 
 			Recorder.Stop(false, true, UserGender.Male);
 		}
@@ -236,6 +232,7 @@ namespace DemoCE
 		{
 			if (PlayBackFromFile)
 				return;
+
 			long currentTimeMilliseconds = -1;
 			Skeleton[] skeletons = null;
 			Skeleton validSkeleton = null;
@@ -294,6 +291,11 @@ namespace DemoCE
 			{
 				dc.DrawRectangle(brush, new Pen(Brushes.Black, 0.5), new Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
 				skeletonDrawer.DrawSkeleton(skeleton, dc);
+				if (IsEngineRunning)
+				{
+					skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderLeft, dc, CurrentFatigueInfo.LeftShoulderTorquePercent / TORQUE_MODIFIER);
+					skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightShoulderTorquePercent / TORQUE_MODIFIER);
+				}
 			}
 			DrawingImage dImageSource = new DrawingImage(dGroup);
 			dGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
@@ -304,6 +306,7 @@ namespace DemoCE
 		{
 			if (!engine.CheckStarted())
 				return;
+
 			CurrentFatigueInfo.TotalTimeInSeconds += deltaTimeInSeconds;
 			SkeletonData measuredArms = new SkeletonData();
 			measuredArms.RightShoulderCms = Convert(skeleton.Joints[JointType.ShoulderRight].Position);
@@ -312,19 +315,27 @@ namespace DemoCE
 			measuredArms.LeftShoulderCms = Convert(skeleton.Joints[JointType.ShoulderLeft].Position);
 			measuredArms.LeftElbowCms = Convert(skeleton.Joints[JointType.ElbowLeft].Position);
 			measuredArms.LeftHandCms = Convert(skeleton.Joints[JointType.HandLeft].Position);
+
 			armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTimeInSeconds);
 
 			CurrentFatigueInfo.LeftArmAngle = armFatigueUpdate.LeftArm.Theta;
-			CurrentFatigueInfo.LeftArmAvgEndurance = armFatigueUpdate.LeftArm.AvgEndurance;
-			CurrentFatigueInfo.LeftArmAvgTorque = armFatigueUpdate.LeftArm.AvgShoulderTorque;
-			CurrentFatigueInfo.LeftArmConsumedEndurance = armFatigueUpdate.LeftArm.ConsumedEndurance;
-			CurrentFatigueInfo.LeftArmTorque = armFatigueUpdate.LeftArm.ShoulderTorque;
-
 			CurrentFatigueInfo.RightArmAngle = armFatigueUpdate.RightArm.Theta;
+
+			CurrentFatigueInfo.LeftArmAvgEndurance = armFatigueUpdate.LeftArm.AvgEndurance;
 			CurrentFatigueInfo.RightArmAvgEndurance = armFatigueUpdate.RightArm.AvgEndurance;
+
+			CurrentFatigueInfo.LeftArmAvgTorque = armFatigueUpdate.LeftArm.AvgShoulderTorque;
 			CurrentFatigueInfo.RightArmAvgTorque = armFatigueUpdate.RightArm.AvgShoulderTorque;
+
+			CurrentFatigueInfo.LeftArmConsumedEndurance = armFatigueUpdate.LeftArm.ConsumedEndurance;
 			CurrentFatigueInfo.RightArmConsumedEndurance = armFatigueUpdate.RightArm.ConsumedEndurance;
+
+			CurrentFatigueInfo.LeftArmTorque = armFatigueUpdate.LeftArm.ShoulderTorque;
 			CurrentFatigueInfo.RightArmTorque = armFatigueUpdate.RightArm.ShoulderTorque;
+
+			CurrentFatigueInfo.LeftShoulderTorquePercent = armFatigueUpdate.LeftArm.ShoulderTorquePercent;
+			CurrentFatigueInfo.RightShoulderTorquePercent = armFatigueUpdate.RightArm.ShoulderTorquePercent;
+			PrintOutEffortLog();
 		}
 
 		private void PlayBack(string fileName, EventHandler pbFinished, bool useDelay)
@@ -349,6 +360,23 @@ namespace DemoCE
 			iSkeleton.Source = colorFrame;
 		}
 
+		private void PrintOutEffortLog()
+		{
+			Object[] logObjects = new Object[]
+      {
+				DateTime.Now,
+				CurrentFatigueInfo.LeftArmConsumedEndurance,
+				CurrentFatigueInfo.RightArmConsumedEndurance
+      };
+
+			int count = 0;
+			StringBuilder formatSt = new StringBuilder();
+			foreach (Object obj in logObjects)
+				formatSt.Append("{" + (count++) + "},");
+			String logString = String.Format(formatSt.ToString(), logObjects);
+			logger.Info(logString);
+		}
+
 		private Point3D Convert(SkeletonPoint trackedPoint)
 		{
 			Point3D point3D;
@@ -356,12 +384,6 @@ namespace DemoCE
 			point3D.Y = trackedPoint.Y;
 			point3D.Z = trackedPoint.Z;
 			return point3D;
-		}
-
-		private void OnPropertyChanged(String name)
-		{
-			if (PropertyChanged != null)
-				PropertyChanged(this, new PropertyChangedEventArgs(name));
 		}
 
 		private void BtStartMeasure_Click(object sender, RoutedEventArgs e)
@@ -383,6 +405,31 @@ namespace DemoCE
 			if (CurrentFatigueInfo.FatigueFileName == string.Empty)
 				FatigueInfoCollection.Remove(CurrentFatigueInfo);
 			CurrentFatigueInfo = new FatigueInfo();
+		}
+
+		private void OnPropertyChanged(String name)
+		{
+			if (PropertyChanged != null)
+				PropertyChanged(this, new PropertyChangedEventArgs(name));
+		}
+
+		private void BtExport_Click(object sender, RoutedEventArgs e)
+		{
+			RollingFileAppender fileAppender = log4net.LogManager.GetRepository().GetAppenders().First(appender => appender is RollingFileAppender) as RollingFileAppender;
+			Microsoft.Win32.SaveFileDialog dialog = new Microsoft.Win32.SaveFileDialog();
+			dialog.FileName = "Document";
+			dialog.DefaultExt = ".csv";
+			dialog.Filter = "Text documents (.csv)|*.csv";
+
+			Nullable<bool> result = dialog.ShowDialog();
+
+			if (result == true)
+			{
+				string filename = dialog.FileName;
+				File.Delete(filename);
+				File.Copy(fileAppender.File, filename);
+			}
+
 		}
 
 	}

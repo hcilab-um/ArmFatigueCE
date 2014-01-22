@@ -13,36 +13,54 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WrapperCE.InterOp;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace DemoCE.Controls
 {
   /// <summary>
   /// Interaction logic for TimelineControl.xaml
   /// </summary>
-  public partial class TimelineControl : UserControl
+  public partial class TimelineControl : UserControl, INotifyPropertyChanged
   {
 		public static readonly RoutedEvent DeleteFatigueInfoEvent = EventManager.RegisterRoutedEvent("DeleteFatigueInfo", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(TimelineControl));
 		public static readonly RoutedEvent ReplayFatigueEvent = EventManager.RegisterRoutedEvent("ReplayFatigue", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(TimelineControl));
 
+
 		public static readonly DependencyProperty TotalTimeInSecondsProperty = DependencyProperty.Register("TotalTimeInSeconds", typeof(double), typeof(TimelineControl));
 		public static readonly DependencyProperty LeftArmCEProperty = DependencyProperty.Register("LeftArmCE", typeof(double), typeof(TimelineControl));
 		public static readonly DependencyProperty RightArmCEProperty = DependencyProperty.Register("RightArmCE", typeof(double), typeof(TimelineControl));
+
 		public static readonly DependencyProperty MaxValueProperty = DependencyProperty.Register("MaxValue", typeof(double), typeof(TimelineControl));
 		public static readonly DependencyProperty LenghtInSecondsProperty = DependencyProperty.Register("LenghtInSeconds", typeof(double), typeof(TimelineControl));
-		public static readonly DependencyProperty CurrentFrameProperty = DependencyProperty.Register("CurrentFrame", typeof(int), typeof(TimelineControl));
-		public static readonly DependencyProperty ValueOneVisibleProperty = DependencyProperty.Register("ValueOneVisible", typeof(Visibility), typeof(TimelineControl));
 		public static readonly DependencyProperty IsEngineRunningProperty = DependencyProperty.Register("IsEngineRunning", typeof(bool), typeof(TimelineControl));
 
+		private double timePlotValue;
+		private double totalConsumeEndurance;
+
+		public double TimePlotValue
+		{
+			get { return timePlotValue; }
+			set
+			{
+				timePlotValue = value;
+				OnPropertyChanged("TimePlotValue");
+			}
+		}
+
+		public double TotalConsumeEndurance
+		{
+			get { return totalConsumeEndurance; }
+			set
+			{
+				totalConsumeEndurance = value;
+				OnPropertyChanged("TotalConsumeEndurance");
+			}
+		}
+		
 		public event RoutedEventHandler DeleteFatigueInfo
 		{
 			add { AddHandler(DeleteFatigueInfoEvent, value); }
 			remove { RemoveHandler(DeleteFatigueInfoEvent, value); }
-		}
-
-		public event RoutedEventHandler ReplayFatigue
-		{
-			add { AddHandler(ReplayFatigueEvent, value); }
-			remove { RemoveHandler(ReplayFatigueEvent, value); }
 		}
 
 		public bool IsEngineRunning
@@ -66,7 +84,7 @@ namespace DemoCE.Controls
 		public double RightArmCE
 		{
 			get { return (double)GetValue(RightArmCEProperty); }
-			set { SetValue(LeftArmCEProperty, value); }
+			set { SetValue(RightArmCEProperty, value); }
 		}
 
 		public double MaxValue
@@ -81,10 +99,10 @@ namespace DemoCE.Controls
 			set { SetValue(LenghtInSecondsProperty, value); }
 		}
 
-		public int CurrentFrame
+		public event RoutedEventHandler ReplayFatigue
 		{
-			get { return (int)GetValue(CurrentFrameProperty); }
-			set { SetValue(CurrentFrameProperty, value); }
+			add { AddHandler(ReplayFatigueEvent, value); }
+			remove { RemoveHandler(ReplayFatigueEvent, value); }
 		}
 
 		public TimelineControl()
@@ -100,34 +118,24 @@ namespace DemoCE.Controls
 			}
 			else if (e.Property == TimelineControl.LeftArmCEProperty)
 			{
-				InsertNewDataPoint(LeftArmCE, Arm.LeftArm, Brushes.Green);
+				InsertNewDataPoint(LeftArmCE, Arm.LeftArm);
 			}
 			else if (e.Property == TimelineControl.RightArmCEProperty)
 			{
-				InsertNewDataPoint(RightArmCE,  Arm.RightArm, Brushes.Yellow);
-			}
-			else if (e.Property == TimelineControl.MaxValueProperty || e.Property == TimelineControl.ActualHeightProperty)
-			{
-				double axisLenght = lAxisY.ActualHeight - lAxisX.Margin.Bottom;
-			}
-			else if (e.Property == TimelineControl.LenghtInSecondsProperty || e.Property == TimelineControl.ActualWidthProperty)
-			{
-				double axisLenght = lAxisX.ActualWidth - lAxisY.Margin.Left;
+				InsertNewDataPoint(RightArmCE, Arm.RightArm);
 			}
 		}
 
-		private void InsertNewDataPoint(double value, WrapperCE.InterOp.Arm arm, Brush colorBrush)
+		private void InsertNewDataPoint(double consumeEndurance, WrapperCE.InterOp.Arm arm)
 		{
 			if (LenghtInSeconds == 0 || MaxValue == 0)
 				return;
-			Ellipse newPoint = new Ellipse();
-			newPoint.Width = 2;
-			newPoint.Height = 4;
-			newPoint.Fill = colorBrush;
-			Canvas.SetLeft(newPoint, TotalTimeInSeconds * (ActualWidth - 33) / LenghtInSeconds);
-			Canvas.SetBottom(newPoint, value * (ActualHeight - 30) / MaxValue);
-			cGraphContent.Children.Add(newPoint);
-			newPoint.ToolTip = new ToolTip() { Content = String.Format("Arm: {0}\nValue: {1}", arm, value) };
+			TimePlotValue = TotalTimeInSeconds * (cGraphContent.Width) / LenghtInSeconds;
+			Point newPoint = new Point(TimePlotValue, consumeEndurance * (cGraphContent.Height) / MaxValue);
+			if (arm == WrapperCE.InterOp.Arm.RightArm)
+				plotGraphRight.Points.Add(newPoint);
+			else
+				plotGraphLeft.Points.Add(newPoint);
 		}
 
 		private void BtDeleteClick(object sender, RoutedEventArgs e)
@@ -141,7 +149,8 @@ namespace DemoCE.Controls
 		{
 			if (IsEngineRunning)
 				return;
-			cGraphContent.Children.Clear();
+			plotGraphLeft.Points.Clear();
+			plotGraphRight.Points.Clear();
 			RaiseEvent(new RoutedEventArgs(TimelineControl.ReplayFatigueEvent, this));
 		}
 
@@ -154,9 +163,16 @@ namespace DemoCE.Controls
 		private void Button_MouseLeave(object sender, MouseEventArgs e)
 		{
 			Button button = (Button)sender;
-			button.Opacity = 0.1;
+			button.Opacity = 0.05;
 		}
 
-  }
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		private void OnPropertyChanged(String name)
+		{
+			if (PropertyChanged != null)
+				PropertyChanged(this, new PropertyChangedEventArgs(name));
+		}
+	}
 
 }

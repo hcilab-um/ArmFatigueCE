@@ -61,6 +61,7 @@ WrapperCE::InterOp::FatigueData WrapperCE::EngineCE::ConvertFatigueData(FatigueD
 	interOpData.ShoulderTorque = fatigueData.ShoulderTorque;
 	interOpData.Endurance = fatigueData.Endurance;
 	interOpData.AvgShoulderTorque = fatigueData.AvgShoulderTorque;
+	interOpData.ShoulderTorquePercent = fatigueData.shoulderTorquePercent;
 	interOpData.AvgEndurance = fatigueData.AvgEndurance;
 	interOpData.ConsumedEndurance = fatigueData.ConsumedEndurance;
 	return interOpData;

@@ -10,7 +10,8 @@ namespace DemoCE
 	public class FatigueInfo : INotifyPropertyChanged
 	{
 		#region Private Value
-		private double totalTimeInSeconds;
+
+		private double totalTimeInSeconds = 0;
 		private string fatigueFileName;
 		private WrapperCE.InterOp.UserGender gender;
 
@@ -20,6 +21,9 @@ namespace DemoCE
 		private double leftArmTorque = 0;
 		private double rightArmTorque = 0;
 
+		private double leftShoulderTorquePercent = 0;
+		private double rightShoulderTorquePercent = 0;
+
 		private double leftArmAvgTorque = 0;
 		private double rightArmAvgTorque = 0;
 
@@ -28,6 +32,7 @@ namespace DemoCE
 
 		private double leftArmConsumedEndurance = 0;
 		private double rightArmConsumedEndurance = 0;
+
 		#endregion
 
 		#region Property
@@ -99,6 +104,26 @@ namespace DemoCE
 			{
 				rightArmTorque = value;
 				OnPropertyChanged("RightArmTorque");
+			}
+		}
+
+		public double LeftShoulderTorquePercent
+		{
+			get { return leftShoulderTorquePercent; }
+			set
+			{
+				leftShoulderTorquePercent = value;
+				OnPropertyChanged("LeftShoulderTorquePercent");
+			}
+		}
+
+		public double RightShoulderTorquePercent
+		{
+			get { return rightShoulderTorquePercent; }
+			set
+			{
+				rightShoulderTorquePercent = value;
+				OnPropertyChanged("RightShoulderTorquePercent");
 			}
 		}
 
@@ -182,6 +207,9 @@ namespace DemoCE
 			LeftArmAvgTorque = 0;
 			RightArmAvgTorque = 0;
 
+			LeftShoulderTorquePercent = 0;
+			RightShoulderTorquePercent = 0;
+
 			LeftArmAvgEndurance = 0;
 			RightArmAvgEndurance = 0;
 
@@ -190,10 +218,12 @@ namespace DemoCE
 		}
 		
 		public event PropertyChangedEventHandler PropertyChanged;
+		
 		private void OnPropertyChanged(String name)
 		{
 			if (PropertyChanged != null)
 				PropertyChanged(this, new PropertyChangedEventArgs(name));
 		}
+
 	}
 }

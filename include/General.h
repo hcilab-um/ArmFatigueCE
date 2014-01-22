@@ -29,24 +29,6 @@ public:
 struct EXPORT_OR_IMPORT FatigueData
 {
 public:
-	FatigueData()
-	{
-		TargetArm = LeftArm;
-
-		Theta = 0;
-		CenterOfMass = Vector3D();
-		Displacement = Vector3D();
-		Velocity = Vector3D();
-		Acceleration = Vector3D();
-		InertialTorque = Vector3D();
-		AngularAcceleration = 0;
-		ShoulderTorque = 0;
-		Endurance = 0;
-		AvgShoulderTorque = 0;
-		AvgEndurance = 0;
-		ConsumedEndurance = 0;
-		
-	}
 
 	Arm TargetArm;
 
@@ -59,12 +41,34 @@ public:
 
 	double AngularAcceleration;
 	double ShoulderTorque;
-	double Endurance;
+	double shoulderTorquePercent;
 
+	double Endurance;
 	double AvgShoulderTorque;
 	double AvgEndurance;
 
 	double ConsumedEndurance;
+
+	FatigueData()
+	{
+		TargetArm = LeftArm;
+
+		Theta = 0;
+		CenterOfMass = Vector3D();
+		Displacement = Vector3D();
+		Velocity = Vector3D();
+		Acceleration = Vector3D();
+		InertialTorque = Vector3D();
+		AngularAcceleration = 0;
+		ShoulderTorque = 0;
+		shoulderTorquePercent = 0;
+
+		Endurance = 0;
+		AvgShoulderTorque = 0;
+		AvgEndurance = 0;
+		ConsumedEndurance = 0;
+		
+	}
 };
 
 struct EXPORT_OR_IMPORT ArmFatigueUpdate

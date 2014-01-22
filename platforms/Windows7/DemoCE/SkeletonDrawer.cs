@@ -82,23 +82,12 @@ namespace DemoCE
       }
     }
 
-    internal void DrawPoint(Skeleton skeleton, System.Windows.Media.Media3D.Vector3D? point, DrawingContext drawingContext)
-    {
-      if (!point.HasValue || skeleton == null)
-        return;
-
-      SkeletonPoint shoulder = skeleton.Joints[JointType.ShoulderRight].Position;
-      SkeletonPoint sPoint = new SkeletonPoint() { X = (float)point.Value.X, Y = (float)point.Value.Y, Z = (float)point.Value.Z };
-      SkeletonPoint result = new SkeletonPoint() { X = shoulder.X + sPoint.X, Y = shoulder.Y + sPoint.Y, Z = shoulder.Z + sPoint.Z };
-      drawingContext.DrawEllipse(inferredJointBrush, null, SkeletonPointToScreen(result), JointThickness, JointThickness);
-    }
-
-		internal void DrawCirlce(Skeleton skeleton, DrawingContext dc, double radius)
+		internal void DrawCirlce(Skeleton skeleton, JointType jointType, DrawingContext dc, double radius)
 		{
 			if (skeleton == null)
 				return;
 
-			SkeletonPoint shoulder = skeleton.Joints[JointType.ShoulderRight].Position;
+			SkeletonPoint shoulder = skeleton.Joints[jointType].Position;
 			
 			dc.DrawEllipse(TorqueBrush, TorquePen, SkeletonPointToScreen(shoulder), radius, radius);
 

@@ -5,44 +5,58 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:converters="clr-namespace:DemoCE.Converters"
              mc:Ignorable="d" Focusable="True"
-             d:DesignHeight="230" d:DesignWidth="630" Background="SkyBlue">
+             Height="150" Width="300" Background="WhiteSmoke">
 
 	<UserControl.Resources>
 		<converters:HeightMarginConverter x:Key="hmConverter"/>
 		<converters:NegateBooleanConverter x:Key="nbConverter"/>
+		<converters:DoubleFormatConverter x:Key="dfConverter"/>
 	</UserControl.Resources>
-	<Grid RenderOptions.EdgeMode="Aliased">
-		<Line x:Name="lAxisY" Stroke="Black" StrokeThickness="1.5" HorizontalAlignment="Left" Margin="30,0" X1="0" Y1="0" X2="0" Y2="{Binding ElementName=tlControl, Path=ActualHeight}"/>
-		<Line x:Name="lAxisX" Stroke="Black" StrokeThickness="1.5" VerticalAlignment="Bottom" Margin="0,30" X1="0" Y1="0" X2="{Binding ElementName=tlControl, Path=ActualWidth}" Y2="0"/>
-		<Button HorizontalAlignment="Right" VerticalAlignment="Top" Height="Auto" Width="25"  Click="BtDeleteClick">
+	<Grid x:Name="gGraphContent" RenderOptions.EdgeMode="Aliased" VerticalAlignment="Bottom" HorizontalAlignment="Left"
+					Width="{Binding ElementName=tlControl, Path=Width}" Height="{Binding ElementName=tlControl, Path=Height}">
+		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Text="100 %" Margin="5,17,0,0"/>
+		<Line x:Name="lCEMax" Stroke="Black" StrokeThickness="1" VerticalAlignment="Top" X1="40" Y1="25" X2="{Binding ElementName=tlControl, Path=Width}" Y2="25" />
+		<TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="60 sec" Margin="0,0,5,10"/>
+		<Line x:Name="lTimeMax" Stroke="Black" StrokeThickness="1" HorizontalAlignment="Right" Margin="0,0,20,25"  VerticalAlignment="Top" Y1="0" Y2="{Binding ElementName=tlControl, Path=Height}" />
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,25,0">
+			<TextBlock FontSize="25" Text="{Binding ElementName=tlControl, Path=RightArmCE, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2, FallbackValue=0.00}" Margin="0,0,5,0"/>
+			<TextBlock FontSize="25" Text="%"/>
+		</StackPanel>
+		<Button x:Name="deleteButton" HorizontalAlignment="Right" VerticalAlignment="Top" Width="25"  Margin="10,10"  Click="BtDeleteClick">
 			<Button.Template>
 				<ControlTemplate TargetType="Button">
 					<Grid>
-						<Image Source="/DemoCE;component/CloseButton.png" />
+						<Image Source="/DemoCE;component/DeleteButton.png" />
 						<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
 					</Grid>
 				</ControlTemplate>
 			</Button.Template>
 		</Button>
-		<Button Opacity="0.1" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="70" Height="70" 
+		<Button x:Name="replayButton" Opacity="0.05" HorizontalAlignment="Left" VerticalAlignment="Center" Width="70" Height="70" 
 						Margin="0,0" MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave" Click="BtReplayClick"
 						IsEnabled="{Binding ElementName=tlControl, Path=IsEngineRunning, Converter={StaticResource ResourceKey=nbConverter}}">
 			<Button.Template>
 				<ControlTemplate TargetType="Button">
 					<Grid>
 						<Image Source="/DemoCE;component/PlayButton.png" />
-						<ContentPresenter HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"/>
+						<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
 					</Grid>
 				</ControlTemplate>
 			</Button.Template>
 		</Button>
-		<Grid x:Name="gGraphContent" VerticalAlignment="Bottom" Margin="30,0,0,30" HorizontalAlignment="Left"
-					Width="{Binding ElementName=tlControl, Path=ActualWidth}" Height="{Binding ElementName=tlControl, Path=ActualHeight}">
-			<Canvas x:Name="cGraphContent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Visible" />
-			<Line x:Name="lCEMax" Stroke="Red" StrokeThickness="1.5" StrokeDashArray="3" VerticalAlignment="Bottom" Margin="0,0,0,100" X1="0" Y1="0" X2="{Binding ElementName=tlControl, Path=ActualWidth}" Y2="0" />
-			<Label HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="{Binding ElementName=tlControl, Path=MaxValue}" Foreground="Red" Margin="0,0,0,100"/>
-			<TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="100 %" Foreground="Red" Margin="0,0,20,0"/>
-		</Grid>
+		<Line Stroke="Black" StrokeThickness="2" X1="{Binding ElementName=tlControl, Path=TimePlotValue}" X2="{Binding ElementName=tlControl, Path=TimePlotValue}" Y1="0" Y2="145" />
+		<Canvas HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="280" Height="125" Visibility="Visible">
+			<StackPanel Orientation="Horizontal" Canvas.Bottom="0" Canvas.Left="{Binding ElementName=tlControl, Path=TimePlotValue}">
+				<TextBlock FontSize="12" Text="{Binding ElementName=tlControl, Path=TotalTimeInSeconds, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2, FallbackValue=0.00}" Margin="4,0,5,0"/>
+				<TextBlock FontSize="12" Text="s"/>
+			</StackPanel>
+		</Canvas>
+		<Canvas x:Name="cGraphContent" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="280" Height="125" Visibility="Visible">
+			<Canvas.LayoutTransform>
+				<ScaleTransform ScaleX="1" ScaleY="-1" CenterX=".5" CenterY=".5" />
+			</Canvas.LayoutTransform>
+			<Polyline x:Name="plotGraphLeft" Stroke="DarkGreen" StrokeThickness="2"/>
+			<Polyline x:Name="plotGraphRight" Stroke="DarkRed" StrokeThickness="2"/>
+		</Canvas>
 	</Grid>
 </UserControl>
