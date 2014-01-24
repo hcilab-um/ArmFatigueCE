@@ -17,17 +17,15 @@ using System.ComponentModel;
 
 namespace DemoCE.Controls
 {
-  /// <summary>
-  /// Interaction logic for TimelineControl.xaml
-  /// </summary>
-  public partial class TimelineControl : UserControl, INotifyPropertyChanged
-  {
+	/// <summary>
+	/// Interaction logic for TimelineControl.xaml
+	/// </summary>
+	public partial class TimelineControl : UserControl, INotifyPropertyChanged
+	{
 		public static readonly RoutedEvent DeleteFatigueInfoEvent = EventManager.RegisterRoutedEvent("DeleteFatigueInfo", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(TimelineControl));
 		public static readonly RoutedEvent ReplayFatigueEvent = EventManager.RegisterRoutedEvent("ReplayFatigue", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(TimelineControl));
 
-
 		public static readonly DependencyProperty TotalTimeInSecondsProperty = DependencyProperty.Register("TotalTimeInSeconds", typeof(double), typeof(TimelineControl));
-		public static readonly DependencyProperty LeftArmCEProperty = DependencyProperty.Register("LeftArmCE", typeof(double), typeof(TimelineControl));
 		public static readonly DependencyProperty RightArmCEProperty = DependencyProperty.Register("RightArmCE", typeof(double), typeof(TimelineControl));
 
 		public static readonly DependencyProperty MaxValueProperty = DependencyProperty.Register("MaxValue", typeof(double), typeof(TimelineControl));
@@ -35,7 +33,7 @@ namespace DemoCE.Controls
 		public static readonly DependencyProperty IsEngineRunningProperty = DependencyProperty.Register("IsEngineRunning", typeof(bool), typeof(TimelineControl));
 
 		private double timePlotValue;
-		private double totalConsumeEndurance;
+		private List<FatigueInfo> fatigueInfoList;
 
 		public double TimePlotValue
 		{
@@ -47,16 +45,6 @@ namespace DemoCE.Controls
 			}
 		}
 
-		public double TotalConsumeEndurance
-		{
-			get { return totalConsumeEndurance; }
-			set
-			{
-				totalConsumeEndurance = value;
-				OnPropertyChanged("TotalConsumeEndurance");
-			}
-		}
-		
 		public event RoutedEventHandler DeleteFatigueInfo
 		{
 			add { AddHandler(DeleteFatigueInfoEvent, value); }
@@ -73,12 +61,6 @@ namespace DemoCE.Controls
 		{
 			get { return (double)GetValue(TotalTimeInSecondsProperty); }
 			set { SetValue(TotalTimeInSecondsProperty, value); }
-		}
-
-		public double LeftArmCE
-		{
-			get { return (double)GetValue(LeftArmCEProperty); }
-			set { SetValue(LeftArmCEProperty, value); }
 		}
 
 		public double RightArmCE
@@ -107,35 +89,33 @@ namespace DemoCE.Controls
 
 		public TimelineControl()
 		{
+			fatigueInfoList = new List<FatigueInfo>();
 			InitializeComponent();
 		}
 
 		protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
 		{
 			base.OnPropertyChanged(e);
-			if (e.Property == TimelineControl.TotalTimeInSecondsProperty)
-			{
-			}
-			else if (e.Property == TimelineControl.LeftArmCEProperty)
-			{
-				InsertNewDataPoint(LeftArmCE, Arm.LeftArm);
-			}
-			else if (e.Property == TimelineControl.RightArmCEProperty)
-			{
-				InsertNewDataPoint(RightArmCE, Arm.RightArm);
-			}
+			if (e.Property == TimelineControl.RightArmCEProperty)
+				InsertNewDataPoint((FatigueInfo)this.DataContext);
 		}
 
-		private void InsertNewDataPoint(double consumeEndurance, WrapperCE.InterOp.Arm arm)
+		private void InsertNewDataPoint(FatigueInfo fatigueInfo)
 		{
 			if (LenghtInSeconds == 0 || MaxValue == 0)
 				return;
 			TimePlotValue = TotalTimeInSeconds * (cGraphContent.Width) / LenghtInSeconds;
-			Point newPoint = new Point(TimePlotValue, consumeEndurance * (cGraphContent.Height) / MaxValue);
-			if (arm == WrapperCE.InterOp.Arm.RightArm)
-				plotGraphRight.Points.Add(newPoint);
-			else
-				plotGraphLeft.Points.Add(newPoint);
+			FatigueInfo newFatigueInfo = new FatigueInfo()
+			{
+				RightArmConsumedEndurance = fatigueInfo.RightArmConsumedEndurance,
+				TotalTimeInSeconds = fatigueInfo.TotalTimeInSeconds,
+				RightShoulderTorquePercent = fatigueInfo.RightShoulderTorquePercent,
+				RightArmAvgEndurance = fatigueInfo.RightArmAvgEndurance
+			};
+
+			fatigueInfoList.Add(newFatigueInfo);
+			Point newPoint = new Point(TimePlotValue, fatigueInfo.RightArmConsumedEndurance * (cGraphContent.Height) / MaxValue);
+			plotGraphRight.Points.Add(newPoint);
 		}
 
 		private void BtDeleteClick(object sender, RoutedEventArgs e)
@@ -149,7 +129,6 @@ namespace DemoCE.Controls
 		{
 			if (IsEngineRunning)
 				return;
-			plotGraphLeft.Points.Clear();
 			plotGraphRight.Points.Clear();
 			RaiseEvent(new RoutedEventArgs(TimelineControl.ReplayFatigueEvent, this));
 		}
@@ -166,6 +145,26 @@ namespace DemoCE.Controls
 			button.Opacity = 0.05;
 		}
 
+		private void OnMouseShowPathInfo(object sender, MouseEventArgs e)
+		{
+			var polyLine = (Polyline)sender;
+			Point mousePos = Mouse.GetPosition(cGraphContent);
+			double timeInSecond = mousePos.X * LenghtInSeconds / (cGraphContent.Width);
+
+			if (fatigueInfoList.Count == 0)
+			{
+				polyLine.ToolTip = "No Fatigue Information";
+				return;
+			}
+
+			var selectedFatigue = fatigueInfoList.OrderBy(fatigue => Math.Abs(fatigue.TotalTimeInSeconds - timeInSecond)).First();
+			polyLine.ToolTip = string.Format("CE: {0} %\nTime: {1} sec\nAvg Strength: {2} %\nAvg Endurance: {3} sec",
+																selectedFatigue.RightArmConsumedEndurance.ToString("F2"),
+																selectedFatigue.TotalTimeInSeconds.ToString("F2"),
+																selectedFatigue.RightShoulderTorquePercent.ToString("F2"),
+																selectedFatigue.RightArmAvgEndurance.ToString("F2"));
+		}
+
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		private void OnPropertyChanged(String name)
@@ -173,6 +172,7 @@ namespace DemoCE.Controls
 			if (PropertyChanged != null)
 				PropertyChanged(this, new PropertyChangedEventArgs(name));
 		}
+
 	}
 
 }

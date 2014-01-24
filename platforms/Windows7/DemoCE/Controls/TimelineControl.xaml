@@ -55,8 +55,7 @@
 			<Canvas.LayoutTransform>
 				<ScaleTransform ScaleX="1" ScaleY="-1" CenterX=".5" CenterY=".5" />
 			</Canvas.LayoutTransform>
-			<Polyline x:Name="plotGraphLeft" Stroke="DarkGreen" StrokeThickness="2"/>
-			<Polyline x:Name="plotGraphRight" Stroke="DarkRed" StrokeThickness="2"/>
+			<Polyline x:Name="plotGraphRight" MouseMove="OnMouseShowPathInfo" MouseEnter="OnMouseShowPathInfo" Stroke="DarkGreen" StrokeThickness="3" RenderOptions.EdgeMode="Aliased"/>
 		</Canvas>
 	</Grid>
 </UserControl>

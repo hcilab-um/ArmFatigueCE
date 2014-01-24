@@ -48,6 +48,7 @@ namespace DemoCE
 		private double deltaTimeInSeconds;
 		private FatigueInfo currentFatigueInfo;
 		private bool playBackFromFile;
+		private bool isAutoStart;
 		#endregion
 
 		#region Property
@@ -101,7 +102,16 @@ namespace DemoCE
 				OnPropertyChanged("PlayBackFromFile");
 			}
 		}
-
+		
+		public bool IsAutoStart
+		{
+			get { return isAutoStart; }
+			set
+			{
+				isAutoStart = value;
+				OnPropertyChanged("IsAutoStart");
+			}
+		}
 		#endregion
 
 		private EventHandler playbackHandler;
@@ -113,6 +123,8 @@ namespace DemoCE
 			engine = new WrapperCE.EngineCE();
 
 			FatigueInfoCollection = new ObservableCollection<DemoCE.FatigueInfo>();
+
+			IsAutoStart = false;
 
 			InitializeComponent();
 		}
@@ -292,10 +304,7 @@ namespace DemoCE
 				dc.DrawRectangle(brush, new Pen(Brushes.Black, 0.5), new Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
 				skeletonDrawer.DrawSkeleton(skeleton, dc);
 				if (IsEngineRunning)
-				{
-					skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderLeft, dc, CurrentFatigueInfo.LeftShoulderTorquePercent / TORQUE_MODIFIER);
 					skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightShoulderTorquePercent / TORQUE_MODIFIER);
-				}
 			}
 			DrawingImage dImageSource = new DrawingImage(dGroup);
 			dGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
