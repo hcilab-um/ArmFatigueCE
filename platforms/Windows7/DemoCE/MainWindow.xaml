@@ -21,12 +21,12 @@
 		<Grid x:Name="gImage" DockPanel.Dock="Left" Width="640" Height="480">
 			<Image Name="iKinectCapture"/>
 			<Image Name="iSkeleton" VerticalAlignment="Top"/>
-			<Button Name="btSetting" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Background="Red" Click="BtSetting_Click">
-				<!--<Button.Template>
+			<Button Name="btSetting" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20" Width="50" Height="50" Click="BtSetting_Click">
+				<Button.Template>
 					<ControlTemplate TargetType="Button">
-						<Image />
+						<Image Source="/DemoCE;component/settings.png" />
 					</ControlTemplate>
-				</Button.Template>-->
+				</Button.Template>
 			</Button>
 		</Grid>
 

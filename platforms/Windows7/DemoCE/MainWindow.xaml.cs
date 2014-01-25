@@ -352,7 +352,6 @@ namespace DemoCE
 
 			CurrentFatigueInfo.LeftShoulderTorquePercent = armFatigueUpdate.LeftArm.ShoulderTorquePercent;
 			CurrentFatigueInfo.RightShoulderTorquePercent = armFatigueUpdate.RightArm.ShoulderTorquePercent;
-			PrintOutEffortLog();
 		}
 
 		private void PlayBack(string fileName, EventHandler pbFinished, bool useDelay)
@@ -368,13 +367,17 @@ namespace DemoCE
 			PlayBackFromFile = true;
 		}
 
-		private void PrintOutEffortLog()
+		private void PrintOutEffortLog(FatigueInfo fatigueInfo)
 		{
 			Object[] logObjects = new Object[]
       {
-				DateTime.Now,
-				CurrentFatigueInfo.LeftArmConsumedEndurance,
-				CurrentFatigueInfo.RightArmConsumedEndurance
+				fatigueInfo.TotalTimeInSeconds,
+				fatigueInfo.LeftShoulderTorquePercent,
+				fatigueInfo.RightShoulderTorquePercent,
+				fatigueInfo.LeftArmAvgEndurance,
+				fatigueInfo.RightArmAvgEndurance,
+				fatigueInfo.LeftArmConsumedEndurance,
+				fatigueInfo.RightArmConsumedEndurance
       };
 
 			int count = 0;
