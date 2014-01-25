@@ -1,0 +1,36 @@
+﻿<Window x:Class="DemoCE.SettingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				xmlns:converter="clr-namespace:DemoCE.Converters"
+				x:Name="SettingW" Title="Demo Setting" 
+				WindowStyle="None" Height="186" Width="400">
+	<Window.Resources>
+		<converter:BooleanGenderConverter x:Key="bgConverter"/>
+		<converter:BooleanArmConverter x:Key="baConverter"/>
+	</Window.Resources>
+	<StackPanel>
+		<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+			<TextBlock VerticalAlignment="Center" Text="Record: "/>
+			<TextBox IsEnabled="False" Width="230" VerticalAlignment="Center" Text="{Binding ElementName=SettingW, Path=RecordPath}"/>
+			<Button Name="btChangeDirectory" Content="Change Directory" Margin="5,0,0,0" Click="btChangeDirectory_Click"/>
+		</StackPanel>
+		<StackPanel Orientation="Horizontal" Margin="0,10">
+			<TextBlock Text="Gender" FontSize="20" Width="100"/>
+			<RadioButton VerticalAlignment="Center" Content="Male" FontSize="20" Width="100"
+									 IsChecked="{Binding ElementName=SettingW, Path=Gender, Converter={StaticResource ResourceKey=bgConverter}, ConverterParameter=Male}"/>
+			<RadioButton VerticalAlignment="Center" Content="Female" FontSize="20" Width="100"
+									 IsChecked="{Binding ElementName=SettingW, Path=Gender, Converter={StaticResource ResourceKey=bgConverter}, ConverterParameter=Female}"/>
+		</StackPanel>
+		<StackPanel Orientation="Horizontal">
+			<TextBlock Text="Arm" FontSize="20" Width="100"/>
+			<RadioButton VerticalAlignment="Center" Content="Left" FontSize="20" Width="100"
+									  IsChecked="{Binding ElementName=SettingW, Path=Arm, Converter={StaticResource ResourceKey=baConverter}, ConverterParameter=LeftArm}"/>
+			<RadioButton VerticalAlignment="Center" Content="Right" FontSize="20" Width="100"
+									 IsChecked="{Binding ElementName=SettingW, Path=Arm, Converter={StaticResource ResourceKey=baConverter}, ConverterParameter=RightArm}"/>
+		</StackPanel>
+		<Grid HorizontalAlignment="Center" Width="250"  Margin="0,10">
+			<Button Width="100" FontSize="20" HorizontalAlignment="Left" Content="OK" Click="Button_Click" />
+			<Button Width="100" FontSize="20" HorizontalAlignment="Right" Content="Cancel" Click="Button_Click" />
+		</Grid>
+	</StackPanel>
+</Window>

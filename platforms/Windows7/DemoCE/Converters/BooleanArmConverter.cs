@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Data;
-using System.Windows;
 using WrapperCE.InterOp;
+using System.Windows;
 
 namespace DemoCE.Converters
 {
-	public class BooleanGenderConverter : IValueConverter
+	public class BooleanArmConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			UserGender target = (UserGender)value;
-			UserGender actual = (UserGender)Enum.Parse(typeof(UserGender), parameter as String);
-
+			Arm target = (Arm)value;
+			Arm actual = (Arm)Enum.Parse(typeof(Arm), parameter as String);
 			if (actual == target)
 				return true;
 			return false;
@@ -26,7 +25,7 @@ namespace DemoCE.Converters
 			if (!isChecked)
 				return null;
 
-			return (UserGender)Enum.Parse(typeof(WrapperCE.InterOp.UserGender), parameter as String);
+			return (Arm)Enum.Parse(typeof(Arm), parameter as String);
 		}
 	}
 }

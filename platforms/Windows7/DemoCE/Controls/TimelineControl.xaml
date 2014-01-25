@@ -25,10 +25,7 @@
 		<Button x:Name="deleteButton" HorizontalAlignment="Right" VerticalAlignment="Top" Width="25"  Margin="10,10"  Click="BtDeleteClick">
 			<Button.Template>
 				<ControlTemplate TargetType="Button">
-					<Grid>
-						<Image Source="/DemoCE;component/DeleteButton.png" />
-						<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-					</Grid>
+					<Image Source="/DemoCE;component/DeleteButton.png" />
 				</ControlTemplate>
 			</Button.Template>
 		</Button>
@@ -37,10 +34,7 @@
 						IsEnabled="{Binding ElementName=tlControl, Path=IsEngineRunning, Converter={StaticResource ResourceKey=nbConverter}}">
 			<Button.Template>
 				<ControlTemplate TargetType="Button">
-					<Grid>
-						<Image Source="/DemoCE;component/PlayButton.png" />
-						<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-					</Grid>
+					<Image Source="/DemoCE;component/PlayButton.png" />
 				</ControlTemplate>
 			</Button.Template>
 		</Button>

@@ -2,9 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DemoCE.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="RecordFolder" Type="System.String" Scope="User">
-      <Value Profile="(Default)">..\..\..\..\..\Data</Value>
-    </Setting>
     <Setting Name="PlayerBufferSize" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>

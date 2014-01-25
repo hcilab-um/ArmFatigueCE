@@ -53,6 +53,7 @@ namespace DemoCE
 
 		#region Property
 
+		public SettingWindow SettingW { get; set; }
 		public SkeletonRecorder Recorder { get; set; }
 		public SkeletonPlayer Player { get; set; }
 
@@ -121,11 +122,9 @@ namespace DemoCE
 		public MainWindow()
 		{
 			engine = new WrapperCE.EngineCE();
-
+			SettingW = new SettingWindow();
 			FatigueInfoCollection = new ObservableCollection<DemoCE.FatigueInfo>();
-
 			IsAutoStart = false;
-
 			InitializeComponent();
 		}
 
@@ -174,8 +173,8 @@ namespace DemoCE
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-			Recorder = new SkeletonRecorder(Settings.Default.RecordFolder);
 			Player = new SkeletonPlayer(Settings.Default.PlayerBufferSize, Dispatcher);
+			Recorder = new SkeletonRecorder(SettingW.RecordPath);
 			Player.SkeletonFrameReady += new EventHandler<PlayerSkeletonFrameReadyEventArgs>(player_SkeletonFrameReady);
 			if (KinectSensor.KinectSensors.Count == 0)
 			{
@@ -238,6 +237,8 @@ namespace DemoCE
 			this.ColorImageReady -= MainWindow_ColorImageReady;
 
 			Recorder.Stop(false, true, UserGender.Male);
+
+			SettingW.Close();
 		}
 
 		private void kinectSensor_AllFramesReady(object sender, AllFramesReadyEventArgs e)
@@ -265,6 +266,11 @@ namespace DemoCE
 					}
 				}
 			}
+
+			if (IsAutoStart && validSkeleton != null && !IsEngineRunning)
+				BtStartMeasure_Click(null, null);
+			if (IsAutoStart && validSkeleton == null && IsEngineRunning)			
+				BtStopMeasure_Click(null, null);
 
 			if (validSkeleton != null)
 			{
@@ -304,7 +310,9 @@ namespace DemoCE
 				dc.DrawRectangle(brush, new Pen(Brushes.Black, 0.5), new Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
 				skeletonDrawer.DrawSkeleton(skeleton, dc);
 				if (IsEngineRunning)
+				{
 					skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightShoulderTorquePercent / TORQUE_MODIFIER);
+				}
 			}
 			DrawingImage dImageSource = new DrawingImage(dGroup);
 			dGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
@@ -360,15 +368,6 @@ namespace DemoCE
 			PlayBackFromFile = true;
 		}
 
-		private void MainW_ColorImageReady(object sender, ColorImageReadyArgs e)
-		{
-			ImageSource colorFrame = e.Frame;
-			if (colorFrame == null)
-				return;
-
-			iSkeleton.Source = colorFrame;
-		}
-
 		private void PrintOutEffortLog()
 		{
 			Object[] logObjects = new Object[]
@@ -399,8 +398,9 @@ namespace DemoCE
 		{
 			if (PlayBackFromFile)
 				return;
+			Recorder = new SkeletonRecorder(SettingW.RecordPath);
 			Recorder.Start();
-			CurrentFatigueInfo = new FatigueInfo();
+			CurrentFatigueInfo = new FatigueInfo() { Gender = SettingW.Gender };
 			FatigueInfoCollection.Insert(0, CurrentFatigueInfo);
 			StartMeasure(CurrentFatigueInfo.Gender);
 		}
@@ -414,12 +414,6 @@ namespace DemoCE
 			if (CurrentFatigueInfo.FatigueFileName == string.Empty)
 				FatigueInfoCollection.Remove(CurrentFatigueInfo);
 			CurrentFatigueInfo = new FatigueInfo();
-		}
-
-		private void OnPropertyChanged(String name)
-		{
-			if (PropertyChanged != null)
-				PropertyChanged(this, new PropertyChangedEventArgs(name));
 		}
 
 		private void BtExport_Click(object sender, RoutedEventArgs e)
@@ -439,6 +433,17 @@ namespace DemoCE
 				File.Copy(fileAppender.File, filename);
 			}
 
+		}
+
+		private void BtSetting_Click(object sender, RoutedEventArgs e)
+		{
+			SettingW.ShowDialog();
+		}
+
+		private void OnPropertyChanged(String name)
+		{
+			if (PropertyChanged != null)
+				PropertyChanged(this, new PropertyChangedEventArgs(name));
 		}
 
 	}
