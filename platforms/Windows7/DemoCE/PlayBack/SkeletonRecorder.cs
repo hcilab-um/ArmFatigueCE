@@ -100,7 +100,7 @@ namespace DemoCE.Playback
       }
     }
 
-    public void Start()
+		public void Start()
     {
 			if (IsRecording)
 				return;
@@ -114,7 +114,7 @@ namespace DemoCE.Playback
       TotalTime = 0;
     }
 
-		public String Stop(bool saveFile, bool shutdown, UserGender gender)
+		public String Stop(bool saveFile, bool shutdown, string qualifiedName, UserGender gender)
     {
 			if (!IsRecording || shutdown)
 				return String.Empty;
@@ -125,11 +125,9 @@ namespace DemoCE.Playback
 
       if (saveFile && FramesRecorded != 0)
       {
-        String qualifiedName = String.Format("{0}-{1}",
-					DateTime.Now.ToString("MMddyy-HHmmss"), gender.ToString().ToLower());
         String newFileName = folderPath + @"\" + qualifiedName + ".kr";
         File.Move(tmpFileName, newFileName);
-        return newFileName;
+				return newFileName;
       }
       else
       {

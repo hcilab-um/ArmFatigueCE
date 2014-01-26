@@ -31,8 +31,6 @@ namespace DemoCE
 	{
 
 		#region Private Variable
-		private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainWindow));
-
 		private const double TORQUE_MODIFIER = 2d;
 		private KinectSensor kinectSensor = null;
 		private WriteableBitmap colorBitmap;
@@ -123,7 +121,7 @@ namespace DemoCE
 		{
 			engine = new WrapperCE.EngineCE();
 			SettingW = new SettingWindow();
-			FatigueInfoCollection = new ObservableCollection<DemoCE.FatigueInfo>();
+			FatigueInfoCollection = new ObservableCollection<FatigueInfo>();
 			IsAutoStart = false;
 			InitializeComponent();
 		}
@@ -134,7 +132,8 @@ namespace DemoCE
 				return;
 			TimelineControl tlControl = (TimelineControl)e.OriginalSource;
 			FatigueInfo fatigueInfo = (FatigueInfo)tlControl.DataContext;
-			FatigueInfoCollection.Remove((FatigueInfo)tlControl.DataContext);
+			File.Delete(fatigueInfo.FatigueFile);
+			FatigueInfoCollection.Remove(fatigueInfo);
 		}
 
 		private void ReplayFatigue(object sender, RoutedEventArgs e)
@@ -143,7 +142,7 @@ namespace DemoCE
 			CurrentFatigueInfo = (FatigueInfo)tlControl.DataContext;
 			CurrentFatigueInfo.Reset();
 			StartMeasure(CurrentFatigueInfo.Gender);
-			PlayBack(CurrentFatigueInfo.FatigueFileName, Player_PlaybackFinished, true);
+			PlayBack(CurrentFatigueInfo.FatigueFile, Player_PlaybackFinished, true);
 		}
 
 		public void Player_PlaybackFinished(object sender, EventArgs e)
@@ -202,6 +201,7 @@ namespace DemoCE
 					skeletonDrawer = new SkeletonDrawer(kinectSensor);
 				}
 			}
+
 			this.ColorImageReady += MainWindow_ColorImageReady;
 		}
 
@@ -236,7 +236,7 @@ namespace DemoCE
 
 			this.ColorImageReady -= MainWindow_ColorImageReady;
 
-			Recorder.Stop(false, true, UserGender.Male);
+			Recorder.Stop(false, true, "", UserGender.Male);
 
 			SettingW.Close();
 		}
@@ -311,9 +311,13 @@ namespace DemoCE
 				skeletonDrawer.DrawSkeleton(skeleton, dc);
 				if (IsEngineRunning)
 				{
-					skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightShoulderTorquePercent / TORQUE_MODIFIER);
+					if(CurrentFatigueInfo.Arm == Arm.RightArm)
+						skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightShoulderTorquePercent / TORQUE_MODIFIER);
+					else
+						skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderLeft, dc, CurrentFatigueInfo.LeftShoulderTorquePercent / TORQUE_MODIFIER);
 				}
 			}
+
 			DrawingImage dImageSource = new DrawingImage(dGroup);
 			dGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
 			return dImageSource;
@@ -363,29 +367,7 @@ namespace DemoCE
 			Player.PlaybackFinished += playbackHandler;
 			Player.Load(fileName);
 			Player.Start();
-
 			PlayBackFromFile = true;
-		}
-
-		private void PrintOutEffortLog(FatigueInfo fatigueInfo)
-		{
-			Object[] logObjects = new Object[]
-      {
-				fatigueInfo.TotalTimeInSeconds,
-				fatigueInfo.LeftShoulderTorquePercent,
-				fatigueInfo.RightShoulderTorquePercent,
-				fatigueInfo.LeftArmAvgEndurance,
-				fatigueInfo.RightArmAvgEndurance,
-				fatigueInfo.LeftArmConsumedEndurance,
-				fatigueInfo.RightArmConsumedEndurance
-      };
-
-			int count = 0;
-			StringBuilder formatSt = new StringBuilder();
-			foreach (Object obj in logObjects)
-				formatSt.Append("{" + (count++) + "},");
-			String logString = String.Format(formatSt.ToString(), logObjects);
-			logger.Info(logString);
 		}
 
 		private Point3D Convert(SkeletonPoint trackedPoint)
@@ -403,7 +385,7 @@ namespace DemoCE
 				return;
 			Recorder = new SkeletonRecorder(SettingW.RecordPath);
 			Recorder.Start();
-			CurrentFatigueInfo = new FatigueInfo() { Gender = SettingW.Gender };
+			CurrentFatigueInfo = new FatigueInfo() { Gender = SettingW.Gender, Arm = SettingW.Arm };
 			FatigueInfoCollection.Insert(0, CurrentFatigueInfo);
 			StartMeasure(CurrentFatigueInfo.Gender);
 		}
@@ -412,18 +394,46 @@ namespace DemoCE
 		{
 			if (PlayBackFromFile)
 				return;
-			CurrentFatigueInfo.FatigueFileName = Recorder.Stop(true, false, CurrentFatigueInfo.Gender);
-			StopMeasure();
-			if (CurrentFatigueInfo.FatigueFileName == string.Empty)
+			String qualifiedName = String.Format("{0}-{1}-{2}", DateTime.Now.ToString("MMddyy-HHmmss"), 
+																						CurrentFatigueInfo.Gender.ToString().ToLower(), currentFatigueInfo.Arm);
+			CurrentFatigueInfo.FatigueName = qualifiedName;
+			CurrentFatigueInfo.FatigueFile =Recorder.Stop(true, false, CurrentFatigueInfo.FatigueName, CurrentFatigueInfo.Gender);
+			if (CurrentFatigueInfo.FatigueFile == string.Empty)
 				FatigueInfoCollection.Remove(CurrentFatigueInfo);
+			StopMeasure();
 			CurrentFatigueInfo = new FatigueInfo();
+		}
+
+		private IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+		{
+			if (depObj != null)
+			{
+				for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+				{
+					DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+					if (child != null && child is T)
+					{
+						yield return (T)child;
+					}
+
+					foreach (T childOfChild in FindVisualChildren<T>(child))
+					{
+						yield return childOfChild;
+					}
+				}
+			}
 		}
 
 		private void BtExport_Click(object sender, RoutedEventArgs e)
 		{
+			foreach (TimelineControl tlControl in FindVisualChildren<TimelineControl>(lbTimeLines))
+			{
+				tlControl.LogFatigueData();
+			}
+
 			RollingFileAppender fileAppender = log4net.LogManager.GetRepository().GetAppenders().First(appender => appender is RollingFileAppender) as RollingFileAppender;
 			Microsoft.Win32.SaveFileDialog dialog = new Microsoft.Win32.SaveFileDialog();
-			dialog.FileName = "Document";
+			dialog.InitialDirectory = Environment.CurrentDirectory;
 			dialog.DefaultExt = ".csv";
 			dialog.Filter = "Text documents (.csv)|*.csv";
 
@@ -433,9 +443,8 @@ namespace DemoCE
 			{
 				string filename = dialog.FileName;
 				File.Delete(filename);
-				File.Copy(fileAppender.File, filename);
+				File.Move(fileAppender.File, filename);
 			}
-
 		}
 
 		private void BtSetting_Click(object sender, RoutedEventArgs e)

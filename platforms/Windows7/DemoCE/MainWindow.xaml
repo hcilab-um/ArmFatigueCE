@@ -53,7 +53,7 @@
 				</StackPanel>
 			</StackPanel>
 
-			<ListBox x:Name="lbTimeLines" VerticalAlignment="Stretch" DockPanel.Dock="Top" 
+			<ListBox x:Name="lbTimeLines" VerticalAlignment="Stretch" DockPanel.Dock="Top" Height="390"
 							 ScrollViewer.VerticalScrollBarVisibility="Visible"
 							 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
 							 ItemsSource="{Binding ElementName=mainW, Path=FatigueInfoCollection}">
@@ -61,7 +61,6 @@
 					<DataTemplate>
 						<controls:TimelineControl Margin="0,0,0,5" Width="300" Height="150"
 																			LenghtInSeconds="60" MaxValue="100"
-																			RightArmCE="{Binding Path=RightArmConsumedEndurance}"
 																			TotalTimeInSeconds="{Binding Path=TotalTimeInSeconds}"
 																			IsEngineRunning="{Binding ElementName=mainW, Path=IsEngineRunning}"/>
 					</DataTemplate>

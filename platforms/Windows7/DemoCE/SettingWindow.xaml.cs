@@ -59,7 +59,7 @@ namespace DemoCE
 		public SettingWindow()
 		{
 			RecordPath = Directory.GetCurrentDirectory();
-			Gender = UserGender.Female;
+			Gender = UserGender.Male;
 			Arm = Arm.RightArm;
 			InitializeComponent();
 		}

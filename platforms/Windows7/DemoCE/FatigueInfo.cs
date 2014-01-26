@@ -12,8 +12,10 @@ namespace DemoCE
 		#region Private Value
 
 		private double totalTimeInSeconds = 0;
-		private string fatigueFileName;
-		private WrapperCE.InterOp.UserGender gender;
+		private string fatigueName;
+		private string fatigueFile;
+		private UserGender gender;
+		private Arm arm;
 
 		private double leftArmAngle = 0;
 		private double rightArmAngle = 0;
@@ -47,13 +49,23 @@ namespace DemoCE
 			}
 		}
 
-		public string FatigueFileName
+		public string FatigueName
 		{
-			get { return fatigueFileName; }
+			get { return fatigueName; }
 			set
 			{
-				fatigueFileName = value;
+				fatigueName = value;
 				OnPropertyChanged("FatigueFileName");
+			}
+		}
+
+		public string FatigueFile
+		{
+			get { return fatigueFile; }
+			set
+			{
+				fatigueFile = value;
+				OnPropertyChanged("FatigueFile");
 			}
 		}
 
@@ -64,6 +76,16 @@ namespace DemoCE
 			{
 				gender = value;
 				OnPropertyChanged("Gender");
+			}
+		}
+
+		public Arm Arm
+		{
+			get { return arm; }
+			set
+			{
+				arm = value;
+				OnPropertyChanged("Arm");
 			}
 		}
 
@@ -190,8 +212,9 @@ namespace DemoCE
 
 		public FatigueInfo()
 		{
-			FatigueFileName = string.Empty;
+			FatigueName = string.Empty;
 			Gender = UserGender.Male;
+			Arm = Arm.RightArm;
 			Reset();
 		}
 

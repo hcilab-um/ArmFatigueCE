@@ -19,7 +19,7 @@
 		<TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="60 sec" Margin="0,0,5,10"/>
 		<Line x:Name="lTimeMax" Stroke="Black" StrokeThickness="1" HorizontalAlignment="Right" Margin="0,0,20,25"  VerticalAlignment="Top" Y1="0" Y2="{Binding ElementName=tlControl, Path=Height}" />
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,25,0">
-			<TextBlock FontSize="25" Text="{Binding ElementName=tlControl, Path=RightArmCE, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2, FallbackValue=0.00}" Margin="0,0,5,0"/>
+			<TextBlock FontSize="25" Text="{Binding ElementName=tlControl, Path=ConsumeEndurance, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2, FallbackValue=0.00}" Margin="0,0,5,0"/>
 			<TextBlock FontSize="25" Text="%"/>
 		</StackPanel>
 		<Button x:Name="deleteButton" HorizontalAlignment="Right" VerticalAlignment="Top" Width="25"  Margin="10,10"  Click="BtDeleteClick">
