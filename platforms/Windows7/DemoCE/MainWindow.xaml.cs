@@ -24,9 +24,6 @@ using log4net.Appender;
 
 namespace DemoCE
 {
-	/// <summary>
-	/// Interaction logic for MainWindow.xaml
-	/// </summary>
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
 
@@ -101,7 +98,7 @@ namespace DemoCE
 				OnPropertyChanged("PlayBackFromFile");
 			}
 		}
-		
+
 		public bool IsAutoStart
 		{
 			get { return isAutoStart; }
@@ -148,10 +145,7 @@ namespace DemoCE
 		public void Player_PlaybackFinished(object sender, EventArgs e)
 		{
 			PlayBackFromFile = false;
-			if (engine.CheckStarted())
-			{
-				StopMeasure();
-			}
+			StopMeasure();
 		}
 
 		private void StartMeasure(UserGender gender)
@@ -218,7 +212,6 @@ namespace DemoCE
 			Skeleton skeleton = e.FrameSkeleton;
 
 			RunFatigueEngine(skeleton, e.DelayInMilliSeconds / 1000);
-			//We paint the skeleton and send the image over to the UI
 			if (ColorImageReady != null)
 			{
 				DrawingImage imageCanvas = DrawSkeleton(skeleton, Brushes.Black);
@@ -269,7 +262,7 @@ namespace DemoCE
 
 			if (IsAutoStart && validSkeleton != null && !IsEngineRunning)
 				BtStartMeasure_Click(null, null);
-			if (IsAutoStart && validSkeleton == null && IsEngineRunning)			
+			if (IsAutoStart && validSkeleton == null && IsEngineRunning)
 				BtStopMeasure_Click(null, null);
 
 			if (validSkeleton != null)
@@ -311,7 +304,7 @@ namespace DemoCE
 				skeletonDrawer.DrawSkeleton(skeleton, dc);
 				if (IsEngineRunning)
 				{
-					if(CurrentFatigueInfo.Arm == Arm.RightArm)
+					if (CurrentFatigueInfo.Arm == Arm.RightArm)
 						skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightShoulderTorquePercent / TORQUE_MODIFIER);
 					else
 						skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderLeft, dc, CurrentFatigueInfo.LeftShoulderTorquePercent / TORQUE_MODIFIER);
@@ -394,10 +387,10 @@ namespace DemoCE
 		{
 			if (PlayBackFromFile)
 				return;
-			String qualifiedName = String.Format("{0}-{1}-{2}", DateTime.Now.ToString("MMddyy-HHmmss"), 
+			String qualifiedName = String.Format("{0}-{1}-{2}", DateTime.Now.ToString("MMddyy-HHmmss"),
 																						CurrentFatigueInfo.Gender.ToString().ToLower(), currentFatigueInfo.Arm);
 			CurrentFatigueInfo.FatigueName = qualifiedName;
-			CurrentFatigueInfo.FatigueFile =Recorder.Stop(true, false, CurrentFatigueInfo.FatigueName, CurrentFatigueInfo.Gender);
+			CurrentFatigueInfo.FatigueFile = Recorder.Stop(true, false, CurrentFatigueInfo.FatigueName, CurrentFatigueInfo.Gender);
 			if (CurrentFatigueInfo.FatigueFile == string.Empty)
 				FatigueInfoCollection.Remove(CurrentFatigueInfo);
 			StopMeasure();
