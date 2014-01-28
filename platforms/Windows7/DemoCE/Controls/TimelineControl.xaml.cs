@@ -15,9 +15,6 @@ using WrapperCE.InterOp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using log4net;
-using log4net.Appender;
-using log4net.Config;
 
 namespace DemoCE.Controls
 {
@@ -26,7 +23,7 @@ namespace DemoCE.Controls
 	/// </summary>
 	public partial class TimelineControl : UserControl, INotifyPropertyChanged
 	{
-		
+
 		public static readonly RoutedEvent DeleteFatigueInfoEvent = EventManager.RegisterRoutedEvent("DeleteFatigueInfo", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(TimelineControl));
 		public static readonly RoutedEvent ReplayFatigueEvent = EventManager.RegisterRoutedEvent("ReplayFatigue", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(TimelineControl));
 
@@ -36,7 +33,6 @@ namespace DemoCE.Controls
 		public static readonly DependencyProperty LenghtInSecondsProperty = DependencyProperty.Register("LenghtInSeconds", typeof(double), typeof(TimelineControl));
 		public static readonly DependencyProperty IsEngineRunningProperty = DependencyProperty.Register("IsEngineRunning", typeof(bool), typeof(TimelineControl));
 
-		private log4net.ILog logger = log4net.LogManager.GetLogger(typeof(TimelineControl));
 		private double timePlotValue;
 		private double consumeEndurance;
 		private List<FatigueInfo> fatigueInfoList;
@@ -107,15 +103,46 @@ namespace DemoCE.Controls
 		{
 			base.OnPropertyChanged(e);
 			if (e.Property == TimelineControl.TotalTimeInSecondsProperty)
-			{
 				InsertNewDataPoint((FatigueInfo)this.DataContext);
-			}
 		}
 
 		private void InsertNewDataPoint(FatigueInfo fatigueInfo)
 		{
-			if (LenghtInSeconds == 0 || MaxValue == 0)
+			if (LenghtInSeconds == 0 || MaxValue == 0 || TotalTimeInSeconds ==0)
 				return;
+
+			if (fatigueInfo.Arm == Arm.LeftArm)
+				ConsumeEndurance = fatigueInfo.LeftArmConsumedEndurance;
+			else
+				ConsumeEndurance = fatigueInfo.RightArmConsumedEndurance;
+
+			//Shrink the graph if needed
+			if (TotalTimeInSeconds > LenghtInSeconds)
+			{
+				for (int i = 0; i < plotGraphRight.Points.Count; i++)
+				{
+					plotGraphRight.Points[i] = new Point()
+					{
+						X = plotGraphRight.Points[i].X * LenghtInSeconds / TotalTimeInSeconds,
+						Y = plotGraphRight.Points[i].Y
+					};
+				}
+				LenghtInSeconds = TotalTimeInSeconds;
+			}
+
+			if (ConsumeEndurance > MaxValue)
+			{
+				for (int i = 0; i < plotGraphRight.Points.Count; i++)
+				{
+					plotGraphRight.Points[i] = new Point()
+					{
+						X = plotGraphRight.Points[i].X,
+						Y = plotGraphRight.Points[i].Y * MaxValue / ConsumeEndurance
+					};
+				}
+				MaxValue = ConsumeEndurance;
+			}
+
 			TimePlotValue = TotalTimeInSeconds * (cGraphContent.Width) / LenghtInSeconds;
 			FatigueInfo newFatigueInfo = new FatigueInfo()
 			{
@@ -142,12 +169,7 @@ namespace DemoCE.Controls
 
 			fatigueInfoList.Add(newFatigueInfo);
 
-			if (newFatigueInfo.Arm == Arm.LeftArm)
-				ConsumeEndurance = newFatigueInfo.LeftArmConsumedEndurance;
-			else
-				ConsumeEndurance = newFatigueInfo.RightArmConsumedEndurance;
-
-			Point newPoint = new Point(TimePlotValue, ConsumeEndurance * (cGraphContent.Height) / MaxValue);	
+			Point newPoint = new Point(TimePlotValue, ConsumeEndurance * (cGraphContent.Height) / MaxValue);
 			plotGraphRight.Points.Add(newPoint);
 		}
 
@@ -191,46 +213,36 @@ namespace DemoCE.Controls
 			}
 
 			var selectedFatigue = fatigueInfoList.OrderBy(fatigue => Math.Abs(fatigue.TotalTimeInSeconds - timeInSecond)).First();
+			string averageEndurance = "Infinity";
+			
 			if (selectedFatigue.Arm == Arm.RightArm)
 			{
+				if (selectedFatigue.RightArmAvgEndurance < 1000)
+					averageEndurance = selectedFatigue.RightArmAvgEndurance.ToString("F2");
 				polyLine.ToolTip = string.Format("CE: {0} %\nTime: {1} sec\nAvg Strength: {2} %\nAvg Endurance: {3} sec",
 																	selectedFatigue.RightArmConsumedEndurance.ToString("F2"),
 																	selectedFatigue.TotalTimeInSeconds.ToString("F2"),
 																	selectedFatigue.RightShoulderTorquePercent.ToString("F2"),
-																	selectedFatigue.RightArmAvgEndurance.ToString("F2"));
+																	averageEndurance);
 			}
 			else
 			{
+				if (selectedFatigue.LeftArmAvgEndurance < 1000)
+					averageEndurance = selectedFatigue.LeftArmAvgEndurance.ToString("F2");
 				polyLine.ToolTip = string.Format("CE: {0} %\nTime: {1} sec\nAvg Strength: {2} %\nAvg Endurance: {3} sec",
 													selectedFatigue.LeftArmConsumedEndurance.ToString("F2"),
 													selectedFatigue.TotalTimeInSeconds.ToString("F2"),
 													selectedFatigue.LeftShoulderTorquePercent.ToString("F2"),
-													selectedFatigue.LeftArmAvgEndurance.ToString("F2"));
+													averageEndurance);
 			}
 		}
 
-		public void LogFatigueData()
+		public string GetEffortLog()
 		{
-			XmlConfigurator.Configure();
-			var hierarchy = (log4net.Repository.Hierarchy.Hierarchy)LogManager.GetRepository();
-			var fatigue = (FatigueInfo)tlControl.DataContext;
-			RollingFileAppender appender = (RollingFileAppender)hierarchy.Root.Appenders[0];
-			string defalutFile = appender.File;
-
-			appender.File = fatigue.FatigueName + ".csv";
-			appender.ActivateOptions();
-			File.Delete(defalutFile);
-			
-			foreach (FatigueInfo fatigueInfo in fatigueInfoList)
-			{
-				PrintOutEffortLog(fatigueInfo);
-			}
-		}
-
-		private void PrintOutEffortLog(FatigueInfo fatigueInfo)
-		{
+			FatigueInfo fatigueInfo = fatigueInfoList.Last();
 			Object[] logObjects = new Object[]
       {
+				fatigueInfo.FatigueName,
 				fatigueInfo.TotalTimeInSeconds,
 				fatigueInfo.LeftShoulderTorquePercent,
 				fatigueInfo.RightShoulderTorquePercent,
@@ -244,8 +256,7 @@ namespace DemoCE.Controls
 			StringBuilder formatSt = new StringBuilder();
 			foreach (Object obj in logObjects)
 				formatSt.Append("{" + (count++) + "},");
-			String logString = String.Format(formatSt.ToString(), logObjects);
-			logger.Info(logString);
+			return String.Format(formatSt.ToString(), logObjects);
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;

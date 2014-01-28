@@ -21,11 +21,14 @@ using System.Collections.ObjectModel;
 using DemoCE.Controls;
 using System.IO;
 using log4net.Appender;
+using log4net.Config;
+using log4net;
 
 namespace DemoCE
 {
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
+		private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainWindow));
 
 		#region Private Variable
 		private const double TORQUE_MODIFIER = 2d;
@@ -44,6 +47,10 @@ namespace DemoCE
 		private FatigueInfo currentFatigueInfo;
 		private bool playBackFromFile;
 		private bool isAutoStart;
+
+		private string recordPath;
+		private Arm arm;
+		private UserGender gender;
 		#endregion
 
 		#region Property
@@ -108,6 +115,36 @@ namespace DemoCE
 				OnPropertyChanged("IsAutoStart");
 			}
 		}
+
+		public string RecordPath
+		{
+			get { return recordPath; }
+			set
+			{
+				recordPath = value;
+				OnPropertyChanged("RecordPath");
+			}
+		}
+
+		public Arm Arm
+		{
+			get { return arm; }
+			set
+			{
+				arm = value;
+				OnPropertyChanged("Arm");
+			}
+		}
+
+		public UserGender Gender
+		{
+			get { return gender; }
+			set
+			{
+				gender = value;
+				OnPropertyChanged("Gender");
+			}
+		}
 		#endregion
 
 		private EventHandler playbackHandler;
@@ -117,7 +154,9 @@ namespace DemoCE
 		public MainWindow()
 		{
 			engine = new WrapperCE.EngineCE();
-			SettingW = new SettingWindow();
+			RecordPath = Environment.CurrentDirectory;
+			Gender = UserGender.Male;
+			Arm = Arm.RightArm;
 			FatigueInfoCollection = new ObservableCollection<FatigueInfo>();
 			IsAutoStart = false;
 			InitializeComponent();
@@ -167,7 +206,7 @@ namespace DemoCE
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			Player = new SkeletonPlayer(Settings.Default.PlayerBufferSize, Dispatcher);
-			Recorder = new SkeletonRecorder(SettingW.RecordPath);
+			Recorder = new SkeletonRecorder(RecordPath);
 			Player.SkeletonFrameReady += new EventHandler<PlayerSkeletonFrameReadyEventArgs>(player_SkeletonFrameReady);
 			if (KinectSensor.KinectSensors.Count == 0)
 			{
@@ -230,8 +269,6 @@ namespace DemoCE
 			this.ColorImageReady -= MainWindow_ColorImageReady;
 
 			Recorder.Stop(false, true, "", UserGender.Male);
-
-			SettingW.Close();
 		}
 
 		private void kinectSensor_AllFramesReady(object sender, AllFramesReadyEventArgs e)
@@ -376,9 +413,9 @@ namespace DemoCE
 		{
 			if (PlayBackFromFile)
 				return;
-			Recorder = new SkeletonRecorder(SettingW.RecordPath);
+			Recorder = new SkeletonRecorder(RecordPath);
 			Recorder.Start();
-			CurrentFatigueInfo = new FatigueInfo() { Gender = SettingW.Gender, Arm = SettingW.Arm };
+			CurrentFatigueInfo = new FatigueInfo() { Gender = Gender, Arm = Arm };
 			FatigueInfoCollection.Insert(0, CurrentFatigueInfo);
 			StartMeasure(CurrentFatigueInfo.Gender);
 		}
@@ -419,12 +456,20 @@ namespace DemoCE
 
 		private void BtExport_Click(object sender, RoutedEventArgs e)
 		{
-			foreach (TimelineControl tlControl in FindVisualChildren<TimelineControl>(lbTimeLines))
+			var timeLineList = FindVisualChildren<TimelineControl>(lbTimeLines).ToList();
+			
+			if (timeLineList.Count == 0)
 			{
-				tlControl.LogFatigueData();
+				MessageBox.Show("No Fatigue Data for Export.");
+				return;
 			}
 
-			RollingFileAppender fileAppender = log4net.LogManager.GetRepository().GetAppenders().First(appender => appender is RollingFileAppender) as RollingFileAppender;
+			XmlConfigurator.Configure();
+			var hierarchy = (log4net.Repository.Hierarchy.Hierarchy)LogManager.GetRepository();
+			RollingFileAppender appender = (RollingFileAppender)hierarchy.Root.Appenders[0];
+
+			for (int i = 0; i < timeLineList.Count; i++)
+				logger.Info(timeLineList[i].GetEffortLog());
 			Microsoft.Win32.SaveFileDialog dialog = new Microsoft.Win32.SaveFileDialog();
 			dialog.InitialDirectory = Environment.CurrentDirectory;
 			dialog.DefaultExt = ".csv";
@@ -436,13 +481,19 @@ namespace DemoCE
 			{
 				string filename = dialog.FileName;
 				File.Delete(filename);
-				File.Move(fileAppender.File, filename);
+				File.Move(appender.File, filename);
 			}
+			else
+				File.Delete(appender.File);
 		}
 
 		private void BtSetting_Click(object sender, RoutedEventArgs e)
 		{
+			SettingW = new SettingWindow() { RecordPath = RecordPath, Gender = Gender, Arm = Arm };
 			SettingW.ShowDialog();
+			Gender = SettingW.Gender;
+			Arm = SettingW.Arm;
+			RecordPath = SettingW.RecordPath;
 		}
 
 		private void OnPropertyChanged(String name)

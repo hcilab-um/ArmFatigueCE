@@ -14,6 +14,7 @@ using System.ComponentModel;
 using System.IO;
 using WrapperCE.InterOp;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace DemoCE
 {
@@ -22,9 +23,11 @@ namespace DemoCE
 	/// </summary>
 	public partial class SettingWindow : Window, INotifyPropertyChanged
 	{
+		#region Private Value
 		private string recordPath;
 		private Arm arm;
 		private UserGender gender;
+		#endregion
 
 		public string RecordPath
 		{
@@ -79,10 +82,10 @@ namespace DemoCE
 			RecordPath = dialog.SelectedPath;
 		}
 
-		private void Button_Click(object sender, RoutedEventArgs e)
+		private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
 		{
-			this.Hide();
+			System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.Uri.AbsoluteUri));
+			e.Handled = true;
 		}
-
 	}
 }

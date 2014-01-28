@@ -100,6 +100,8 @@ namespace DemoCE.Playback
       {
         PlaybackFinished(this, new EventArgs());
         IsPlaying = false;
+				reader.Close();
+				reader.Dispose();
       }
     }
 
@@ -143,13 +145,9 @@ namespace DemoCE.Playback
       reader.Read(buffer, 0, objectLenght);
       MemoryStream stream = new MemoryStream(buffer);
       SkeletonCapture capture = (SkeletonCapture)formatter.Deserialize(stream);
-
       recordFile.Seek(0, SeekOrigin.Begin);
     }
 
-    /// <summary>
-    /// Loads 
-    /// </summary>
     public void Start()
     {
       IsPlaying = true;

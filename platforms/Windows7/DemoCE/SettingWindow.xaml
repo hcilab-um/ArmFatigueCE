@@ -2,18 +2,37 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 				xmlns:converter="clr-namespace:DemoCE.Converters"
-				x:Name="SettingW" Title="Demo Setting" 
-				WindowStyle="None" Height="192" Width="400">
+				x:Name="SettingW" Title="DemoCE Setting" ResizeMode="NoResize" 
+				Height="341" Width="376">
 	<Window.Resources>
 		<converter:BooleanGenderConverter x:Key="bgConverter"/>
 		<converter:BooleanArmConverter x:Key="baConverter"/>
 	</Window.Resources>
 	<StackPanel>
-		<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-			<TextBlock VerticalAlignment="Center" Text="Record: "/>
-			<TextBox IsEnabled="False" Width="230" VerticalAlignment="Center" Text="{Binding ElementName=SettingW, Path=RecordPath}"/>
-			<Button Name="btChangeDirectory" Content="Change Directory" Margin="5,0,0,0" Click="btChangeDirectory_Click"/>
-		</StackPanel>
+		<TextBlock Text="Consumed Endurance (CE)" FontSize="27" FontWeight="Bold" HorizontalAlignment="Center"/>
+		<Border BorderBrush="Black" BorderThickness="1" Margin="3">
+			<StackPanel>
+				<TextBlock TextWrapping="Wrap" Margin="3">
+			Developed by Xiang Guo, ‎Juan David Hincapié-Ramos, Paymahn Moghadasian and Pourang Irani in University of Manitoba HCI Lab. For more information, check the paper and the link below:
+				</TextBlock>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="Link:      " HorizontalAlignment="Left" FontSize="15" FontWeight="Bold"/>
+					<TextBlock HorizontalAlignment="Center" FontSize="15">
+					<Hyperlink RequestNavigate="Hyperlink_RequestNavigate" 
+										 NavigateUri="http://hci.cs.umanitoba.ca/publications/details/consumed-endurance-a-metric-to-quantify-arm-fatigue-of-mid-air-interactions">
+						University of Manitoba - HCI Lab
+					</Hyperlink>
+					</TextBlock>
+				</StackPanel>
+				<StackPanel Orientation="Vertical" Height="70">
+					<TextBlock Text="Paper Reference: " HorizontalAlignment="Left" FontSize="15" FontWeight="Bold"/>
+					<TextBlock TextWrapping="Wrap" Margin="5,0">
+				 J. D. Hincapié-Ramos, X. Guo, P. Moghadasian and P. Irani. "Consumed Endurance: A Metric to Quantify Arm Fatigue of Mid-Air Interactions," in CHI 2014, May 2014, Toronto, Canada.
+					</TextBlock>
+				</StackPanel>
+
+			</StackPanel>
+		</Border>
 		<StackPanel Orientation="Horizontal" Margin="0,10">
 			<TextBlock Text="Gender" FontSize="20" Width="100"/>
 			<RadioButton VerticalAlignment="Center" Content="Male" FontSize="20" Width="100"
@@ -28,9 +47,9 @@
 			<RadioButton VerticalAlignment="Center" Content="Left" FontSize="20" Width="100"
 									  IsChecked="{Binding ElementName=SettingW, Path=Arm, Converter={StaticResource ResourceKey=baConverter}, ConverterParameter=LeftArm}"/>
 		</StackPanel>
-		<Grid HorizontalAlignment="Center" Width="250"  Margin="0,10">
-			<Button Width="100" FontSize="20" HorizontalAlignment="Left" Content="OK" Click="Button_Click" />
-			<Button Width="100" FontSize="20" HorizontalAlignment="Right" Content="Cancel" Click="Button_Click" />
-		</Grid>
+		<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+			<Button Name="btChangeDirectory" Content="Save To" Margin="0,0,5,0" Click="btChangeDirectory_Click"/>
+			<TextBox IsEnabled="False" Width="300" VerticalAlignment="Center" Text="{Binding ElementName=SettingW, Path=RecordPath}"/>
+		</StackPanel>
 	</StackPanel>
 </Window>

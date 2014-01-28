@@ -8,9 +8,6 @@ using System.IO;
 
 namespace DemoCE
 {
-  /// <summary>
-  /// Interaction logic for App.xaml
-  /// </summary>
   public partial class App : Application
   {
 	}

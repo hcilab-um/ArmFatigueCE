@@ -42,13 +42,13 @@
 					</CheckBox>
 				</StackPanel>
 				<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-					<Button Name="btStartMeasure" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" 
+					<Button Name="btStartMeasure" BorderThickness="0" 
 										Content="Start" FontSize="15" Width="90" Click="BtStartMeasure_Click"
 										IsEnabled="{Binding ElementName=mainW, Path=IsEngineRunning, Converter={StaticResource ResourceKey=nbConverter}}" />
-					<Button Name="btStopMeasure" Background="Transparent" BorderBrush="Transparent" BorderThickness="0"
+					<Button Name="btStopMeasure" BorderThickness="0"
 										Content="Stop" FontSize="15"  Width="90" Margin="15,0,0,0" Click="BtStopMeasure_Click" 
 										IsEnabled="{Binding ElementName=mainW, Path=IsEngineRunning}"/>
-					<Button Name="btExport" Background="Transparent" BorderBrush="Transparent" BorderThickness="0"
+					<Button Name="btExport" BorderThickness="0"
 										Content="Export" FontSize="15"  Width="90" Margin="15,0,0,0" Click="BtExport_Click"
 										IsEnabled="{Binding ElementName=mainW, Path=IsEngineRunning, Converter={StaticResource ResourceKey=nbConverter}}" />
 				</StackPanel>
@@ -62,7 +62,7 @@
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<controls:TimelineControl Margin="0,0,0,5" Width="300" Height="150"
-																			LenghtInSeconds="60" MaxValue="100"
+																			LenghtInSeconds="30" MaxValue="50"
 																			TotalTimeInSeconds="{Binding Path=TotalTimeInSeconds}"
 																			IsEngineRunning="{Binding ElementName=mainW, Path=IsEngineRunning}"/>
 					</DataTemplate>

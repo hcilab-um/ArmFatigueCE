@@ -220,7 +220,6 @@ namespace DemoCE
 
 		public void Reset()
 		{
-			TotalTimeInSeconds = 0;
 			LeftArmAngle = 0;
 			RightArmAngle = 0;
 
@@ -238,6 +237,7 @@ namespace DemoCE
 
 			LeftArmConsumedEndurance = 0;
 			RightArmConsumedEndurance = 0;
+			TotalTimeInSeconds = 0;
 		}
 		
 		public event PropertyChangedEventHandler PropertyChanged;
