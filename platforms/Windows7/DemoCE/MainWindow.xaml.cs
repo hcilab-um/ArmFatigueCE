@@ -342,9 +342,9 @@ namespace DemoCE
 				if (IsEngineRunning)
 				{
 					if (CurrentFatigueInfo.Arm == Arm.RightArm)
-						skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightShoulderTorquePercent / TORQUE_MODIFIER);
+						skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightArmStrength / TORQUE_MODIFIER);
 					else
-						skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderLeft, dc, CurrentFatigueInfo.LeftShoulderTorquePercent / TORQUE_MODIFIER);
+						skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderLeft, dc, CurrentFatigueInfo.LeftArmStrength / TORQUE_MODIFIER);
 				}
 			}
 
@@ -384,8 +384,8 @@ namespace DemoCE
 			CurrentFatigueInfo.LeftArmTorque = armFatigueUpdate.LeftArm.ShoulderTorque;
 			CurrentFatigueInfo.RightArmTorque = armFatigueUpdate.RightArm.ShoulderTorque;
 
-			CurrentFatigueInfo.LeftShoulderTorquePercent = armFatigueUpdate.LeftArm.ShoulderTorquePercent;
-			CurrentFatigueInfo.RightShoulderTorquePercent = armFatigueUpdate.RightArm.ShoulderTorquePercent;
+			CurrentFatigueInfo.LeftArmStrength = armFatigueUpdate.LeftArm.ArmStrength;
+			CurrentFatigueInfo.RightArmStrength = armFatigueUpdate.RightArm.ArmStrength;
 		}
 
 		private void PlayBack(string fileName, EventHandler pbFinished, bool useDelay)

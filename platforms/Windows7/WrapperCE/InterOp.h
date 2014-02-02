@@ -39,10 +39,11 @@ namespace WrapperCE
 			InterOp::Vector3D InertialTorque;
 
 			double ShoulderTorque;
-			double ShoulderTorquePercent;
+		  double ArmStrength;
 			double Endurance;
 
 			double AvgShoulderTorque;
+			double AvgArmStrength;
 			double AvgEndurance;
 
 			double ConsumedEndurance;

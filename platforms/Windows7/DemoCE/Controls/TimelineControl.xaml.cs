@@ -157,8 +157,8 @@ namespace DemoCE.Controls
 				LeftArmAvgTorque = fatigueInfo.LeftArmAvgTorque,
 				RightArmAvgTorque = fatigueInfo.RightArmAvgTorque,
 
-				LeftShoulderTorquePercent = fatigueInfo.LeftShoulderTorquePercent,
-				RightShoulderTorquePercent = fatigueInfo.RightShoulderTorquePercent,
+				LeftArmStrength = fatigueInfo.LeftArmStrength,
+				RightArmStrength = fatigueInfo.RightArmStrength,
 
 				LeftArmAvgEndurance = fatigueInfo.LeftArmAvgEndurance,
 				RightArmAvgEndurance = fatigueInfo.RightArmAvgEndurance,
@@ -222,7 +222,7 @@ namespace DemoCE.Controls
 				polyLine.ToolTip = string.Format("CE: {0} %\nTime: {1} sec\nAvg Strength: {2} %\nAvg Endurance: {3} sec",
 																	selectedFatigue.RightArmConsumedEndurance.ToString("F2"),
 																	selectedFatigue.TotalTimeInSeconds.ToString("F2"),
-																	selectedFatigue.RightShoulderTorquePercent.ToString("F2"),
+																	selectedFatigue.RightArmStrength.ToString("F2"),
 																	averageEndurance);
 			}
 			else
@@ -232,7 +232,7 @@ namespace DemoCE.Controls
 				polyLine.ToolTip = string.Format("CE: {0} %\nTime: {1} sec\nAvg Strength: {2} %\nAvg Endurance: {3} sec",
 													selectedFatigue.LeftArmConsumedEndurance.ToString("F2"),
 													selectedFatigue.TotalTimeInSeconds.ToString("F2"),
-													selectedFatigue.LeftShoulderTorquePercent.ToString("F2"),
+													selectedFatigue.LeftArmStrength.ToString("F2"),
 													averageEndurance);
 			}
 		}
@@ -244,11 +244,13 @@ namespace DemoCE.Controls
       {
 				fatigueInfo.FatigueName,
 				fatigueInfo.TotalTimeInSeconds,
-				fatigueInfo.LeftShoulderTorquePercent,
-				fatigueInfo.RightShoulderTorquePercent,
+				
+				fatigueInfo.LeftArmAvgStrength,
 				fatigueInfo.LeftArmAvgEndurance,
-				fatigueInfo.RightArmAvgEndurance,
 				fatigueInfo.LeftArmConsumedEndurance,
+
+				fatigueInfo.RightArmAvgStrength,
+				fatigueInfo.RightArmAvgEndurance,
 				fatigueInfo.RightArmConsumedEndurance
       };
 

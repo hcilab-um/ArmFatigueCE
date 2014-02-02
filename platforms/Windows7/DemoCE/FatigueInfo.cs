@@ -23,8 +23,11 @@ namespace DemoCE
 		private double leftArmTorque = 0;
 		private double rightArmTorque = 0;
 
-		private double leftShoulderTorquePercent = 0;
-		private double rightShoulderTorquePercent = 0;
+		private double leftArmStrength = 0;
+		private double rightArmStrength = 0;
+
+		private double rightArmAvgStrength = 0;
+		private double leftArmAvgStrength = 0;
 
 		private double leftArmAvgTorque = 0;
 		private double rightArmAvgTorque = 0;
@@ -129,25 +132,46 @@ namespace DemoCE
 			}
 		}
 
-		public double LeftShoulderTorquePercent
+		public double LeftArmStrength
 		{
-			get { return leftShoulderTorquePercent; }
+			get { return leftArmStrength; }
 			set
 			{
-				leftShoulderTorquePercent = value;
-				OnPropertyChanged("LeftShoulderTorquePercent");
+				leftArmStrength = value;
+				OnPropertyChanged("LeftArmStrength");
 			}
 		}
 
-		public double RightShoulderTorquePercent
+		public double RightArmStrength
 		{
-			get { return rightShoulderTorquePercent; }
+			get { return rightArmStrength; }
 			set
 			{
-				rightShoulderTorquePercent = value;
-				OnPropertyChanged("RightShoulderTorquePercent");
+				rightArmStrength = value;
+				OnPropertyChanged("RightArmStrength");
 			}
 		}
+
+		public double LeftArmAvgStrength
+		{
+			get { return leftArmAvgStrength; }
+			set
+			{
+				leftArmAvgStrength = value;
+				OnPropertyChanged("LeftArmAvgStrength");
+			}
+		}
+
+		public double RightArmAvgStrength
+		{
+			get { return rightArmAvgStrength; }
+			set
+			{
+				rightArmAvgStrength = value;
+				OnPropertyChanged("RightArmAvgStrength");
+			}
+		}
+
 
 		public double LeftArmAvgTorque
 		{
@@ -229,8 +253,8 @@ namespace DemoCE
 			LeftArmAvgTorque = 0;
 			RightArmAvgTorque = 0;
 
-			LeftShoulderTorquePercent = 0;
-			RightShoulderTorquePercent = 0;
+			LeftArmStrength = 0;
+			RightArmStrength = 0;
 
 			LeftArmAvgEndurance = 0;
 			RightArmAvgEndurance = 0;

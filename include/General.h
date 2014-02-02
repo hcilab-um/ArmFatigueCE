@@ -41,7 +41,8 @@ public:
 
 	double AngularAcceleration;
 	double ShoulderTorque;
-	double shoulderTorquePercent;
+	double ArmStrength;
+	double AvgArmStrength;
 
 	double Endurance;
 	double AvgShoulderTorque;
@@ -60,14 +61,16 @@ public:
 		Acceleration = Vector3D();
 		InertialTorque = Vector3D();
 		AngularAcceleration = 0;
-		ShoulderTorque = 0;
-		shoulderTorquePercent = 0;
-
-		Endurance = 0;
-		AvgShoulderTorque = 0;
-		AvgEndurance = 0;
-		ConsumedEndurance = 0;
 		
+		ShoulderTorque = 0;
+		ArmStrength = 0;
+		Endurance = 0;
+		
+		AvgShoulderTorque = 0;
+		AvgArmStrength = 0;
+		AvgEndurance = 0;
+
+		ConsumedEndurance = 0;
 	}
 };
 

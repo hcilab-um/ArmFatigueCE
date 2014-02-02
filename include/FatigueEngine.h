@@ -6,8 +6,11 @@
 class EXPORT_OR_IMPORT FatigueEngine
 {
 private:
-	UserGender gender;
+
 	double totalTime;
+
+	UserGender gender;
+
 	ArmFatigueEstimator estimatorLeft;
 	ArmFatigueEstimator estimatorRight;
 
