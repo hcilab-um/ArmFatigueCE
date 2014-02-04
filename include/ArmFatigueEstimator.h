@@ -59,7 +59,7 @@ private:
 	double foreArmAndHandCenterOfGravityRatio;
 	double humanTorqueSum;
 
-	Vector3D CalculateCenterMass(Vector3D shoulder, Vector3D elbow, Vector3D hand);
+	Vector3D CalculateCenterMass(Vector3D shoulder, Vector3D elbow, Vector3D wrist, Vector3D hand);
 	Vector3D CalculateInertialTorque(Vector3D displacement, Vector3D armCM, double angularAcc);
 	double CalculateEndurance(double armStrength);
 

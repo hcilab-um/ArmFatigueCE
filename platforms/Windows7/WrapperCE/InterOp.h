@@ -61,9 +61,11 @@ namespace WrapperCE
 		public:
 			InterOp::Point3D RightShoulderCms;
 			InterOp::Point3D RightElbowCms;
+			InterOp::Point3D RightWristCms;
 			InterOp::Point3D RightHandCms;
 			InterOp::Point3D LeftShoulderCms;
 			InterOp::Point3D LeftElbowCms;
+			InterOp::Point3D LeftWristCms;
 			InterOp::Point3D LeftHandCms;
 		};
 	}

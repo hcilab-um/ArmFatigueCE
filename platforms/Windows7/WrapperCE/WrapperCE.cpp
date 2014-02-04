@@ -77,10 +77,14 @@ WrapperCE::InterOp::ArmFatigueUpdate WrapperCE::EngineCE::ProcessNewSkeletonData
 	SkeletonData input;
 	input.RightShoulderCms =	this->ConvertPV(armsData.RightShoulderCms);
 	input.RightElbowCms =			this->ConvertPV(armsData.RightElbowCms);
+	input.RightWristCms =			this->ConvertPV(armsData.RightWristCms);
 	input.RightHandCms =			this->ConvertPV(armsData.RightHandCms);
+
 	input.LeftShoulderCms =		this->ConvertPV(armsData.LeftShoulderCms);
 	input.LeftElbowCms =			this->ConvertPV(armsData.LeftElbowCms);
+	input.LeftWristCms =			this->ConvertPV(armsData.LeftWristCms);
 	input.LeftHandCms =				this->ConvertPV(armsData.LeftHandCms);
+
 	ArmFatigueUpdate update = engineCE->ProcessNewSkeletonData(input, deltaTimeInSeconds);
 	interOp.LeftArm = this-> ConvertFatigueData(update.LeftArm);
 	interOp.RightArm = this-> ConvertFatigueData(update.RightArm);

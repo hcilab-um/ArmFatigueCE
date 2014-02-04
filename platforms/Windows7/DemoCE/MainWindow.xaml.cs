@@ -362,9 +362,12 @@ namespace DemoCE
 			SkeletonData measuredArms = new SkeletonData();
 			measuredArms.RightShoulderCms = Convert(skeleton.Joints[JointType.ShoulderRight].Position);
 			measuredArms.RightElbowCms = Convert(skeleton.Joints[JointType.ElbowRight].Position);
+			measuredArms.RightWristCms = Convert(skeleton.Joints[JointType.WristRight].Position);
 			measuredArms.RightHandCms = Convert(skeleton.Joints[JointType.HandRight].Position);
+
 			measuredArms.LeftShoulderCms = Convert(skeleton.Joints[JointType.ShoulderLeft].Position);
 			measuredArms.LeftElbowCms = Convert(skeleton.Joints[JointType.ElbowLeft].Position);
+			measuredArms.LeftWristCms = Convert(skeleton.Joints[JointType.WristLeft].Position);
 			measuredArms.LeftHandCms = Convert(skeleton.Joints[JointType.HandLeft].Position);
 
 			armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTimeInSeconds);

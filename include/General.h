@@ -89,8 +89,10 @@ public:
 
 	Vector3D RightShoulderCms;
 	Vector3D RightElbowCms;
+	Vector3D RightWristCms;
 	Vector3D RightHandCms;
 	Vector3D LeftShoulderCms;
 	Vector3D LeftElbowCms;
+	Vector3D LeftWristCms;
 	Vector3D LeftHandCms;
 };
