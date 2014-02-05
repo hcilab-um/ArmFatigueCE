@@ -19,6 +19,9 @@ namespace DemoCE.Converters
         return Double.PositiveInfinity;
 
       int decimalPoints = Int32.Parse((String)parameter);
+			if (decimalPoints == 0)
+				return ((int)valueToConvert).ToString();
+
       String format = "F" + decimalPoints;
       String returnValue = valueToConvert.ToString(format);
 

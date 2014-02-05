@@ -33,6 +33,8 @@ namespace DemoCE
 		#region Private Variable
 		private const double TORQUE_MODIFIER = 2d;
 		private KinectSensor kinectSensor = null;
+		private SkeletonRecorder recorder;
+		private SkeletonPlayer player;
 		private WriteableBitmap colorBitmap;
 		private byte[] colorPixels;
 		private SkeletonDrawer skeletonDrawer;
@@ -54,10 +56,8 @@ namespace DemoCE
 		#endregion
 
 		#region Property
-
+		
 		public SettingWindow SettingW { get; set; }
-		public SkeletonRecorder Recorder { get; set; }
-		public SkeletonPlayer Player { get; set; }
 
 		public ObservableCollection<FatigueInfo> FatigueInfoCollection { get; set; }
 
@@ -71,9 +71,24 @@ namespace DemoCE
 			}
 		}
 
-		public bool IsEngineRunning
+		public SkeletonRecorder Recorder
 		{
-			get { return engine.CheckStarted(); }
+			get { return recorder; }
+			set
+			{
+				recorder = value;
+				OnPropertyChanged("Recorder");
+			}
+		}
+
+		public SkeletonPlayer Player
+		{
+			get { return player; }
+			set
+			{
+				player = value;
+				OnPropertyChanged("Player");
+			}
 		}
 
 		public double DeltaTimeInSeconds
@@ -164,8 +179,6 @@ namespace DemoCE
 
 		private void DeleteFatigueInfo(object sender, RoutedEventArgs e)
 		{
-			if (engine.CheckStarted())
-				return;
 			TimelineControl tlControl = (TimelineControl)e.OriginalSource;
 			FatigueInfo fatigueInfo = (FatigueInfo)tlControl.DataContext;
 			File.Delete(fatigueInfo.FatigueFile);
@@ -177,30 +190,15 @@ namespace DemoCE
 			TimelineControl tlControl = (TimelineControl)e.OriginalSource;
 			CurrentFatigueInfo = (FatigueInfo)tlControl.DataContext;
 			CurrentFatigueInfo.Reset();
-			StartMeasure(CurrentFatigueInfo.Gender);
+			engine.Reset();
+			engine.SetGender(CurrentFatigueInfo.Gender);
 			PlayBack(CurrentFatigueInfo.FatigueFile, Player_PlaybackFinished, true);
 		}
 
 		public void Player_PlaybackFinished(object sender, EventArgs e)
 		{
 			PlayBackFromFile = false;
-			StopMeasure();
-		}
-
-		private void StartMeasure(UserGender gender)
-		{
-			if (engine.CheckStarted())
-				return;
-			engine.Start(gender);
-			OnPropertyChanged("IsEngineRunning");
-		}
-
-		private void StopMeasure()
-		{
-			if (!engine.CheckStarted())
-				return;
-			engine.Stop();
-			OnPropertyChanged("IsEngineRunning");
+			CurrentFatigueInfo = new FatigueInfo() { Gender = Gender, SelectedArm = Arm };
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -208,6 +206,7 @@ namespace DemoCE
 			Player = new SkeletonPlayer(Settings.Default.PlayerBufferSize, Dispatcher);
 			Recorder = new SkeletonRecorder(RecordPath);
 			Player.SkeletonFrameReady += new EventHandler<PlayerSkeletonFrameReadyEventArgs>(player_SkeletonFrameReady);
+			CurrentFatigueInfo = new FatigueInfo();
 			if (KinectSensor.KinectSensors.Count == 0)
 			{
 				IsKinectConnected = false;
@@ -297,11 +296,6 @@ namespace DemoCE
 				}
 			}
 
-			if (IsAutoStart && validSkeleton != null && !IsEngineRunning)
-				BtStartMeasure_Click(null, null);
-			if (IsAutoStart && validSkeleton == null && IsEngineRunning)
-				BtStopMeasure_Click(null, null);
-
 			if (validSkeleton != null)
 			{
 				double deltaTimeMilliseconds = (currentTimeMilliseconds - lastUpdate);
@@ -310,6 +304,15 @@ namespace DemoCE
 				DeltaTimeInSeconds = deltaTimeMilliseconds / 1000;
 				lastUpdate = currentTimeMilliseconds;
 				RunFatigueEngine(validSkeleton, DeltaTimeInSeconds);
+				
+				if (IsAutoStart)
+				{
+					if (Arm == Arm.LeftArm)
+						AutoMeasure(CurrentFatigueInfo.LeftData);
+					else
+						AutoMeasure(CurrentFatigueInfo.RightData);
+				}
+
 				Recorder.ProcessNewSkeletonData(validSkeleton, deltaTimeMilliseconds);
 			}
 
@@ -332,6 +335,14 @@ namespace DemoCE
 			}
 		}
 
+		private void AutoMeasure(ArmData data)
+		{
+			if (!Recorder.IsRecording && data.ArmStrength >= 15)
+				BtStartMeasure_Click(null, null);
+			else if (Recorder.IsRecording && data.ArmStrength < 15)
+				BtStopMeasure_Click(null, null);
+		}
+
 		private DrawingImage DrawSkeleton(Skeleton skeleton, SolidColorBrush brush)
 		{
 			DrawingGroup dGroup = new DrawingGroup();
@@ -339,13 +350,10 @@ namespace DemoCE
 			{
 				dc.DrawRectangle(brush, new Pen(Brushes.Black, 0.5), new Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight));
 				skeletonDrawer.DrawSkeleton(skeleton, dc);
-				if (IsEngineRunning)
-				{
-					if (CurrentFatigueInfo.Arm == Arm.RightArm)
-						skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightArmStrength / TORQUE_MODIFIER);
-					else
-						skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderLeft, dc, CurrentFatigueInfo.LeftArmStrength / TORQUE_MODIFIER);
-				}
+				if (CurrentFatigueInfo.SelectedArm == Arm.RightArm)
+					skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightData.ArmStrength / TORQUE_MODIFIER);
+				else
+					skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderLeft, dc, CurrentFatigueInfo.LeftData.ArmStrength / TORQUE_MODIFIER);
 			}
 
 			DrawingImage dImageSource = new DrawingImage(dGroup);
@@ -355,9 +363,6 @@ namespace DemoCE
 
 		private void RunFatigueEngine(Skeleton skeleton, double deltaTimeInSeconds)
 		{
-			if (!engine.CheckStarted())
-				return;
-
 			CurrentFatigueInfo.TotalTimeInSeconds += deltaTimeInSeconds;
 			SkeletonData measuredArms = new SkeletonData();
 			measuredArms.RightShoulderCms = Convert(skeleton.Joints[JointType.ShoulderRight].Position);
@@ -372,23 +377,23 @@ namespace DemoCE
 
 			armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTimeInSeconds);
 
-			CurrentFatigueInfo.LeftArmAngle = armFatigueUpdate.LeftArm.Theta;
-			CurrentFatigueInfo.RightArmAngle = armFatigueUpdate.RightArm.Theta;
+			CurrentFatigueInfo.LeftData.Angle = armFatigueUpdate.LeftArm.Theta;
+			CurrentFatigueInfo.LeftData.AvgEndurance = armFatigueUpdate.LeftArm.AvgEndurance;
+			CurrentFatigueInfo.LeftData.AvgShoulderTorque = armFatigueUpdate.LeftArm.AvgShoulderTorque;
+			CurrentFatigueInfo.LeftData.ConsumedEndurance = armFatigueUpdate.LeftArm.ConsumedEndurance;
+			CurrentFatigueInfo.LeftData.ShoulderTorque = armFatigueUpdate.LeftArm.ShoulderTorque;
+			CurrentFatigueInfo.LeftData.AvgShoulderTorque = armFatigueUpdate.LeftArm.AvgShoulderTorque;
+			CurrentFatigueInfo.LeftData.ArmStrength = armFatigueUpdate.LeftArm.ArmStrength;
+			CurrentFatigueInfo.LeftData.AvgArmStrength = armFatigueUpdate.LeftArm.AvgArmStrength;
 
-			CurrentFatigueInfo.LeftArmAvgEndurance = armFatigueUpdate.LeftArm.AvgEndurance;
-			CurrentFatigueInfo.RightArmAvgEndurance = armFatigueUpdate.RightArm.AvgEndurance;
-
-			CurrentFatigueInfo.LeftArmAvgTorque = armFatigueUpdate.LeftArm.AvgShoulderTorque;
-			CurrentFatigueInfo.RightArmAvgTorque = armFatigueUpdate.RightArm.AvgShoulderTorque;
-
-			CurrentFatigueInfo.LeftArmConsumedEndurance = armFatigueUpdate.LeftArm.ConsumedEndurance;
-			CurrentFatigueInfo.RightArmConsumedEndurance = armFatigueUpdate.RightArm.ConsumedEndurance;
-
-			CurrentFatigueInfo.LeftArmTorque = armFatigueUpdate.LeftArm.ShoulderTorque;
-			CurrentFatigueInfo.RightArmTorque = armFatigueUpdate.RightArm.ShoulderTorque;
-
-			CurrentFatigueInfo.LeftArmStrength = armFatigueUpdate.LeftArm.ArmStrength;
-			CurrentFatigueInfo.RightArmStrength = armFatigueUpdate.RightArm.ArmStrength;
+			CurrentFatigueInfo.RightData.Angle = armFatigueUpdate.RightArm.Theta;
+			CurrentFatigueInfo.RightData.AvgEndurance = armFatigueUpdate.RightArm.AvgEndurance;
+			CurrentFatigueInfo.RightData.AvgShoulderTorque = armFatigueUpdate.RightArm.AvgShoulderTorque;
+			CurrentFatigueInfo.RightData.ConsumedEndurance = armFatigueUpdate.RightArm.ConsumedEndurance;
+			CurrentFatigueInfo.RightData.ShoulderTorque = armFatigueUpdate.RightArm.ShoulderTorque;
+			CurrentFatigueInfo.RightData.AvgShoulderTorque = armFatigueUpdate.RightArm.AvgShoulderTorque;
+			CurrentFatigueInfo.RightData.ArmStrength = armFatigueUpdate.RightArm.ArmStrength;
+			CurrentFatigueInfo.RightData.AvgArmStrength = armFatigueUpdate.RightArm.AvgArmStrength;
 		}
 
 		private void PlayBack(string fileName, EventHandler pbFinished, bool useDelay)
@@ -418,22 +423,23 @@ namespace DemoCE
 				return;
 			Recorder = new SkeletonRecorder(RecordPath);
 			Recorder.Start();
-			CurrentFatigueInfo = new FatigueInfo() { Gender = Gender, Arm = Arm };
+			engine.Reset();
+			CurrentFatigueInfo = new FatigueInfo() { DateTime = DateTime.Now, Gender = Gender, SelectedArm = Arm };
 			FatigueInfoCollection.Insert(0, CurrentFatigueInfo);
-			StartMeasure(CurrentFatigueInfo.Gender);
+
 		}
 
 		private void BtStopMeasure_Click(object sender, RoutedEventArgs e)
 		{
 			if (PlayBackFromFile)
 				return;
-			String qualifiedName = String.Format("{0}-{1}-{2}", DateTime.Now.ToString("MMddyy-HHmmss"),
-																						CurrentFatigueInfo.Gender.ToString().ToLower(), currentFatigueInfo.Arm);
+
+			String qualifiedName = String.Format("{0}-{1}-{2}", CurrentFatigueInfo.DateTime.ToString("MMddyy-HHmmss"),
+																						CurrentFatigueInfo.Gender.ToString().ToLower(), currentFatigueInfo.SelectedArm);
 			CurrentFatigueInfo.FatigueName = qualifiedName;
 			CurrentFatigueInfo.FatigueFile = Recorder.Stop(true, false, CurrentFatigueInfo.FatigueName, CurrentFatigueInfo.Gender);
 			if (CurrentFatigueInfo.FatigueFile == string.Empty)
 				FatigueInfoCollection.Remove(CurrentFatigueInfo);
-			StopMeasure();
 			CurrentFatigueInfo = new FatigueInfo();
 		}
 
@@ -460,7 +466,7 @@ namespace DemoCE
 		private void BtExport_Click(object sender, RoutedEventArgs e)
 		{
 			var timeLineList = FindVisualChildren<TimelineControl>(lbTimeLines).ToList();
-			
+
 			if (timeLineList.Count == 0)
 			{
 				MessageBox.Show("No Fatigue Data for Export.");
@@ -497,6 +503,7 @@ namespace DemoCE
 			Gender = SettingW.Gender;
 			Arm = SettingW.Arm;
 			RecordPath = SettingW.RecordPath;
+			engine.SetGender(Gender);
 		}
 
 		private void OnPropertyChanged(String name)

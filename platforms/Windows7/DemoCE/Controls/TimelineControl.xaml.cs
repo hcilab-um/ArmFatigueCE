@@ -31,8 +31,8 @@ namespace DemoCE.Controls
 
 		public static readonly DependencyProperty MaxValueProperty = DependencyProperty.Register("MaxValue", typeof(double), typeof(TimelineControl));
 		public static readonly DependencyProperty LenghtInSecondsProperty = DependencyProperty.Register("LenghtInSeconds", typeof(double), typeof(TimelineControl));
-		public static readonly DependencyProperty IsEngineRunningProperty = DependencyProperty.Register("IsEngineRunning", typeof(bool), typeof(TimelineControl));
-
+		public static readonly DependencyProperty IsRecordingProperty = DependencyProperty.Register("IsRecording", typeof(bool), typeof(TimelineControl));
+		public static readonly DependencyProperty IsPlayingProperty = DependencyProperty.Register("IsPlaying", typeof(bool), typeof(TimelineControl));
 		private double timePlotValue;
 		private double consumeEndurance;
 		private List<FatigueInfo> fatigueInfoList;
@@ -63,10 +63,16 @@ namespace DemoCE.Controls
 			remove { RemoveHandler(DeleteFatigueInfoEvent, value); }
 		}
 
-		public bool IsEngineRunning
+		public bool IsRecording
 		{
-			get { return (bool)GetValue(IsEngineRunningProperty); }
-			set { SetValue(IsEngineRunningProperty, value); }
+			get { return (bool)GetValue(IsRecordingProperty); }
+			set { SetValue(IsRecordingProperty, value); }
+		}
+
+		public bool IsPlaying
+		{
+			get { return (bool)GetValue(IsPlayingProperty); }
+			set { SetValue(IsPlayingProperty, value); }
 		}
 
 		public double TotalTimeInSeconds
@@ -108,13 +114,13 @@ namespace DemoCE.Controls
 
 		private void InsertNewDataPoint(FatigueInfo fatigueInfo)
 		{
-			if (LenghtInSeconds == 0 || MaxValue == 0 || TotalTimeInSeconds ==0)
+			if (LenghtInSeconds == 0 || MaxValue == 0 || TotalTimeInSeconds == 0)
 				return;
 
-			if (fatigueInfo.Arm == Arm.LeftArm)
-				ConsumeEndurance = fatigueInfo.LeftArmConsumedEndurance;
+			if (fatigueInfo.SelectedArm == Arm.LeftArm)
+				ConsumeEndurance = fatigueInfo.LeftData.ConsumedEndurance;
 			else
-				ConsumeEndurance = fatigueInfo.RightArmConsumedEndurance;
+				ConsumeEndurance = fatigueInfo.RightData.ConsumedEndurance;
 
 			//Shrink the graph if needed
 			if (TotalTimeInSeconds > LenghtInSeconds)
@@ -144,27 +150,15 @@ namespace DemoCE.Controls
 			}
 
 			TimePlotValue = TotalTimeInSeconds * (cGraphContent.Width) / LenghtInSeconds;
+
 			FatigueInfo newFatigueInfo = new FatigueInfo()
 			{
-				Arm = fatigueInfo.Arm,
+				DateTime = DateTime.Now,
+				FatigueFile = fatigueInfo.FatigueFile,
+				SelectedArm = fatigueInfo.SelectedArm,
 				TotalTimeInSeconds = fatigueInfo.TotalTimeInSeconds,
-				LeftArmAngle = fatigueInfo.LeftArmAngle,
-				RightArmAngle = fatigueInfo.RightArmAngle,
-
-				LeftArmTorque = fatigueInfo.LeftArmTorque,
-				RightArmTorque = fatigueInfo.RightArmTorque,
-
-				LeftArmAvgTorque = fatigueInfo.LeftArmAvgTorque,
-				RightArmAvgTorque = fatigueInfo.RightArmAvgTorque,
-
-				LeftArmStrength = fatigueInfo.LeftArmStrength,
-				RightArmStrength = fatigueInfo.RightArmStrength,
-
-				LeftArmAvgEndurance = fatigueInfo.LeftArmAvgEndurance,
-				RightArmAvgEndurance = fatigueInfo.RightArmAvgEndurance,
-
-				LeftArmConsumedEndurance = fatigueInfo.LeftArmConsumedEndurance,
-				RightArmConsumedEndurance = fatigueInfo.RightArmConsumedEndurance,
+				LeftData = fatigueInfo.LeftData,
+				RightData = fatigueInfo.RightData,
 			};
 
 			fatigueInfoList.Add(newFatigueInfo);
@@ -175,16 +169,21 @@ namespace DemoCE.Controls
 
 		private void BtDeleteClick(object sender, RoutedEventArgs e)
 		{
-			if (IsEngineRunning)
+			if (IsRecording || IsPlaying)
+			{
+				MessageBox.Show("Can not delete when playing or recording fatigue data");
 				return;
+			}
+
 			RaiseEvent(new RoutedEventArgs(TimelineControl.DeleteFatigueInfoEvent, this));
 		}
 
 		private void BtReplayClick(object sender, RoutedEventArgs e)
 		{
-			if (IsEngineRunning)
+			if (IsRecording)
 				return;
 			plotGraphRight.Points.Clear();
+			fatigueInfoList.Clear();
 			RaiseEvent(new RoutedEventArgs(TimelineControl.ReplayFatigueEvent, this));
 		}
 
@@ -214,26 +213,26 @@ namespace DemoCE.Controls
 
 			var selectedFatigue = fatigueInfoList.OrderBy(fatigue => Math.Abs(fatigue.TotalTimeInSeconds - timeInSecond)).First();
 			string averageEndurance = "Infinity";
-			
-			if (selectedFatigue.Arm == Arm.RightArm)
+
+			if (selectedFatigue.SelectedArm == Arm.RightArm)
 			{
-				if (selectedFatigue.RightArmAvgEndurance < 1000)
-					averageEndurance = selectedFatigue.RightArmAvgEndurance.ToString("F2");
+				if (selectedFatigue.RightData.AvgEndurance < 1000)
+					averageEndurance = selectedFatigue.RightData.AvgEndurance.ToString("F2");
 				polyLine.ToolTip = string.Format("CE: {0} %\nTime: {1} sec\nAvg Strength: {2} %\nAvg Endurance: {3} sec",
-																	selectedFatigue.RightArmConsumedEndurance.ToString("F2"),
+																	selectedFatigue.RightData.ConsumedEndurance.ToString("F2"),
 																	selectedFatigue.TotalTimeInSeconds.ToString("F2"),
-																	selectedFatigue.RightArmStrength.ToString("F2"),
+																	selectedFatigue.RightData.ArmStrength.ToString("F2"),
 																	averageEndurance);
 			}
 			else
 			{
-				if (selectedFatigue.LeftArmAvgEndurance < 1000)
-					averageEndurance = selectedFatigue.LeftArmAvgEndurance.ToString("F2");
+				if (selectedFatigue.LeftData.AvgEndurance < 1000)
+					averageEndurance = selectedFatigue.LeftData.AvgEndurance.ToString("F2");
 				polyLine.ToolTip = string.Format("CE: {0} %\nTime: {1} sec\nAvg Strength: {2} %\nAvg Endurance: {3} sec",
-													selectedFatigue.LeftArmConsumedEndurance.ToString("F2"),
-													selectedFatigue.TotalTimeInSeconds.ToString("F2"),
-													selectedFatigue.LeftArmStrength.ToString("F2"),
-													averageEndurance);
+																	selectedFatigue.LeftData.ConsumedEndurance.ToString("F2"),
+																	selectedFatigue.TotalTimeInSeconds.ToString("F2"),
+																	selectedFatigue.LeftData.ArmStrength.ToString("F2"),
+																	averageEndurance);
 			}
 		}
 
@@ -242,16 +241,16 @@ namespace DemoCE.Controls
 			FatigueInfo fatigueInfo = fatigueInfoList.Last();
 			Object[] logObjects = new Object[]
       {
-				fatigueInfo.FatigueName,
+				fatigueInfo.DateTime.ToString(),
 				fatigueInfo.TotalTimeInSeconds,
 				
-				fatigueInfo.LeftArmAvgStrength,
-				fatigueInfo.LeftArmAvgEndurance,
-				fatigueInfo.LeftArmConsumedEndurance,
+				fatigueInfo.LeftData.AvgArmStrength,
+				fatigueInfo.LeftData.AvgEndurance,
+				fatigueInfo.LeftData.ConsumedEndurance,
 
-				fatigueInfo.RightArmAvgStrength,
-				fatigueInfo.RightArmAvgEndurance,
-				fatigueInfo.RightArmConsumedEndurance
+				fatigueInfo.RightData.AvgArmStrength,
+				fatigueInfo.RightData.AvgEndurance,
+				fatigueInfo.RightData.ConsumedEndurance
       };
 
 			int count = 0;

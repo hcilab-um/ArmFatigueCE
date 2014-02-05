@@ -77,12 +77,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ArmData.cs" />
     <Compile Include="ColorImageReadyArgs.cs" />
     <Compile Include="Controls\TimelineControl.xaml.cs">
       <DependentUpon>TimelineControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\BooleanArmConverter.cs" />
     <Compile Include="Converters\BoolGenderConverter.cs" />
+    <Compile Include="Converters\ButtonEnableConverter.cs" />
     <Compile Include="Converters\DoubleFormatConverter.cs" />
     <Compile Include="Converters\HeightMarginConverter.cs" />
     <Compile Include="Converters\NegateBooleanConverter.cs" />

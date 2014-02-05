@@ -8,7 +8,6 @@ WrapperCE::EngineCE::EngineCE()
 {
 	engineCE = new FatigueEngine();
 	engineCE->SetGender(Male);
-	isStarted = false;
 }
 
 WrapperCE::EngineCE::~EngineCE()
@@ -16,21 +15,15 @@ WrapperCE::EngineCE::~EngineCE()
 	delete engineCE;
 }
 
-bool WrapperCE::EngineCE::CheckStarted()
-{
-	return isStarted;
-}
-
-void WrapperCE::EngineCE::Start(WrapperCE::InterOp::UserGender gender)
+void WrapperCE::EngineCE::Reset()
 {
 	engineCE->Reset();
-	engineCE->SetGender((UserGender)gender);
-	isStarted = true;
-}
 
-void WrapperCE::EngineCE::Stop()
+}
+	
+void WrapperCE::EngineCE::SetGender(WrapperCE::InterOp::UserGender gender)
 {
-	isStarted = false;
+	engineCE->SetGender((UserGender)gender);
 }
 
 Vector3D WrapperCE::EngineCE::ConvertPV(InterOp::Point3D source)
@@ -71,8 +64,6 @@ WrapperCE::InterOp::FatigueData WrapperCE::EngineCE::ConvertFatigueData(FatigueD
 WrapperCE::InterOp::ArmFatigueUpdate WrapperCE::EngineCE::ProcessNewSkeletonData(InterOp::SkeletonData armsData, double deltaTimeInSeconds)
 {
 	InterOp::ArmFatigueUpdate interOp = InterOp::ArmFatigueUpdate();
-	if(!isStarted)
-		return interOp;
 	//general.h SkeletonData
 	SkeletonData input;
 	input.RightShoulderCms =	this->ConvertPV(armsData.RightShoulderCms);

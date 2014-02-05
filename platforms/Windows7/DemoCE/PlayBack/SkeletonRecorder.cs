@@ -72,6 +72,7 @@ namespace DemoCE.Playback
     {
       folderPath = fPath;
       formatter = new BinaryFormatter();
+			isRecording = false;
     }
 
     public void ProcessNewSkeletonData(Skeleton skeleton, double deltaTimeMilliseconds)
