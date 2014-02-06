@@ -33,47 +33,37 @@
 
 		<DockPanel DockPanel.Dock="Right" Width="320">
 
-			<StackPanel x:Name="spControl" DockPanel.Dock="Bottom" Background="White" Margin="0,10">
-				<StackPanel Name="spAutoStart" Orientation="Horizontal" Height="30" Margin="5">
-					<CheckBox Margin="10,0,0,0" VerticalAlignment="Bottom" FontSize="15" IsChecked="{Binding ElementName=mainW, Path=IsAutoStart}">
-						<CheckBox.LayoutTransform>
-							<ScaleTransform ScaleX="1.5" ScaleY="1.5" />
-						</CheckBox.LayoutTransform>
-						Auto Start/Stop
-					</CheckBox>
-				</StackPanel>
-				<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-					<Button Name="btStartMeasure" BorderThickness="0" 
+			<StackPanel x:Name="spControl" DockPanel.Dock="Bottom" Background="White" HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,5">
+				<Button Name="btStartMeasure" BorderThickness="0" 
 										Content="Start" FontSize="15" Width="90" Click="BtStartMeasure_Click">
-						<Button.IsEnabled>
-							<MultiBinding Converter ="{StaticResource ResourceKey=beConverter}" ConverterParameter="start">
-								<Binding ElementName="mainW" Path="Recorder.IsRecording"/>
-								<Binding ElementName="mainW" Path="Player.IsPlaying"/>
-							</MultiBinding>
-						</Button.IsEnabled>
-					</Button>
-					<Button Name="btStopMeasure" BorderThickness="0"
+					<Button.IsEnabled>
+						<MultiBinding Converter ="{StaticResource ResourceKey=beConverter}" ConverterParameter="start">
+							<Binding ElementName="mainW" Path="Recorder.IsRecording"/>
+							<Binding ElementName="mainW" Path="Player.IsPlaying"/>
+						</MultiBinding>
+					</Button.IsEnabled>
+				</Button>
+				<Button Name="btStopMeasure" BorderThickness="0"
 										Content="Stop" FontSize="15"  Width="90" Margin="15,0,0,0" Click="BtStopMeasure_Click">
-						<Button.IsEnabled>
-							<MultiBinding Converter ="{StaticResource ResourceKey=beConverter}" ConverterParameter="stop">
-								<Binding ElementName="mainW" Path="Recorder.IsRecording"/>
-								<Binding ElementName="mainW" Path="Player.IsPlaying"/>
-							</MultiBinding>
-						</Button.IsEnabled>
-					</Button>
-					<Button Name="btExport" BorderThickness="0"
+					<Button.IsEnabled>
+						<MultiBinding Converter ="{StaticResource ResourceKey=beConverter}" ConverterParameter="stop">
+							<Binding ElementName="mainW" Path="Recorder.IsRecording"/>
+							<Binding ElementName="mainW" Path="Player.IsPlaying"/>
+						</MultiBinding>
+					</Button.IsEnabled>
+				</Button>
+				<Button Name="btExport" BorderThickness="0"
 										Content="Export" FontSize="15"  Width="90" Margin="15,0,0,0" Click="BtExport_Click">
-						<Button.IsEnabled>
-							<MultiBinding Converter ="{StaticResource ResourceKey=beConverter}" ConverterParameter="export">
-								<Binding ElementName="mainW" Path="Recorder.IsRecording"/>
-								<Binding ElementName="mainW" Path="Player.IsPlaying"/>
-							</MultiBinding>
-						</Button.IsEnabled>
-					</Button>
-				</StackPanel>
+					<Button.IsEnabled>
+						<MultiBinding Converter ="{StaticResource ResourceKey=beConverter}" ConverterParameter="export">
+							<Binding ElementName="mainW" Path="Recorder.IsRecording"/>
+							<Binding ElementName="mainW" Path="Player.IsPlaying"/>
+						</MultiBinding>
+					</Button.IsEnabled>
+				</Button>
 			</StackPanel>
 
-			<ListBox x:Name="lbTimeLines" VerticalAlignment="Stretch" DockPanel.Dock="Top" Height="390"
+			<ListBox x:Name="lbTimeLines" VerticalAlignment="Stretch" DockPanel.Dock="Top" Height="435"
 							 ScrollViewer.VerticalScrollBarVisibility="Visible"
 							 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
 							 Background="Transparent"

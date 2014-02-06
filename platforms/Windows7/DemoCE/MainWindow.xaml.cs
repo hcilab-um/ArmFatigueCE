@@ -48,7 +48,6 @@ namespace DemoCE
 		private double deltaTimeInSeconds;
 		private FatigueInfo currentFatigueInfo;
 		private bool playBackFromFile;
-		private bool isAutoStart;
 
 		private string recordPath;
 		private Arm arm;
@@ -121,16 +120,6 @@ namespace DemoCE
 			}
 		}
 
-		public bool IsAutoStart
-		{
-			get { return isAutoStart; }
-			set
-			{
-				isAutoStart = value;
-				OnPropertyChanged("IsAutoStart");
-			}
-		}
-
 		public string RecordPath
 		{
 			get { return recordPath; }
@@ -173,7 +162,6 @@ namespace DemoCE
 			Gender = UserGender.Male;
 			Arm = Arm.RightArm;
 			FatigueInfoCollection = new ObservableCollection<FatigueInfo>();
-			IsAutoStart = false;
 			InitializeComponent();
 		}
 
@@ -304,14 +292,6 @@ namespace DemoCE
 				DeltaTimeInSeconds = deltaTimeMilliseconds / 1000;
 				lastUpdate = currentTimeMilliseconds;
 				RunFatigueEngine(validSkeleton, DeltaTimeInSeconds);
-				
-				if (IsAutoStart)
-				{
-					if (Arm == Arm.LeftArm)
-						AutoMeasure(CurrentFatigueInfo.LeftData);
-					else
-						AutoMeasure(CurrentFatigueInfo.RightData);
-				}
 
 				Recorder.ProcessNewSkeletonData(validSkeleton, deltaTimeMilliseconds);
 			}
@@ -333,14 +313,6 @@ namespace DemoCE
 						iSkeleton.Source = null;
 				}
 			}
-		}
-
-		private void AutoMeasure(ArmData data)
-		{
-			if (!Recorder.IsRecording && data.ArmStrength >= 15)
-				BtStartMeasure_Click(null, null);
-			else if (Recorder.IsRecording && data.ArmStrength < 15)
-				BtStopMeasure_Click(null, null);
 		}
 
 		private DrawingImage DrawSkeleton(Skeleton skeleton, SolidColorBrush brush)
@@ -377,23 +349,20 @@ namespace DemoCE
 
 			armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTimeInSeconds);
 
-			CurrentFatigueInfo.LeftData.Angle = armFatigueUpdate.LeftArm.Theta;
-			CurrentFatigueInfo.LeftData.AvgEndurance = armFatigueUpdate.LeftArm.AvgEndurance;
-			CurrentFatigueInfo.LeftData.AvgShoulderTorque = armFatigueUpdate.LeftArm.AvgShoulderTorque;
-			CurrentFatigueInfo.LeftData.ConsumedEndurance = armFatigueUpdate.LeftArm.ConsumedEndurance;
-			CurrentFatigueInfo.LeftData.ShoulderTorque = armFatigueUpdate.LeftArm.ShoulderTorque;
-			CurrentFatigueInfo.LeftData.AvgShoulderTorque = armFatigueUpdate.LeftArm.AvgShoulderTorque;
-			CurrentFatigueInfo.LeftData.ArmStrength = armFatigueUpdate.LeftArm.ArmStrength;
-			CurrentFatigueInfo.LeftData.AvgArmStrength = armFatigueUpdate.LeftArm.AvgArmStrength;
+			LoadArmData(CurrentFatigueInfo.LeftData, armFatigueUpdate.LeftArm);
+			LoadArmData(CurrentFatigueInfo.RightData, armFatigueUpdate.RightArm);
+		}
 
-			CurrentFatigueInfo.RightData.Angle = armFatigueUpdate.RightArm.Theta;
-			CurrentFatigueInfo.RightData.AvgEndurance = armFatigueUpdate.RightArm.AvgEndurance;
-			CurrentFatigueInfo.RightData.AvgShoulderTorque = armFatigueUpdate.RightArm.AvgShoulderTorque;
-			CurrentFatigueInfo.RightData.ConsumedEndurance = armFatigueUpdate.RightArm.ConsumedEndurance;
-			CurrentFatigueInfo.RightData.ShoulderTorque = armFatigueUpdate.RightArm.ShoulderTorque;
-			CurrentFatigueInfo.RightData.AvgShoulderTorque = armFatigueUpdate.RightArm.AvgShoulderTorque;
-			CurrentFatigueInfo.RightData.ArmStrength = armFatigueUpdate.RightArm.ArmStrength;
-			CurrentFatigueInfo.RightData.AvgArmStrength = armFatigueUpdate.RightArm.AvgArmStrength;
+		private void LoadArmData(ArmData arm, FatigueData data)
+		{
+			arm.Angle = data.Theta;
+			arm.AvgEndurance = data.AvgEndurance;
+			arm.AvgShoulderTorque = data.AvgShoulderTorque;
+			arm.ConsumedEndurance = data.ConsumedEndurance;
+			arm.ShoulderTorque = data.ShoulderTorque;
+			arm.AvgShoulderTorque = data.AvgShoulderTorque;
+			arm.ArmStrength = data.ArmStrength;
+			arm.AvgArmStrength = data.AvgArmStrength;
 		}
 
 		private void PlayBack(string fileName, EventHandler pbFinished, bool useDelay)
@@ -434,7 +403,7 @@ namespace DemoCE
 			if (PlayBackFromFile)
 				return;
 
-			String qualifiedName = String.Format("{0}-{1}-{2}", CurrentFatigueInfo.DateTime.ToString("MMddyy-HHmmss"),
+			String qualifiedName = String.Format("{0}-{1}-{2}", CurrentFatigueInfo.DateTime.ToString("MMddyy-HHmmss-fff"),
 																						CurrentFatigueInfo.Gender.ToString().ToLower(), currentFatigueInfo.SelectedArm);
 			CurrentFatigueInfo.FatigueName = qualifiedName;
 			CurrentFatigueInfo.FatigueFile = Recorder.Stop(true, false, CurrentFatigueInfo.FatigueName, CurrentFatigueInfo.Gender);
