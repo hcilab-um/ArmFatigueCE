@@ -34,5 +34,29 @@ namespace DemoCE.Properties {
                 this["PlayerBufferSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int SkeletonBufferSize {
+            get {
+                return ((int)(this["SkeletonBufferSize"]));
+            }
+            set {
+                this["SkeletonBufferSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("20")]
+        public int StrengthBufferSize {
+            get {
+                return ((int)(this["StrengthBufferSize"]));
+            }
+            set {
+                this["StrengthBufferSize"] = value;
+            }
+        }
     }
 }

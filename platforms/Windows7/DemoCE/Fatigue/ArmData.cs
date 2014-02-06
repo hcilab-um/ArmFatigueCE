@@ -5,7 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using WrapperCE.InterOp;
 
-namespace DemoCE
+namespace DemoCE.Fatigue
 {
 	public class ArmData : INotifyPropertyChanged
 	{

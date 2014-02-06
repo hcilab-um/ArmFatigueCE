@@ -23,6 +23,8 @@ using System.IO;
 using log4net.Appender;
 using log4net.Config;
 using log4net;
+using DemoCE.Fatigue;
+using DemoCE.Util;
 
 namespace DemoCE
 {
@@ -48,6 +50,7 @@ namespace DemoCE
 		private double deltaTimeInSeconds;
 		private FatigueInfo currentFatigueInfo;
 		private bool playBackFromFile;
+		private bool isAutoStart;
 
 		private string recordPath;
 		private Arm arm;
@@ -59,6 +62,9 @@ namespace DemoCE
 		public SettingWindow SettingW { get; set; }
 
 		public ObservableCollection<FatigueInfo> FatigueInfoCollection { get; set; }
+		
+		public SkeletonFilter SkeletonFilter { get; set; }
+		public DoubleFilter DoubleFilter { get; set; }
 
 		public bool IsKinectConnected
 		{
@@ -120,6 +126,16 @@ namespace DemoCE
 			}
 		}
 
+		public bool IsAutoStart
+		{
+			get { return isAutoStart; }
+			set
+			{
+				isAutoStart = value;
+				OnPropertyChanged("IsAutoStart");
+			}
+		}
+
 		public string RecordPath
 		{
 			get { return recordPath; }
@@ -161,7 +177,10 @@ namespace DemoCE
 			RecordPath = Environment.CurrentDirectory;
 			Gender = UserGender.Male;
 			Arm = Arm.RightArm;
+			IsAutoStart = false;
 			FatigueInfoCollection = new ObservableCollection<FatigueInfo>();
+			SkeletonFilter = new SkeletonFilter(Settings.Default.SkeletonBufferSize);
+			DoubleFilter = new DoubleFilter(Settings.Default.StrengthBufferSize);
 			InitializeComponent();
 		}
 
@@ -235,12 +254,12 @@ namespace DemoCE
 
 		private void player_SkeletonFrameReady(object sender, PlayerSkeletonFrameReadyEventArgs e)
 		{
-			Skeleton skeleton = e.FrameSkeleton;
+			Skeleton stableSkeleton = SkeletonFilter.FilterSkeletonData(e.FrameSkeleton);
 
-			RunFatigueEngine(skeleton, e.DelayInMilliSeconds / 1000);
+			RunFatigueEngine(stableSkeleton, e.DelayInMilliSeconds / 1000);
 			if (ColorImageReady != null)
 			{
-				DrawingImage imageCanvas = DrawSkeleton(skeleton, Brushes.Black);
+				DrawingImage imageCanvas = DrawSkeleton(stableSkeleton, Brushes.Black);
 				ColorImageReady(this, new ColorImageReadyArgs() { Frame = imageCanvas });
 			}
 		}
@@ -265,7 +284,7 @@ namespace DemoCE
 
 			long currentTimeMilliseconds = -1;
 			Skeleton[] skeletons = null;
-			Skeleton validSkeleton = null;
+			Skeleton stableSkeleton = null;
 			using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
 			{
 				if (skeletonFrame != null)
@@ -278,22 +297,28 @@ namespace DemoCE
 					{
 						if (skeleton.TrackingState != SkeletonTrackingState.Tracked)
 							continue;
-						validSkeleton = skeleton;
+						stableSkeleton = SkeletonFilter.FilterSkeletonData(skeleton);
 						break;
 					}
 				}
 			}
 
-			if (validSkeleton != null)
+			if (stableSkeleton != null)
 			{
 				double deltaTimeMilliseconds = (currentTimeMilliseconds - lastUpdate);
 				if (lastUpdate == -1)
 					deltaTimeMilliseconds = 0;
 				DeltaTimeInSeconds = deltaTimeMilliseconds / 1000;
 				lastUpdate = currentTimeMilliseconds;
-				RunFatigueEngine(validSkeleton, DeltaTimeInSeconds);
-
-				Recorder.ProcessNewSkeletonData(validSkeleton, deltaTimeMilliseconds);
+				RunFatigueEngine(stableSkeleton, DeltaTimeInSeconds);
+				if (IsAutoStart)
+				{
+					if (Arm == Arm.LeftArm)
+						AutoMeasure(CurrentFatigueInfo.LeftData);
+					else
+						AutoMeasure(CurrentFatigueInfo.RightData);
+				}
+				Recorder.ProcessNewSkeletonData(stableSkeleton, deltaTimeMilliseconds);
 			}
 
 			using (ColorImageFrame colorFrame = e.OpenColorImageFrame())
@@ -305,9 +330,9 @@ namespace DemoCE
 							new Int32Rect(0, 0, colorBitmap.PixelWidth, colorBitmap.PixelHeight),
 							colorPixels, colorBitmap.PixelWidth * sizeof(int), 0);
 
-					if (validSkeleton != null)
+					if (stableSkeleton != null)
 					{
-						iSkeleton.Source = DrawSkeleton(validSkeleton, Brushes.Transparent);
+						iSkeleton.Source = DrawSkeleton(stableSkeleton, Brushes.Transparent);
 					}
 					else
 						iSkeleton.Source = null;
@@ -365,6 +390,15 @@ namespace DemoCE
 			arm.AvgArmStrength = data.AvgArmStrength;
 		}
 
+		private void AutoMeasure(ArmData data)
+		{
+			double triggerStrength = DoubleFilter.FilterData(data.ArmStrength);
+			if (!Recorder.IsRecording && triggerStrength >= 15)
+				BtStartMeasure_Click(null, null);
+			else if (Recorder.IsRecording && triggerStrength < 15)
+				BtStopMeasure_Click(null, null);
+		}
+
 		private void PlayBack(string fileName, EventHandler pbFinished, bool useDelay)
 		{
 			if (playbackHandler != null)
@@ -392,6 +426,7 @@ namespace DemoCE
 				return;
 			Recorder = new SkeletonRecorder(RecordPath);
 			Recorder.Start();
+			SkeletonFilter.Reset();
 			engine.Reset();
 			CurrentFatigueInfo = new FatigueInfo() { DateTime = DateTime.Now, Gender = Gender, SelectedArm = Arm };
 			FatigueInfoCollection.Insert(0, CurrentFatigueInfo);

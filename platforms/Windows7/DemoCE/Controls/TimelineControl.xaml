@@ -15,7 +15,7 @@
 	</UserControl.Resources>
 	<Grid x:Name="gGraphContent" RenderOptions.EdgeMode="Aliased" VerticalAlignment="Bottom" HorizontalAlignment="Left"
 					Width="{Binding ElementName=tlControl, Path=Width}" Height="{Binding ElementName=tlControl, Path=Height}">
-		<Image Source="/DemoCE;component/background.png" VerticalAlignment="Stretch"/>
+		<Image VerticalAlignment="Stretch" Source="/DemoCE;component/Image/background.png" />
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4,20,0,0">
 			<TextBlock Foreground="Gray" Text="{Binding ElementName=tlControl, Path=MaxValue, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=0}"/>
 			<TextBlock Foreground="Gray" Text=" %" />
@@ -30,7 +30,7 @@
 		<Button x:Name="deleteButton" HorizontalAlignment="Right" VerticalAlignment="Top" Width="25"  Margin="15,15"  Click="BtDeleteClick">
 			<Button.Template>
 				<ControlTemplate TargetType="Button">
-					<Image Source="/DemoCE;component/DeleteButton.png" />
+					<Image Source="/DemoCE;component/Image/DeleteButton.png" />
 				</ControlTemplate>
 			</Button.Template>
 		</Button>
@@ -44,7 +44,7 @@
 			</Button.IsEnabled>
 			<Button.Template>
 				<ControlTemplate TargetType="Button">
-					<Image Source="/DemoCE;component/PlayButton.png" />
+					<Image Source="/DemoCE;component/Image/PlayButton.png" />
 				</ControlTemplate>
 			</Button.Template>
 		</Button>

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Kinect;
 
-namespace DemoCE
+namespace DemoCE.Playback
 {
   [Serializable]
   public class SkeletonCapture

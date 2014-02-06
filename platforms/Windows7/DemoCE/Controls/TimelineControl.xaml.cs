@@ -15,6 +15,7 @@ using WrapperCE.InterOp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using DemoCE.Fatigue;
 
 namespace DemoCE.Controls
 {
