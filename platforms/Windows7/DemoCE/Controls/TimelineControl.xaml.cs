@@ -158,8 +158,8 @@ namespace DemoCE.Controls
 				FatigueFile = fatigueInfo.FatigueFile,
 				SelectedArm = fatigueInfo.SelectedArm,
 				TotalTimeInSeconds = fatigueInfo.TotalTimeInSeconds,
-				LeftData = fatigueInfo.LeftData,
-				RightData = fatigueInfo.RightData,
+				LeftData = new ArmData(fatigueInfo.LeftData),
+				RightData = new ArmData(fatigueInfo.RightData)
 			};
 
 			fatigueInfoList.Add(newFatigueInfo);

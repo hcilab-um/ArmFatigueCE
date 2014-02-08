@@ -197,8 +197,9 @@ namespace DemoCE
 			TimelineControl tlControl = (TimelineControl)e.OriginalSource;
 			CurrentFatigueInfo = (FatigueInfo)tlControl.DataContext;
 			CurrentFatigueInfo.Reset();
-			engine.Reset();
 			engine.SetGender(CurrentFatigueInfo.Gender);
+			engine.Reset();
+			SkeletonFilter.Reset();
 			PlayBack(CurrentFatigueInfo.FatigueFile, Player_PlaybackFinished, true);
 		}
 
@@ -393,9 +394,9 @@ namespace DemoCE
 		private void AutoMeasure(ArmData data)
 		{
 			double triggerStrength = DoubleFilter.FilterData(data.ArmStrength);
-			if (!Recorder.IsRecording && triggerStrength >= 15)
+			if (!Recorder.IsRecording && triggerStrength >= Settings.Default.AutoStartThreshold)
 				BtStartMeasure_Click(null, null);
-			else if (Recorder.IsRecording && triggerStrength < 15)
+			else if (Recorder.IsRecording && triggerStrength < Settings.Default.AutoStartThreshold)
 				BtStopMeasure_Click(null, null);
 		}
 
@@ -425,12 +426,11 @@ namespace DemoCE
 			if (PlayBackFromFile)
 				return;
 			Recorder = new SkeletonRecorder(RecordPath);
-			Recorder.Start();
 			SkeletonFilter.Reset();
 			engine.Reset();
 			CurrentFatigueInfo = new FatigueInfo() { DateTime = DateTime.Now, Gender = Gender, SelectedArm = Arm };
 			FatigueInfoCollection.Insert(0, CurrentFatigueInfo);
-
+			Recorder.Start();
 		}
 
 		private void BtStopMeasure_Click(object sender, RoutedEventArgs e)

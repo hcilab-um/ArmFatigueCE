@@ -12,6 +12,7 @@
 		<converter:NegateBooleanConverter x:Key="nbConverter"/>
 		<converter:DoubleFormatConverter x:Key="dfConverter"/>
 		<converter:ButtonEnableConverter x:Key="beConverter"/>
+		<converter:MinusConverter x:Key="mConverter"/>
 	</UserControl.Resources>
 	<Grid x:Name="gGraphContent" RenderOptions.EdgeMode="Aliased" VerticalAlignment="Bottom" HorizontalAlignment="Left"
 					Width="{Binding ElementName=tlControl, Path=Width}" Height="{Binding ElementName=tlControl, Path=Height}">
@@ -21,7 +22,7 @@
 			<TextBlock Foreground="Gray" Text=" %" />
 		</StackPanel>
 		<Line x:Name="lCEMax" Stroke="Gray" StrokeThickness="1" VerticalAlignment="Top" X1="40" Y1="30" X2="{Binding ElementName=tlControl, Path=Width}" Y2="30" />
-		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,15,10">
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10">
 			<TextBlock Foreground="Gray" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding ElementName=tlControl, Path=LenghtInSeconds, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2}"/>
 			<TextBlock Foreground="Gray" VerticalAlignment="Center" HorizontalAlignment="Left" Text=" s"/>
 		</StackPanel>	
@@ -49,8 +50,8 @@
 			</Button.Template>
 		</Button>
 		<Canvas HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="275" Height="120" Visibility="Visible">
-			<StackPanel Orientation="Horizontal" Canvas.Bottom="0" Canvas.Left="{Binding ElementName=tlControl, Path=TimePlotValue}">
-				<TextBlock FontSize="12" Text="{Binding ElementName=tlControl, Path=TotalTimeInSeconds, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2, FallbackValue=0}" Margin="0,0,5,10"/>
+			<StackPanel Orientation="Horizontal" Canvas.Bottom="0" Canvas.Left="{Binding ElementName=tlControl, Path=TimePlotValue, Converter={StaticResource ResourceKey=mConverter}, ConverterParameter=15}">
+				<TextBlock FontSize="12" Text="{Binding ElementName=tlControl, Path=TotalTimeInSeconds, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2, FallbackValue=0.00}" Margin="0,0,5,10"/>
 				<TextBlock FontSize="12" Text="s"/>
 			</StackPanel>
 		</Canvas>
@@ -61,7 +62,7 @@
 			<Polyline x:Name="plotGraphRight" MouseMove="OnMouseShowPathInfo" MouseEnter="OnMouseShowPathInfo" Stroke="Green" StrokeThickness="3" RenderOptions.EdgeMode="Aliased"/>
 		</Canvas>
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,35,0">
-			<TextBlock FontSize="40" Text="{Binding ElementName=tlControl, Path=ConsumeEndurance, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=0, FallbackValue=0}" Margin="0,0,5,0"/>
+			<TextBlock FontSize="40" Text="{Binding ElementName=tlControl, Path=ConsumeEndurance, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2, FallbackValue=0.00}" Margin="0,0,5,0"/>
 			<TextBlock FontSize="40" Text=" %"/>
 		</StackPanel>
 	</Grid>

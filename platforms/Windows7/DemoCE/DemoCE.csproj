@@ -77,6 +77,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\MinusConverter.cs" />
     <Compile Include="Fatigue\ArmData.cs" />
     <Compile Include="Util\CircularList.cs" />
     <Compile Include="Util\ColorImageReadyArgs.cs" />

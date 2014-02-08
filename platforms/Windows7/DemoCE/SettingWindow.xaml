@@ -3,16 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 				xmlns:converter="clr-namespace:DemoCE.Converters"
 				x:Name="SettingW" Title="DemoCE Setting" ResizeMode="NoResize" 
-				Height="341" Width="376">
+				Height="380"  Width="377">
 	<Window.Resources>
 		<converter:BooleanGenderConverter x:Key="bgConverter"/>
 		<converter:BooleanArmConverter x:Key="baConverter"/>
 	</Window.Resources>
-	<StackPanel>
-		<TextBlock Text="Consumed Endurance (CE)" FontSize="27" FontWeight="Bold" HorizontalAlignment="Center"/>
+	<StackPanel Margin="10,0">
+		<TextBlock Text="Consumed Endurance (CE)" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
 		<Border BorderBrush="Black" BorderThickness="1" Margin="3">
 			<StackPanel>
-				<TextBlock TextWrapping="Wrap" Margin="3">
+				<TextBlock TextWrapping="Wrap" Margin="3" FontSize="15">
 			Developed by Xiang Guo, ‎Juan David Hincapié-Ramos, Paymahn Moghadasian and Pourang Irani at University of Manitoba HCI Lab. For more information, check the paper and the link below:
 				</TextBlock>
 				<StackPanel Orientation="Horizontal">
@@ -24,9 +24,9 @@
 					</Hyperlink>
 					</TextBlock>
 				</StackPanel>
-				<StackPanel Orientation="Vertical" Height="80">
+				<StackPanel Orientation="Vertical">
 					<TextBlock Text="Paper Reference: " HorizontalAlignment="Left" FontSize="15" FontWeight="Bold"/>
-					<TextBox IsReadOnly="True" TextWrapping="Wrap" Margin="5,0" Height="55">
+					<TextBox IsReadOnly="True" BorderBrush="Transparent" TextWrapping="Wrap" TextAlignment="Left" FontSize="15">
 				 J. D. Hincapié-Ramos, X. Guo, P. Moghadasian and P. Irani. "Consumed Endurance: A Metric to Quantify Arm Fatigue of Mid-Air Interactions," in CHI 2014, May 2014, Toronto, Canada.
 					</TextBox>
 				</StackPanel>
@@ -34,22 +34,22 @@
 			</StackPanel>
 		</Border>
 		<StackPanel Orientation="Horizontal" Margin="0,10">
-			<TextBlock Text="Gender" FontSize="20" Width="100"/>
-			<RadioButton VerticalAlignment="Center" Content="Male" FontSize="20" Width="100"
+			<TextBlock Text="Gender" FontSize="15" Width="100"/>
+			<RadioButton VerticalAlignment="Center" Content="Male" FontSize="15" Width="100"
 									 IsChecked="{Binding ElementName=SettingW, Path=Gender, Converter={StaticResource ResourceKey=bgConverter}, ConverterParameter=Male}"/>
-			<RadioButton VerticalAlignment="Center" Content="Female" FontSize="20" Width="100"
+			<RadioButton VerticalAlignment="Center" Content="Female" FontSize="15" Width="100"
 									 IsChecked="{Binding ElementName=SettingW, Path=Gender, Converter={StaticResource ResourceKey=bgConverter}, ConverterParameter=Female}"/>
 		</StackPanel>
 		<StackPanel Orientation="Horizontal">
-			<TextBlock Text="Arm" FontSize="20" Width="100"/>
-			<RadioButton VerticalAlignment="Center" Content="Right" FontSize="20" Width="100"
+			<TextBlock Text="Arm" FontSize="15" Width="100"/>
+			<RadioButton VerticalAlignment="Center" Content="Right" FontSize="15" Width="100"
 									 IsChecked="{Binding ElementName=SettingW, Path=Arm, Converter={StaticResource ResourceKey=baConverter}, ConverterParameter=RightArm}"/>
-			<RadioButton VerticalAlignment="Center" Content="Left" FontSize="20" Width="100"
+			<RadioButton VerticalAlignment="Center" Content="Left" FontSize="15" Width="100"
 									  IsChecked="{Binding ElementName=SettingW, Path=Arm, Converter={StaticResource ResourceKey=baConverter}, ConverterParameter=LeftArm}"/>
 		</StackPanel>
 		<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-			<Button Name="btChangeDirectory" Content="Save To" Margin="0,0,5,0" Click="btChangeDirectory_Click"/>
-			<TextBox IsReadOnly="True" Width="300" VerticalAlignment="Center" Text="{Binding ElementName=SettingW, Path=RecordPath}"/>
+			<Button Name="btChangeDirectory" Content="Save To" Margin="0,0,5,0" FontSize="15" Click="btChangeDirectory_Click" Width="61" />
+			<TextBox IsReadOnly="True" Width="287" VerticalAlignment="Center" FontSize="15" Text="{Binding ElementName=SettingW, Path=RecordPath}"/>
 		</StackPanel>
 	</StackPanel>
 </Window>

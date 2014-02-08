@@ -58,5 +58,17 @@ namespace DemoCE.Properties {
                 this["StrengthBufferSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public double AutoStartThreshold {
+            get {
+                return ((double)(this["AutoStartThreshold"]));
+            }
+            set {
+                this["AutoStartThreshold"] = value;
+            }
+        }
     }
 }

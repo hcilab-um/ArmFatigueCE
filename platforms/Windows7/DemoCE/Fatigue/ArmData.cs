@@ -107,6 +107,18 @@ namespace DemoCE.Fatigue
 			Reset();
 		}
 
+		public ArmData(ArmData data)
+		{
+			Arm = data.Arm;
+			Angle = data.Angle;
+			ShoulderTorque = data.ShoulderTorque;
+			ArmStrength = data.ArmStrength;
+			AvgArmStrength = data.AvgArmStrength;
+			AvgShoulderTorque = data.AvgShoulderTorque;
+			AvgEndurance = data.AvgEndurance;
+			ConsumedEndurance = data.ConsumedEndurance;
+		}
+
 		public void Reset()
 		{
 			Angle = 0;
