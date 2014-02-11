@@ -1,0 +1,69 @@
+﻿<UserControl x:Class="KinectCE.Controls.TimelineControl" x:Name="tlControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converter="clr-namespace:KinectCE.Converters"
+             mc:Ignorable="d" Focusable="True"
+             Height="150" Width="300" Background="WhiteSmoke">
+
+	<UserControl.Resources>
+		<converter:HeightMarginConverter x:Key="hmConverter"/>
+		<converter:NegateBooleanConverter x:Key="nbConverter"/>
+		<converter:DoubleFormatConverter x:Key="dfConverter"/>
+		<converter:ButtonEnableConverter x:Key="beConverter"/>
+		<converter:MinusConverter x:Key="mConverter"/>
+	</UserControl.Resources>
+	<Grid x:Name="gGraphContent" RenderOptions.EdgeMode="Aliased" VerticalAlignment="Bottom" HorizontalAlignment="Left"
+					Width="{Binding ElementName=tlControl, Path=Width}" Height="{Binding ElementName=tlControl, Path=Height}">
+		<Image VerticalAlignment="Stretch" Source="/KinectCE;component/Image/background.png" />
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4,20,0,0">
+			<TextBlock Foreground="Gray" Text="{Binding ElementName=tlControl, Path=MaxValue, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=0}"/>
+			<TextBlock Foreground="Gray" Text=" %" />
+		</StackPanel>
+		<Line x:Name="lCEMax" Stroke="Gray" StrokeThickness="1" VerticalAlignment="Top" X1="40" Y1="30" X2="{Binding ElementName=tlControl, Path=Width}" Y2="30" />
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10">
+			<TextBlock Foreground="Gray" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding ElementName=tlControl, Path=LenghtInSeconds, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2}"/>
+			<TextBlock Foreground="Gray" VerticalAlignment="Center" HorizontalAlignment="Left" Text=" s"/>
+		</StackPanel>	
+		<Line x:Name="lTimeMax" Stroke="Gray" StrokeThickness="1" HorizontalAlignment="Right" Margin="0,0,25,25"  VerticalAlignment="Top" Y1="0" Y2="{Binding ElementName=tlControl, Path=Height}" />
+		<Line Stroke="Black" StrokeThickness="2" X1="{Binding ElementName=tlControl, Path=TimePlotValue}" X2="{Binding ElementName=tlControl, Path=TimePlotValue}" Y1="0" Y2="125" />
+		<Button x:Name="deleteButton" HorizontalAlignment="Right" VerticalAlignment="Top" Width="25"  Margin="15,15"  Click="BtDeleteClick">
+			<Button.Template>
+				<ControlTemplate TargetType="Button">
+					<Image Source="/KinectCE;component/Image/DeleteButton.png" />
+				</ControlTemplate>
+			</Button.Template>
+		</Button>
+		<Button x:Name="replayButton" Opacity="0.05" HorizontalAlignment="Left" VerticalAlignment="Center" Width="70" Height="70" 
+						Margin="5,0" MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave" Click="BtReplayClick">
+			<Button.IsEnabled>
+				<MultiBinding Converter ="{StaticResource ResourceKey=beConverter}" ConverterParameter="replay">
+					<Binding ElementName="tlControl" Path="IsRecording"/>
+					<Binding ElementName="tlControl" Path="IsPlaying"/>
+				</MultiBinding>
+			</Button.IsEnabled>
+			<Button.Template>
+				<ControlTemplate TargetType="Button">
+					<Image Source="/KinectCE;component/Image/PlayButton.png" />
+				</ControlTemplate>
+			</Button.Template>
+		</Button>
+		<Canvas HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="275" Height="120" Visibility="Visible">
+			<StackPanel Orientation="Horizontal" Canvas.Bottom="0" Canvas.Left="{Binding ElementName=tlControl, Path=TimePlotValue, Converter={StaticResource ResourceKey=mConverter}, ConverterParameter=15}">
+				<TextBlock FontSize="12" Text="{Binding ElementName=tlControl, Path=TotalTimeInSeconds, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2, FallbackValue=0.00}" Margin="0,0,5,10"/>
+				<TextBlock FontSize="12" Text="s"/>
+			</StackPanel>
+		</Canvas>
+		<Canvas x:Name="cGraphContent" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="275" Height="120" Visibility="Visible">
+			<Canvas.LayoutTransform>
+				<ScaleTransform ScaleX="1" ScaleY="-1" CenterX=".5" CenterY=".5" />
+			</Canvas.LayoutTransform>
+			<Polyline x:Name="plotGraphRight" MouseMove="OnMouseShowPathInfo" MouseEnter="OnMouseShowPathInfo" Stroke="Green" StrokeThickness="3" RenderOptions.EdgeMode="Aliased"/>
+		</Canvas>
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,35,0">
+			<TextBlock FontSize="40" Text="{Binding ElementName=tlControl, Path=ConsumeEndurance, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2, FallbackValue=0.00}" Margin="0,0,5,0"/>
+			<TextBlock FontSize="40" Text=" %"/>
+		</StackPanel>
+	</Grid>
+</UserControl>

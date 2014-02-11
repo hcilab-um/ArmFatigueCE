@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WrapperCE", "WrapperCE\WrapperCE.vcxproj", "{1873A84D-73E1-4667-BB0A-4D0003F83C44}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoCE", "DemoCE\DemoCE.csproj", "{E0F96B61-BCCB-473C-B2A1-9BC1209956AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KinectCE", "KinectCE\KinectCE.csproj", "{E0F96B61-BCCB-473C-B2A1-9BC1209956AB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArmFatigueCE-dynamic", "..\..\..\ArmText\Src\ArmFatigueCE\ArmFatigueCE-dynamic.vcxproj", "{28C1A85D-50E7-4F2B-ABA2-CA59B3C4CC04}"
 EndProject
@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArmFatigueCE-static", "..\.
 	ProjectSection(ProjectDependencies) = postProject
 		{28C1A85D-50E7-4F2B-ABA2-CA59B3C4CC04} = {28C1A85D-50E7-4F2B-ABA2-CA59B3C4CC04}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenNICE", "OpenniCE\OpenNICE.csproj", "{523AF885-483C-46F3-8FB2-F7994D6BFFB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,18 @@ Global
 		{48393CF9-F1C5-49EB-9508-49A2C3DA6CD2}.Release|x64.ActiveCfg = Release|x64
 		{48393CF9-F1C5-49EB-9508-49A2C3DA6CD2}.Release|x64.Build.0 = Release|x64
 		{48393CF9-F1C5-49EB-9508-49A2C3DA6CD2}.Release|x86.ActiveCfg = Release|x64
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Debug|Win32.ActiveCfg = Debug|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Debug|x64.ActiveCfg = Debug|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Debug|x86.ActiveCfg = Debug|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Debug|x86.Build.0 = Debug|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Release|Mixed Platforms.Build.0 = Release|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Release|Win32.ActiveCfg = Release|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Release|x64.ActiveCfg = Release|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Release|x86.ActiveCfg = Release|x86
+		{523AF885-483C-46F3-8FB2-F7994D6BFFB3}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
