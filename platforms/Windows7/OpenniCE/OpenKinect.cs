@@ -5,11 +5,10 @@ using System.Text;
 using OpenNIWrapper;
 using System.Windows;
 using NiTEWrapper;
-using System.ComponentModel;
 
 namespace OpenNiCE
 {
-	public class OpenKinect : INotifyPropertyChanged
+	public class OpenKinect
 	{
 		private Object colorMutex = new Object();
 
@@ -119,8 +118,6 @@ namespace OpenNiCE
 			OpenNI.Shutdown();
 			NiTE.Shutdown();
 		}
-
-		public event PropertyChangedEventHandler PropertyChanged;
 
 	}
 }

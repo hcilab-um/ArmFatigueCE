@@ -21,7 +21,8 @@ public:
 	void SetGender(UserGender newGender);
 	UserGender GetGender();
 	void Reset();
-
+	
+	Vector3D EstimateWristPosition(Vector3D hand, Vector3D elbow);
 	ArmFatigueUpdate ProcessNewSkeletonData(SkeletonData skeleton, double deltaTimeInSeconds);
 };
 

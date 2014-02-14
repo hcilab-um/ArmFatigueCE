@@ -17,7 +17,6 @@ using System.Threading;
 using System.ComponentModel;
 using WrapperCE;
 using WrapperCE.InterOp;
-//using System.Drawing;
 
 namespace OpenNiCE
 {
@@ -28,22 +27,22 @@ namespace OpenNiCE
 	{
 		#region Private Value
 
+		private const double TORQUE_MODIFIER = 2d;
 		private SkeletonDrawer skeletonDrawer;
 		private OpenKinect kinectSensor;
 		private EngineCE engine;
 		private ulong lastUpdate = 0;
 		private double totalTimeInSeconds;
 		private ArmFatigueUpdate armFatigueUpdate;
-		
 		private double leftCE;
 		private double rightCE;
 		private bool isEngineStart;
-
+		private UserGender userGender;
 		#endregion
 
 		#region Property
 
-		public double TotalTimeInSeconds 
+		public double TotalTimeInSeconds
 		{
 			get { return totalTimeInSeconds; }
 			set
@@ -72,6 +71,7 @@ namespace OpenNiCE
 				OnPropertyChanged("RightCE");
 			}
 		}
+
 		public bool IsEngineStart
 		{
 			get { return isEngineStart; }
@@ -81,17 +81,18 @@ namespace OpenNiCE
 				OnPropertyChanged("IsEngineStart");
 			}
 		}
+
 		#endregion
 
 		public MainWindow()
 		{
+			userGender = UserGender.Male;
 			engine = new EngineCE();
-
+			engine.SetGender(userGender);
 			TotalTimeInSeconds = 0;
 			LeftCE = 0;
 			RightCE = 0;
 			IsEngineStart = false;
-
 			kinectSensor = new OpenKinect();
 			skeletonDrawer = new SkeletonDrawer(kinectSensor.SkeletonSensor);
 			InitializeComponent();
@@ -108,39 +109,44 @@ namespace OpenNiCE
 			if (!userTracker.IsValid)
 				return;
 
-			UserData trackedUser = null;
 			ulong currentTimeTicks = 0;
-
+			Skeleton validSkeleton = null;
 			using (UserTrackerFrameRef frame = userTracker.ReadFrame())
 			{
 				if (frame == null || !frame.IsValid)
 					return;
+
 				foreach (UserData user in frame.Users)
 				{
 					if (user.IsNew && user.IsVisible)
 					{
 						userTracker.StartSkeletonTracking(user.UserId);
 					}
+					if (user.IsVisible && user.Skeleton.State == Skeleton.SkeletonState.Tracked)
+					{
+						validSkeleton = user.Skeleton;
+						break;
+					}
 				}
-
 				currentTimeTicks = frame.Timestamp;
-				trackedUser = frame.Users.FirstOrDefault(user=>user.Skeleton.State == Skeleton.SkeletonState.Tracked);
 			}
 
-
-			if (trackedUser != null)
+			if (validSkeleton != null && IsEngineStart)
 			{
-				double deltaTimeMilliseconds = (currentTimeTicks - lastUpdate);
+				double deltaTimeTicks = (currentTimeTicks - lastUpdate);
+				if (lastUpdate == 0)
+					deltaTimeTicks = 0;
 				lastUpdate = currentTimeTicks;
-				if(IsEngineStart)
-					RunFatigueEngine(trackedUser.Skeleton, deltaTimeMilliseconds / 1000000);
+				RunFatigueEngine(validSkeleton, deltaTimeTicks / 1000000);
 			}
 
 			Dispatcher.Invoke((Action)delegate
 			{
 				iKinectCapture.Source = kinectSensor.RawImageSource;
-				if (trackedUser != null)
-					iSkeleton.Source = DrawSkeleton(trackedUser.Skeleton, Brushes.Transparent);
+				if (validSkeleton != null)
+				{
+					iSkeleton.Source = DrawSkeleton(validSkeleton, Brushes.Transparent);
+				}
 				else
 					iSkeleton.Source = null;
 			});
@@ -151,15 +157,17 @@ namespace OpenNiCE
 			TotalTimeInSeconds += deltaTimeInSeconds;
 			SkeletonData measuredArms = new SkeletonData();
 			measuredArms.RightShoulderCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.RightShoulder).Position);
-			measuredArms.RightElbowCms =    Convert(skeleton.GetJoint(SkeletonJoint.JointType.RightElbow).Position);
-			measuredArms.RightWristCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.RightHand).Position);
-			measuredArms.RightHandCms =     Convert(skeleton.GetJoint(SkeletonJoint.JointType.RightHand).Position);
+			measuredArms.RightElbowCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.RightElbow).Position);
+			measuredArms.RightHandCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.RightHand).Position);
+			
+			measuredArms.RightWristCms = engine.EstimateWristPosition(measuredArms.RightHandCms, measuredArms.RightElbowCms);
 
 			measuredArms.LeftShoulderCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.LeftShoulder).Position);
 			measuredArms.LeftElbowCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.LeftElbow).Position);
-			measuredArms.LeftWristCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.LeftHand).Position);
 			measuredArms.LeftHandCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.LeftHand).Position);
-
+			
+			measuredArms.LeftWristCms = engine.EstimateWristPosition(measuredArms.LeftHandCms, measuredArms.LeftElbowCms);
+			
 			armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTimeInSeconds);
 			RightCE = armFatigueUpdate.RightArm.ConsumedEndurance;
 			LeftCE = armFatigueUpdate.LeftArm.ConsumedEndurance;
@@ -186,15 +194,26 @@ namespace OpenNiCE
 			{
 				dc.DrawRectangle(brush, new Pen(Brushes.Black, 0.5), new Rect(0, 0, kinectSensor.FrameWidth, kinectSensor.FrameHeight));
 				skeletonDrawer.DrawSkeleton(skeleton, dc);
-				//if (CurrentFatigueInfo.SelectedArm == Arm.RightArm)
-				//  skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightData.ArmStrength / TORQUE_MODIFIER);
-				//else
-				//  skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderLeft, dc, CurrentFatigueInfo.LeftData.ArmStrength / TORQUE_MODIFIER);
+				skeletonDrawer.DrawCirlce(skeleton, NiTEWrapper.SkeletonJoint.JointType.RightShoulder, dc, armFatigueUpdate.RightArm.ArmStrength / TORQUE_MODIFIER);
 			}
 
 			DrawingImage dImageSource = new DrawingImage(dGroup);
 			dGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, kinectSensor.FrameWidth, kinectSensor.FrameHeight));
 			return dImageSource;
+		}
+
+		private void BtStart_Click(object sender, RoutedEventArgs e)
+		{
+			IsEngineStart = true;
+			engine.Reset();
+			TotalTimeInSeconds = 0;
+			IsEngineStart = true;
+			lastUpdate = 0;
+		}
+
+		private void BtStop_Click(object sender, RoutedEventArgs e)
+		{
+			IsEngineStart = false;
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -204,19 +223,5 @@ namespace OpenNiCE
 			if (PropertyChanged != null)
 				PropertyChanged(this, new PropertyChangedEventArgs(name));
 		}
-
-		private void BtStart_Click(object sender, RoutedEventArgs e)
-		{
-			IsEngineStart = true;
-			engine.Reset();
-			TotalTimeInSeconds = 0;
-			IsEngineStart = true;
-		}
-
-		private void BtStop_Click(object sender, RoutedEventArgs e)
-		{
-			IsEngineStart = false;
-		}
-
 	}
 }

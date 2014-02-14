@@ -12,16 +12,16 @@
 		<Grid DockPanel.Dock="Top" Width="640" Height="480">
 			<Image x:Name="iKinectCapture"/>
 			<Image Name="iSkeleton" VerticalAlignment="Top"/>
-			<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20">
+			<StackPanel Background="White" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20">
 				<StackPanel Orientation="Horizontal" >
-					<Label Content="Time:" FontSize="50" Foreground="Red"/>
-					<Label Content="{Binding ElementName=mainW, Path=TotalTimeInSeconds, FallbackValue=0.00, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2}" FontSize="50" Foreground="Red"/>
-					<Label Content="s" FontSize="50" Foreground="Red"/>
+					<Label Content="Time:" FontSize="30" Foreground="Black"/>
+					<Label Content="{Binding ElementName=mainW, Path=TotalTimeInSeconds, FallbackValue=0.00, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2}" FontSize="30" Foreground="Black"/>
+					<Label Content="s" FontSize="30" Foreground="Black"/>
 				</StackPanel>
 				<StackPanel Orientation="Horizontal">
-					<Label Content="CE:" FontSize="50" Foreground="Red"/>
-					<Label Content="{Binding ElementName=mainW, Path=RightCE, FallbackValue=0.00, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2}" FontSize="50" Foreground="Red"/>
-					<Label Content="%" FontSize="50" Foreground="Red"/>
+					<Label Content="CE:" FontSize="30" Foreground="Black"/>
+					<Label Content="{Binding ElementName=mainW, Path=RightCE, FallbackValue=0.00, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2}" FontSize="30" Foreground="Black"/>
+					<Label Content="%" FontSize="30" Foreground="Black"/>
 				</StackPanel>
 			</StackPanel>
 		</Grid>

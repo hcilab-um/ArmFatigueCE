@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenNiCE</RootNamespace>
-    <AssemblyName>OpenniCE</AssemblyName>
+    <AssemblyName>OpenNiCE</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -39,11 +39,11 @@
   <ItemGroup>
     <Reference Include="NiWrapper.Net, Version=2.2.0.33, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\OpenNI\NiWrapper.Net.dll</HintPath>
+      <HintPath>.\NiWrapper.Net.dll</HintPath>
     </Reference>
     <Reference Include="NiWrapper.NiTE.Net, Version=2.2.0.11, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\OpenNI\NiWrapper.NiTE.Net.dll</HintPath>
+      <HintPath>.\NiWrapper.NiTE.Net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
