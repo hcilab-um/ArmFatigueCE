@@ -8,7 +8,7 @@
     <ProjectGuid>{523AF885-483C-46F3-8FB2-F7994D6BFFB3}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OpenNICE</RootNamespace>
+    <RootNamespace>OpenNiCE</RootNamespace>
     <AssemblyName>OpenniCE</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
@@ -47,6 +47,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -64,6 +65,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\DoubleFormatConverter.cs" />
+    <Compile Include="Converters\NotConverter.cs" />
+    <Compile Include="OpenKinect.cs" />
+    <Compile Include="SkeletonDrawer.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

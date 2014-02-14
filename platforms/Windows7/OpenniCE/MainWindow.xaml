@@ -1,7 +1,35 @@
-﻿<Window x:Class="OpenNICE.MainWindow"
+﻿<Window x:Class="OpenNiCE.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525" Loaded="Window_Loaded" Closed="Window_Closed">
-    <Grid>        
-    </Grid>
+        x:Name="mainW" Title="MainWindow" SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+				xmlns:converter="clr-namespace:OpenNiCE.Converters"
+				Loaded="Window_Loaded" Closed="Window_Closed">
+	<Window.Resources>
+		<converter:NotConverter x:Key="nConverter"/>
+		<converter:DoubleFormatConverter x:Key="dfConverter"/>
+	</Window.Resources>
+	<DockPanel>
+		<Grid DockPanel.Dock="Top" Width="640" Height="480">
+			<Image x:Name="iKinectCapture"/>
+			<Image Name="iSkeleton" VerticalAlignment="Top"/>
+			<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20">
+				<StackPanel Orientation="Horizontal" >
+					<Label Content="Time:" FontSize="50" Foreground="Red"/>
+					<Label Content="{Binding ElementName=mainW, Path=TotalTimeInSeconds, FallbackValue=0.00, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2}" FontSize="50" Foreground="Red"/>
+					<Label Content="s" FontSize="50" Foreground="Red"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<Label Content="CE:" FontSize="50" Foreground="Red"/>
+					<Label Content="{Binding ElementName=mainW, Path=RightCE, FallbackValue=0.00, Converter={StaticResource ResourceKey=dfConverter}, ConverterParameter=2}" FontSize="50" Foreground="Red"/>
+					<Label Content="%" FontSize="50" Foreground="Red"/>
+				</StackPanel>
+			</StackPanel>
+		</Grid>
+		<Grid DockPanel.Dock="Bottom" Height="30" Width="300">
+			<Button Name="btStart" HorizontalAlignment="Left" Width="70" Height="30" Content="Start" Click="BtStart_Click"
+							IsEnabled="{Binding ElementName=mainW, Path=IsEngineStart, Converter={StaticResource ResourceKey=nConverter}}"/>
+			<Button Name="btStop" HorizontalAlignment="Right" Width="70" Height="30" Content="Stop" Click="BtStop_Click"
+							IsEnabled="{Binding ElementName=mainW, Path=IsEngineStart}"/>
+		</Grid>
+	</DockPanel>
 </Window>

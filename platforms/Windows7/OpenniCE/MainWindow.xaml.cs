@@ -13,198 +13,210 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using OpenNIWrapper;
 using NiTEWrapper;
+using System.Threading;
+using System.ComponentModel;
+using WrapperCE;
+using WrapperCE.InterOp;
 //using System.Drawing;
 
-namespace OpenNICE
+namespace OpenNiCE
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
-	public partial class MainWindow : Window
+	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
-		private UserTracker userTracker;
-		//private Bitmap image = new Bitmap(1, 1);
+		#region Private Value
+
+		private SkeletonDrawer skeletonDrawer;
+		private OpenKinect kinectSensor;
+		private EngineCE engine;
+		private ulong lastUpdate = 0;
+		private double totalTimeInSeconds;
+		private ArmFatigueUpdate armFatigueUpdate;
+		
+		private double leftCE;
+		private double rightCE;
+		private bool isEngineStart;
+
+		#endregion
+
+		#region Property
+
+		public double TotalTimeInSeconds 
+		{
+			get { return totalTimeInSeconds; }
+			set
+			{
+				totalTimeInSeconds = value;
+				OnPropertyChanged("TotalTimeInSeconds");
+			}
+		}
+
+		public double LeftCE
+		{
+			get { return leftCE; }
+			set
+			{
+				leftCE = value;
+				OnPropertyChanged("LeftCE");
+			}
+		}
+
+		public double RightCE
+		{
+			get { return rightCE; }
+			set
+			{
+				rightCE = value;
+				OnPropertyChanged("RightCE");
+			}
+		}
+		public bool IsEngineStart
+		{
+			get { return isEngineStart; }
+			set
+			{
+				isEngineStart = value;
+				OnPropertyChanged("IsEngineStart");
+			}
+		}
+		#endregion
 
 		public MainWindow()
 		{
+			engine = new EngineCE();
+
+			TotalTimeInSeconds = 0;
+			LeftCE = 0;
+			RightCE = 0;
+			IsEngineStart = false;
+
+			kinectSensor = new OpenKinect();
+			skeletonDrawer = new SkeletonDrawer(kinectSensor.SkeletonSensor);
 			InitializeComponent();
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-			NiTE.Status status = NiTE.Initialize();
-
-			if (status != NiTE.Status.Ok)
-			{
-				Console.WriteLine("Error: {0}", status);
-				return;
-			}
-			try
-			{
-				this.userTracker = UserTracker.Create();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex);
-			}
-			userTracker.OnNewData += new UserTracker.UserTrackerListenerDelegate(userTracker_OnNewData);
+			kinectSensor.SkeletonSensor.OnNewData += new UserTracker.UserTrackerListenerDelegate(SkeletonSensor_OnNewData);
 		}
 
-		private void Window_Closed(object sender, EventArgs e)
+		private void SkeletonSensor_OnNewData(UserTracker userTracker)
 		{
-			NiTE.Shutdown();
-			OpenNI.Shutdown();
-		}
 
-		private void userTracker_OnNewData(UserTracker userTracker)
-		{
 			if (!userTracker.IsValid)
 				return;
+
+			UserData trackedUser = null;
+			ulong currentTimeTicks = 0;
 
 			using (UserTrackerFrameRef frame = userTracker.ReadFrame())
 			{
 				if (frame == null || !frame.IsValid)
 					return;
+				foreach (UserData user in frame.Users)
+				{
+					if (user.IsNew && user.IsVisible)
+					{
+						userTracker.StartSkeletonTracking(user.UserId);
+					}
+				}
+
+				currentTimeTicks = frame.Timestamp;
+				trackedUser = frame.Users.FirstOrDefault(user=>user.Skeleton.State == Skeleton.SkeletonState.Tracked);
 			}
 
-			//lock (this.image)
-			//{
-			//  if (this.image.Width != frame.UserMap.FrameSize.Width
-			//      || this.image.Height != frame.UserMap.FrameSize.Height)
-			//  {
-			//    this.image = new Bitmap(
-			//        frame.UserMap.FrameSize.Width,
-			//        frame.UserMap.FrameSize.Height,
-			//        PixelFormat.Format24bppRgb);
-			//  }
 
-			//  using (Graphics g = Graphics.FromImage(this.image))
-			//  {
-			//    g.FillRectangle(Brushes.Black, new Rectangle(new Point(0, 0), this.image.Size));
-			//    foreach (UserData user in frame.Users)
-			//    {
-			//      if (user.IsNew && user.IsVisible)
-			//      {
-			//        userTracker.StartSkeletonTracking(user.UserId);
-			//      }
+			if (trackedUser != null)
+			{
+				double deltaTimeMilliseconds = (currentTimeTicks - lastUpdate);
+				lastUpdate = currentTimeTicks;
+				if(IsEngineStart)
+					RunFatigueEngine(trackedUser.Skeleton, deltaTimeMilliseconds / 1000000);
+			}
 
-			//      if (user.IsVisible && user.Skeleton.State == Skeleton.SkeletonState.Tracked)
-			//      {
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.RightHand,
-			//            SkeletonJoint.JointType.RightElbow);
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.LeftHand,
-			//            SkeletonJoint.JointType.LeftElbow);
-
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.RightElbow,
-			//            SkeletonJoint.JointType.RightShoulder);
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.LeftElbow,
-			//            SkeletonJoint.JointType.LeftShoulder);
-
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.RightFoot,
-			//            SkeletonJoint.JointType.RightKnee);
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.LeftFoot,
-			//            SkeletonJoint.JointType.LeftKnee);
-
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.RightKnee,
-			//            SkeletonJoint.JointType.RightHip);
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.LeftKnee,
-			//            SkeletonJoint.JointType.LeftHip);
-
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.RightShoulder,
-			//            SkeletonJoint.JointType.LeftShoulder);
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.RightHip,
-			//            SkeletonJoint.JointType.LeftHip);
-
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.RightShoulder,
-			//            SkeletonJoint.JointType.RightHip);
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.LeftShoulder,
-			//            SkeletonJoint.JointType.LeftHip);
-
-			//        this.DrawLineBetweenJoints(
-			//            g,
-			//            user.Skeleton,
-			//            SkeletonJoint.JointType.Head,
-			//            SkeletonJoint.JointType.Neck);
-			//      }
-			//    }
-
-			//    g.Save();
-			//  }
-			//}
+			Dispatcher.Invoke((Action)delegate
+			{
+				iKinectCapture.Source = kinectSensor.RawImageSource;
+				if (trackedUser != null)
+					iSkeleton.Source = DrawSkeleton(trackedUser.Skeleton, Brushes.Transparent);
+				else
+					iSkeleton.Source = null;
+			});
 		}
 
-		//private void DrawLineBetweenJoints(
-		//Graphics g,
-		//Skeleton skel,
-		//SkeletonJoint.JointType j1,
-		//SkeletonJoint.JointType j2)
-		//{
-		//  try
-		//  {
-		//    if (skel.State == Skeleton.SkeletonState.Tracked)
-		//    {
-		//      SkeletonJoint joint1 = skel.GetJoint(j1);
-		//      SkeletonJoint joint2 = skel.GetJoint(j2);
-		//      if (joint1.Position.Z > 0 && joint2.Position.Z > 0)
-		//      {
-		//        Point joint1PosEllipse = new Point();
-		//        Point joint2PosEllipse = new Point();
-		//        PointF joint1PosLine = this.userTracker.ConvertJointCoordinatesToDepth(joint1.Position);
-		//        PointF joint2PosLine = this.userTracker.ConvertJointCoordinatesToDepth(joint2.Position);
-		//        joint1PosEllipse.X = (int)joint1PosLine.X - 5;
-		//        joint1PosEllipse.Y = (int)joint1PosLine.Y - 5;
-		//        joint2PosEllipse.X = (int)joint2PosLine.X - 5;
-		//        joint2PosEllipse.Y = (int)joint2PosLine.Y - 5;
-		//        joint1PosLine.X -= 2;
-		//        joint1PosLine.Y -= 2;
-		//        joint2PosLine.X -= 2;
-		//        joint2PosLine.Y -= 2;
-		//        g.DrawLine(new Pen(Brushes.White, 3), joint1PosLine, joint2PosLine);
-		//        g.DrawEllipse(new Pen(Brushes.White, 5), new Rectangle(joint1PosEllipse, new Size(5, 5)));
-		//        g.DrawEllipse(new Pen(Brushes.White, 5), new Rectangle(joint2PosEllipse, new Size(5, 5)));
-		//      }
-		//    }
-		//  }
-		//  catch (Exception)
-		//  {
-		//  }
-		//}
+		private void RunFatigueEngine(Skeleton skeleton, double deltaTimeInSeconds)
+		{
+			TotalTimeInSeconds += deltaTimeInSeconds;
+			SkeletonData measuredArms = new SkeletonData();
+			measuredArms.RightShoulderCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.RightShoulder).Position);
+			measuredArms.RightElbowCms =    Convert(skeleton.GetJoint(SkeletonJoint.JointType.RightElbow).Position);
+			measuredArms.RightWristCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.RightHand).Position);
+			measuredArms.RightHandCms =     Convert(skeleton.GetJoint(SkeletonJoint.JointType.RightHand).Position);
+
+			measuredArms.LeftShoulderCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.LeftShoulder).Position);
+			measuredArms.LeftElbowCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.LeftElbow).Position);
+			measuredArms.LeftWristCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.LeftHand).Position);
+			measuredArms.LeftHandCms = Convert(skeleton.GetJoint(SkeletonJoint.JointType.LeftHand).Position);
+
+			armFatigueUpdate = engine.ProcessNewSkeletonData(measuredArms, deltaTimeInSeconds);
+			RightCE = armFatigueUpdate.RightArm.ConsumedEndurance;
+			LeftCE = armFatigueUpdate.LeftArm.ConsumedEndurance;
+		}
+
+		private Point3D Convert(System.Windows.Media.Media3D.Point3D trackedPoint)
+		{
+			Point3D point3D;
+			point3D.X = trackedPoint.X;
+			point3D.Y = trackedPoint.Y;
+			point3D.Z = trackedPoint.Z;
+			return point3D;
+		}
+
+		private void Window_Closed(object sender, EventArgs e)
+		{
+			kinectSensor.Dispose();
+		}
+
+		private DrawingImage DrawSkeleton(Skeleton skeleton, SolidColorBrush brush)
+		{
+			DrawingGroup dGroup = new DrawingGroup();
+			using (DrawingContext dc = dGroup.Open())
+			{
+				dc.DrawRectangle(brush, new Pen(Brushes.Black, 0.5), new Rect(0, 0, kinectSensor.FrameWidth, kinectSensor.FrameHeight));
+				skeletonDrawer.DrawSkeleton(skeleton, dc);
+				//if (CurrentFatigueInfo.SelectedArm == Arm.RightArm)
+				//  skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderRight, dc, CurrentFatigueInfo.RightData.ArmStrength / TORQUE_MODIFIER);
+				//else
+				//  skeletonDrawer.DrawCirlce(skeleton, JointType.ShoulderLeft, dc, CurrentFatigueInfo.LeftData.ArmStrength / TORQUE_MODIFIER);
+			}
+
+			DrawingImage dImageSource = new DrawingImage(dGroup);
+			dGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, kinectSensor.FrameWidth, kinectSensor.FrameHeight));
+			return dImageSource;
+		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		private void OnPropertyChanged(String name)
+		{
+			if (PropertyChanged != null)
+				PropertyChanged(this, new PropertyChangedEventArgs(name));
+		}
+
+		private void BtStart_Click(object sender, RoutedEventArgs e)
+		{
+			IsEngineStart = true;
+			engine.Reset();
+			TotalTimeInSeconds = 0;
+			IsEngineStart = true;
+		}
+
+		private void BtStop_Click(object sender, RoutedEventArgs e)
+		{
+			IsEngineStart = false;
+		}
 
 	}
 }
