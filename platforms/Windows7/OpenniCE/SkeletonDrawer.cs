@@ -9,7 +9,7 @@ using NiTEWrapper;
 using System.Windows.Media.Media3D;
 
 
-namespace OpenNiCE
+namespace OpenNICE
 {
 
   class SkeletonDrawer
@@ -21,7 +21,6 @@ namespace OpenNiCE
     private UserTracker userTracker;
     private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
     private readonly Brush inferredJointBrush = Brushes.Yellow;
-    
 		
 		private static readonly Brush TorqueBrush = new SolidColorBrush(Color.FromRgb(255,0,0)); //this needs to be static for the next line to work ...?
 		private readonly Pen TorquePen = new Pen(TorqueBrush, 0);

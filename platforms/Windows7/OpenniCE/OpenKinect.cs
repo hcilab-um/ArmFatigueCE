@@ -6,7 +6,7 @@ using OpenNIWrapper;
 using System.Windows;
 using NiTEWrapper;
 
-namespace OpenNiCE
+namespace OpenNICE
 {
 	public class OpenKinect
 	{

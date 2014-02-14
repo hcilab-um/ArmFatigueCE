@@ -18,7 +18,7 @@ using System.ComponentModel;
 using WrapperCE;
 using WrapperCE.InterOp;
 
-namespace OpenNiCE
+namespace OpenNICE
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
@@ -144,9 +144,7 @@ namespace OpenNiCE
 			{
 				iKinectCapture.Source = kinectSensor.RawImageSource;
 				if (validSkeleton != null)
-				{
 					iSkeleton.Source = DrawSkeleton(validSkeleton, Brushes.Transparent);
-				}
 				else
 					iSkeleton.Source = null;
 			});

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Data;
 
-namespace OpenNiCE.Converters
+namespace OpenNICE.Converters
 {
 	public class NotConverter : IValueConverter
 	{

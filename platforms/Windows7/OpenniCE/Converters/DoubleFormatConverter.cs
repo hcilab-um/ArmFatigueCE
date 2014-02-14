@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Data;
 using System.Windows;
 
-namespace OpenNiCE.Converters
+namespace OpenNICE.Converters
 {
 	public class DoubleFormatConverter : IValueConverter
 	{

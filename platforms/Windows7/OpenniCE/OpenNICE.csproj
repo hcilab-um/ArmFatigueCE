@@ -8,8 +8,8 @@
     <ProjectGuid>{523AF885-483C-46F3-8FB2-F7994D6BFFB3}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OpenNiCE</RootNamespace>
-    <AssemblyName>OpenNiCE</AssemblyName>
+    <RootNamespace>OpenNICE</RootNamespace>
+    <AssemblyName>OpenNICE</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
