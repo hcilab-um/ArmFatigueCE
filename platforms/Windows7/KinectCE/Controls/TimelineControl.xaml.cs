@@ -126,28 +126,30 @@ namespace KinectCE.Controls
 			//Shrink the graph if needed
 			if (TotalTimeInSeconds > LenghtInSeconds)
 			{
+				double newLengthInSeconds = LenghtInSeconds * 1.5;
 				for (int i = 0; i < plotGraphRight.Points.Count; i++)
 				{
 					plotGraphRight.Points[i] = new Point()
 					{
-						X = plotGraphRight.Points[i].X * LenghtInSeconds / TotalTimeInSeconds,
+						X = plotGraphRight.Points[i].X * LenghtInSeconds / newLengthInSeconds,
 						Y = plotGraphRight.Points[i].Y
 					};
 				}
-				LenghtInSeconds = TotalTimeInSeconds;
+				LenghtInSeconds = newLengthInSeconds;
 			}
 
 			if (ConsumeEndurance > MaxValue)
 			{
+				double newMaxValue = MaxValue * 1.5;
 				for (int i = 0; i < plotGraphRight.Points.Count; i++)
 				{
 					plotGraphRight.Points[i] = new Point()
 					{
 						X = plotGraphRight.Points[i].X,
-						Y = plotGraphRight.Points[i].Y * MaxValue / ConsumeEndurance
+						Y = plotGraphRight.Points[i].Y * MaxValue / newMaxValue
 					};
 				}
-				MaxValue = ConsumeEndurance;
+				MaxValue = newMaxValue;
 			}
 
 			TimePlotValue = TotalTimeInSeconds * (cGraphContent.Width) / LenghtInSeconds;
