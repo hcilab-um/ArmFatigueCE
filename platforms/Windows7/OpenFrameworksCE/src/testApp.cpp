@@ -1,11 +1,30 @@
 #include "testApp.h"
-
 //--------------------------------------------------------------
 void testApp::setup()
 {
-	NuiInitialize(NUI_INITIALIZE_FLAG_USES_COLOR|NUI_INITIALIZE_FLAG_USES_SKELETON);
+	colorEvent = INVALID_HANDLE_VALUE;
+	HRESULT hr;
+	int iSensorCount = 0;
+	hr = NuiGetSensorCount(&iSensorCount);
+  if (FAILED(hr))
+		return;
+	hr = NuiCreateSensorByIndex(0, &pKinectSensor);
+	hr = pKinectSensor->NuiStatus();
+	if(hr != S_OK)
+	{
+		hr = S_OK;
+	}
+	//|NUI_INITIALIZE_FLAG_USES_SKELETON
+	hr = pKinectSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_COLOR);
 
-	HRESULT hr= NuiImageStreamOpen(
+	if(hr == S_OK)
+	{
+		hr = S_OK;
+	}
+
+	colorEvent = CreateEventW(NULL, TRUE, FALSE, NULL);
+
+	hr= pKinectSensor->NuiImageStreamOpen(
 		NUI_IMAGE_TYPE_COLOR,
 		NUI_IMAGE_RESOLUTION_640x480,
 		0,
@@ -13,20 +32,93 @@ void testApp::setup()
 		colorEvent,
 		&colorStreamHandle);
 
+	if(hr != S_OK)
+	{
+		hr = S_OK;
+	}
+
+	//hr = NuiSkeletonTrackingEnable(skeletonEvent, 0);
+	//if(hr == S_OK)
+	//{
+	//	hr = S_OK;
+	//}
+	colorText.allocate(640, 480, GL_RGBA);
 	hr = NuiSkeletonTrackingEnable(skeletonEvent, 0);
 }
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-	ofPoint handLocation = this->getRightHand();
-	std::cout << handLocation << std::endl;
+	//ofPoint handLocation = this->getRightHand();
+	//std::cout << handLocation << std::endl;
+	if(pKinectSensor == NULL)
+		return;
+	if (WAIT_OBJECT_0 == WaitForSingleObject(colorEvent, 0))
+		ProcessColor();
+}
+
+void testApp::exit()
+{
+	if (pKinectSensor)
+		pKinectSensor->NuiShutdown();
+
+	if (colorEvent != INVALID_HANDLE_VALUE)
+  {
+		CloseHandle(colorEvent);
+  }
+
+	if(pKinectSensor != NULL)
+	{
+		pKinectSensor->Release();
+		pKinectSensor = NULL;
+	}
 }
 
 //--------------------------------------------------------------
 void testApp::draw()
 {
+	colorText.draw(0,0);
 }		
+
+void testApp::ProcessColor()
+{
+	NUI_IMAGE_FRAME imageFrame;
+
+	// Attempt to get the color frame
+	pKinectSensor->NuiImageStreamGetNextFrame(colorStreamHandle, 0, &imageFrame);
+
+	INuiFrameTexture * pTexture = imageFrame.pFrameTexture;
+	NUI_LOCKED_RECT LockedRect;
+	
+	// Lock the frame data so the Kinect knows not to modify it while we're reading it
+  pTexture->LockRect(0, &LockedRect, NULL, 0);
+
+	// Make sure we've received valid data
+  if (LockedRect.Pitch != 0)
+  {
+		//640,480,OF_IMAGE_COLOR
+		
+		//pixels1 = static_cast<BYTE *>(LockedRect.pBits);
+		//unsigned char *pix = static_cast<BYTE *>(LockedRect.pBits);
+		//int size=0;
+		//int size2 = 0;
+		//while(size < (LockedRect.size))
+		//{
+
+		//	pix[size2]   = 1;	  //colorPixel[size] =   1;
+		//	pix[size2+1] = 1;   //colorPixel[size+1] = 1;
+		//	pix[size2+1] = 1;   //colorPixel[size+1] = 1;
+		//	size+=3;
+		//	size2+=4;
+		//}
+
+		colorText.loadData(LockedRect.pBits, 640, 480, GL_BGRA);
+	}
+	pTexture->UnlockRect(0);
+	// Release the frame
+  pKinectSensor->NuiImageStreamReleaseFrame(colorStreamHandle, &imageFrame);
+}
+
 
 ofPoint testApp::getRightHand()
 {
@@ -216,7 +308,8 @@ void testApp::windowResized(int w, int h){
 }
 
 //--------------------------------------------------------------
-void testApp::gotMessage(ofMessage msg){
+void testApp::gotMessage(ofMessage msg)
+{
 
 }
 

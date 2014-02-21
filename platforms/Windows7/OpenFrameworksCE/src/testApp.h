@@ -5,13 +5,19 @@
 #include <windows.h>
 #include <ole2.h>
 #include "NuiApi.h"
+#include "ofSerial.h"
 
 class testApp : public ofBaseApp
 {
 
 private:
+
+	ofTexture colorText;
+
+	INuiSensor* pKinectSensor;
 	ofPoint getRightHand();
 	void getSkeleton(float* x, float* y);
+  void ProcessColor();
 
 public:
 	HANDLE colorStreamHandle;
@@ -25,6 +31,7 @@ public:
 	void setup();
 	void update();
 	void draw();
+	void exit();
 
 	void keyPressed  (int key);
 	void keyReleased(int key);
