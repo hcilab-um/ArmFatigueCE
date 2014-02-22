@@ -1,60 +1,62 @@
 #include "testApp.h"
+
 //--------------------------------------------------------------
 void testApp::setup()
 {
+	engineCE = new FatigueEngine();
+	engineCE->SetGender(Male);
+
 	colorEvent = INVALID_HANDLE_VALUE;
 	HRESULT hr;
 	int iSensorCount = 0;
 	hr = NuiGetSensorCount(&iSensorCount);
+
   if (FAILED(hr))
 		return;
+	
 	hr = NuiCreateSensorByIndex(0, &pKinectSensor);
-	hr = pKinectSensor->NuiStatus();
-	if(hr != S_OK)
-	{
-		hr = S_OK;
-	}
-	//|NUI_INITIALIZE_FLAG_USES_SKELETON
-	hr = pKinectSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_COLOR);
+	if (FAILED(hr))
+		return;
 
-	if(hr == S_OK)
-	{
-		hr = S_OK;
-	}
+	hr = pKinectSensor->NuiStatus();
+  if (FAILED(hr))
+		return;
+
+	hr = pKinectSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_COLOR|NUI_INITIALIZE_FLAG_USES_SKELETON);
+  if (FAILED(hr))
+		return;
 
 	colorEvent = CreateEventW(NULL, TRUE, FALSE, NULL);
+	skeletonEvent = CreateEventW(NULL, TRUE, FALSE, NULL);
 
-	hr= pKinectSensor->NuiImageStreamOpen(
+	hr = pKinectSensor->NuiImageStreamOpen(
 		NUI_IMAGE_TYPE_COLOR,
 		NUI_IMAGE_RESOLUTION_640x480,
 		0,
 		2,
 		colorEvent,
 		&colorStreamHandle);
+	if (FAILED(hr))
+		return;
 
-	if(hr != S_OK)
-	{
-		hr = S_OK;
-	}
-
-	//hr = NuiSkeletonTrackingEnable(skeletonEvent, 0);
-	//if(hr == S_OK)
-	//{
-	//	hr = S_OK;
-	//}
-	colorText.allocate(640, 480, GL_RGBA);
 	hr = NuiSkeletonTrackingEnable(skeletonEvent, 0);
+  if (FAILED(hr))
+		return;
+	skeleton = NUI_SKELETON_DATA();
+	skeleton.eTrackingState = NUI_SKELETON_NOT_TRACKED;
+
+	colorText.allocate(IMAGE_WIDTH, IMAGE_HEIGHT, GL_RGBA);
 }
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-	//ofPoint handLocation = this->getRightHand();
-	//std::cout << handLocation << std::endl;
 	if(pKinectSensor == NULL)
 		return;
 	if (WAIT_OBJECT_0 == WaitForSingleObject(colorEvent, 0))
 		ProcessColor();
+	if ( WAIT_OBJECT_0 == WaitForSingleObject(skeletonEvent, 0) )
+		ProcessSkeleton();
 }
 
 void testApp::exit()
@@ -67,17 +69,28 @@ void testApp::exit()
 		CloseHandle(colorEvent);
   }
 
+	if (skeletonEvent && skeletonEvent != INVALID_HANDLE_VALUE)
+		CloseHandle(skeletonEvent);
+
+	delete engineCE;
+	
 	if(pKinectSensor != NULL)
 	{
 		pKinectSensor->Release();
 		pKinectSensor = NULL;
 	}
+
 }
 
 //--------------------------------------------------------------
 void testApp::draw()
 {
-	colorText.draw(0,0);
+
+	ofSetColor(ofColor::white);
+	colorText.draw(0, 0);
+	ofSetColor(ofColor::green);
+	ofSetLineWidth(5);
+	DrawSkeleton(skeleton);
 }		
 
 void testApp::ProcessColor()
@@ -95,181 +108,103 @@ void testApp::ProcessColor()
 
 	// Make sure we've received valid data
   if (LockedRect.Pitch != 0)
-  {
-		//640,480,OF_IMAGE_COLOR
-		
-		//pixels1 = static_cast<BYTE *>(LockedRect.pBits);
-		//unsigned char *pix = static_cast<BYTE *>(LockedRect.pBits);
-		//int size=0;
-		//int size2 = 0;
-		//while(size < (LockedRect.size))
-		//{
+		colorText.loadData(LockedRect.pBits, IMAGE_WIDTH, IMAGE_HEIGHT, GL_BGRA);
 
-		//	pix[size2]   = 1;	  //colorPixel[size] =   1;
-		//	pix[size2+1] = 1;   //colorPixel[size+1] = 1;
-		//	pix[size2+1] = 1;   //colorPixel[size+1] = 1;
-		//	size+=3;
-		//	size2+=4;
-		//}
-
-		colorText.loadData(LockedRect.pBits, 640, 480, GL_BGRA);
-	}
 	pTexture->UnlockRect(0);
+
 	// Release the frame
   pKinectSensor->NuiImageStreamReleaseFrame(colorStreamHandle, &imageFrame);
+
 }
 
-
-ofPoint testApp::getRightHand()
+void testApp::ProcessSkeleton()
 {
-	ofPoint p1(-1, -1, -1);
-	if (SUCCEEDED(NuiSkeletonGetNextFrame(0, &skeletonFrame)))
-        {	
-			for (int i = 0; i < NUI_SKELETON_COUNT ; i++)
-				{
-					const NUI_SKELETON_DATA & skeleton = skeletonFrame.SkeletonData[i];
-					switch (skeleton.eTrackingState)
-						{
-							NuiTransformSmooth(&skeletonFrame, NULL);
-							case NUI_SKELETON_TRACKED:
-								float x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].x,-2.2,2.2,0,4.4);
-								float y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].y*-1,-1.6,1.6,0,3.2);
-								p1.set(x/4.4*1024,y/3.2*768);
-								//float x=skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].x;
-								//float y=skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].y;
-								//p1.set(x,y);
-								return p1;
-								break;							
-						}
-				}
+	NUI_SKELETON_FRAME skeletonFrame = {0};
+	HRESULT hr = pKinectSensor->NuiSkeletonGetNextFrame(0, &skeletonFrame);
+	if (FAILED(hr))
+    return;
+	
+	pKinectSensor->NuiTransformSmooth(&skeletonFrame, NULL);
+	ofSetBackgroundColor(0,0,0);
+			
+	skeleton = NUI_SKELETON_DATA();
+	skeleton.eTrackingState = NUI_SKELETON_NOT_TRACKED;
+
+	for (int i = 0; i < NUI_SKELETON_COUNT; ++i)
+  {
+		if(skeletonFrame.SkeletonData[i].eTrackingState == NUI_SKELETON_TRACKED)
+		{
+			skeleton = skeletonFrame.SkeletonData[i];
+			break;
 		}
+	}
 }
 
-void testApp::getSkeleton(float* skeletonX,float* skeletonY)
+void testApp::DrawSkeleton(const NUI_SKELETON_DATA & skel)
 {
-	if (SUCCEEDED(NuiSkeletonGetNextFrame(0, &skeletonFrame)))
-        {	
-			for (int i = 0; i < NUI_SKELETON_COUNT ; i++)
-				{
-					const NUI_SKELETON_DATA & skeleton = skeletonFrame.SkeletonData[i];
-					switch (skeleton.eTrackingState)
-						{
-							NuiTransformSmooth(&skeletonFrame, NULL);
-							case NUI_SKELETON_TRACKED:
-								{float x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].x,-2.2,2.2,0,4.4);
-								float y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[0]=x/4.4*1024;
-								skeletonY[0]=y/3.2*768;
+	if(skel.eTrackingState != NUI_SKELETON_TRACKED)
+		return;
+		
+	// Render Torso
+  DrawBone(skel, NUI_SKELETON_POSITION_HEAD, NUI_SKELETON_POSITION_SHOULDER_CENTER);
+  DrawBone(skel, NUI_SKELETON_POSITION_SHOULDER_CENTER, NUI_SKELETON_POSITION_SHOULDER_LEFT);
+  DrawBone(skel, NUI_SKELETON_POSITION_SHOULDER_CENTER, NUI_SKELETON_POSITION_SHOULDER_RIGHT);
+  DrawBone(skel, NUI_SKELETON_POSITION_SHOULDER_CENTER, NUI_SKELETON_POSITION_SPINE);
+  DrawBone(skel, NUI_SKELETON_POSITION_SPINE, NUI_SKELETON_POSITION_HIP_CENTER);
+  DrawBone(skel, NUI_SKELETON_POSITION_HIP_CENTER, NUI_SKELETON_POSITION_HIP_LEFT);
+  DrawBone(skel, NUI_SKELETON_POSITION_HIP_CENTER, NUI_SKELETON_POSITION_HIP_RIGHT);
 
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_CENTER].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_CENTER].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[1]=x/4.4*1024;
-								skeletonY[1]=y/3.2*768;
+  // Left Arm
+  DrawBone(skel, NUI_SKELETON_POSITION_SHOULDER_LEFT, NUI_SKELETON_POSITION_ELBOW_LEFT);
+  DrawBone(skel, NUI_SKELETON_POSITION_ELBOW_LEFT, NUI_SKELETON_POSITION_WRIST_LEFT);
+  DrawBone(skel, NUI_SKELETON_POSITION_WRIST_LEFT, NUI_SKELETON_POSITION_HAND_LEFT);
 
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_LEFT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_LEFT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[2]=x/4.4*1024;
-								skeletonY[2]=y/3.2*768;
+  // Right Arm
+  DrawBone(skel, NUI_SKELETON_POSITION_SHOULDER_RIGHT, NUI_SKELETON_POSITION_ELBOW_RIGHT);
+  DrawBone(skel, NUI_SKELETON_POSITION_ELBOW_RIGHT, NUI_SKELETON_POSITION_WRIST_RIGHT);
+  DrawBone(skel, NUI_SKELETON_POSITION_WRIST_RIGHT, NUI_SKELETON_POSITION_HAND_RIGHT);
 
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_LEFT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_LEFT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[3]=x/4.4*1024;
-								skeletonY[3]=y/3.2*768;
+  // Left Leg
+  DrawBone(skel, NUI_SKELETON_POSITION_HIP_LEFT, NUI_SKELETON_POSITION_KNEE_LEFT);
+  DrawBone(skel, NUI_SKELETON_POSITION_KNEE_LEFT, NUI_SKELETON_POSITION_ANKLE_LEFT);
+  DrawBone(skel, NUI_SKELETON_POSITION_ANKLE_LEFT, NUI_SKELETON_POSITION_FOOT_LEFT);
 
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_WRIST_LEFT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_WRIST_LEFT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[4]=x/4.4*1024;
-								skeletonY[4]=y/3.2*768;
+  // Right Leg
+  DrawBone(skel, NUI_SKELETON_POSITION_HIP_RIGHT, NUI_SKELETON_POSITION_KNEE_RIGHT);
+  DrawBone(skel, NUI_SKELETON_POSITION_KNEE_RIGHT, NUI_SKELETON_POSITION_ANKLE_RIGHT);
+  DrawBone(skel, NUI_SKELETON_POSITION_ANKLE_RIGHT, NUI_SKELETON_POSITION_FOOT_RIGHT);
+}
 
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[5]=x/4.4*1024;
-								skeletonY[5]=y/3.2*768;
+void testApp::DrawBone(const NUI_SKELETON_DATA & skel, NUI_SKELETON_POSITION_INDEX joint0, NUI_SKELETON_POSITION_INDEX joint1)
+{
+	ofPolyline pol = ofPolyline();
+	NUI_SKELETON_POSITION_TRACKING_STATE joint0State = skel.eSkeletonPositionTrackingState[joint0];
+  NUI_SKELETON_POSITION_TRACKING_STATE joint1State = skel.eSkeletonPositionTrackingState[joint1];
+	if (joint0State == NUI_SKELETON_POSITION_NOT_TRACKED || joint1State == NUI_SKELETON_POSITION_NOT_TRACKED)
+		return;
 
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[6]=x/4.4*1024;
-								skeletonY[6]=y/3.2*768;
+	if (joint0State == NUI_SKELETON_POSITION_INFERRED && joint1State == NUI_SKELETON_POSITION_INFERRED)
+		return;
 
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[7]=x/4.4*1024;
-								skeletonY[7]=y/3.2*768;
+	ofPoint point0 = SkeletonToScreen(skel.SkeletonPositions[joint0], IMAGE_WIDTH, IMAGE_HEIGHT);
+	ofPoint point1 = SkeletonToScreen(skel.SkeletonPositions[joint1], IMAGE_WIDTH, IMAGE_HEIGHT);
+	pol.addVertex(point0);
+	pol.addVertex(point1);
 
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[8]=x/4.4*1024;
-								skeletonY[8]=y/3.2*768;
+	pol.draw();
+}
 
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[9]=x/4.4*1024;
-								skeletonY[9]=y/3.2*768;
+ofPoint testApp::SkeletonToScreen(Vector4 skeletonPoint, const int width, const int height)
+{
+	LONG x, y;
+  USHORT depth;
 
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_SPINE].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_SPINE].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[10]=x/4.4*1024;
-								skeletonY[10]=y/3.2*768;
-
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HIP_LEFT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HIP_LEFT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[11]=x/4.4*1024;
-								skeletonY[11]=y/3.2*768;
-
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_KNEE_LEFT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_KNEE_LEFT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[12]=x/4.4*1024;
-								skeletonY[12]=y/3.2*768;
-
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_ANKLE_LEFT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_ANKLE_LEFT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[13]=x/4.4*1024;
-								skeletonY[13]=y/3.2*768;
-
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_FOOT_LEFT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_FOOT_LEFT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[14]=x/4.4*1024;
-								skeletonY[14]=y/3.2*768;
-
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_FOOT_RIGHT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_FOOT_RIGHT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[15]=x/4.4*1024;
-								skeletonY[15]=y/3.2*768;
-
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_ANKLE_RIGHT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_ANKLE_RIGHT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[16]=x/4.4*1024;
-								skeletonY[16]=y/3.2*768;
-
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_KNEE_RIGHT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_KNEE_RIGHT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[17]=x/4.4*1024;
-								skeletonY[17]=y/3.2*768;
-
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HIP_RIGHT].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HIP_RIGHT].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[18]=x/4.4*1024;
-								skeletonY[18]=y/3.2*768;
-
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[19]=x/4.4*1024;
-								skeletonY[19]=y/3.2*768;								
-
-								x=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER].x,-2.2,2.2,0,4.4);
-								y=ofMap(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER].y*-1,-1.6,1.6,0,3.2);
-								skeletonX[20]=x/4.4*1024;
-								skeletonY[20]=y/3.2*768;}
-								ofLog(OF_LOG_NOTICE,"tracked");
-								break;
-						/*case NUI_SKELETON_NOT_TRACKED:
-								skeletonX[1]=-1;
-								skeletonY[1]=-1;
-								ofLog(OF_LOG_NOTICE,"NOT tracked");*/
-						}
-
-				}
-		}	
+  // Calculate the skeleton's position on the screen
+  // NuiTransformSkeletonToDepthImage returns coordinates in NUI_IMAGE_RESOLUTION_320x240 space
+  NuiTransformSkeletonToDepthImage(skeletonPoint, &x, &y, &depth);
+	float screenPointX = static_cast<float>(x * width) / 320;
+  float screenPointY = static_cast<float>(y * height) / 240;
+	return ofPoint(screenPointX, screenPointY);
 }
 
 //--------------------------------------------------------------
@@ -303,8 +238,8 @@ void testApp::mouseReleased(int x, int y, int button){
 }
 
 //--------------------------------------------------------------
-void testApp::windowResized(int w, int h){
-
+void testApp::windowResized(int w, int h)
+{
 }
 
 //--------------------------------------------------------------
