@@ -173,7 +173,6 @@ namespace KinectCE
 
 		public MainWindow()
 		{
-			engine = new WrapperCE.EngineCE();
 			RecordPath = Environment.CurrentDirectory;
 			Gender = UserGender.Male;
 			Arm = Arm.RightArm;
@@ -211,6 +210,7 @@ namespace KinectCE
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+			engine = new WrapperCE.EngineCE();
 			Player = new SkeletonPlayer(Settings.Default.PlayerBufferSize, Dispatcher);
 			Recorder = new SkeletonRecorder(RecordPath);
 			Player.SkeletonFrameReady += new EventHandler<PlayerSkeletonFrameReadyEventArgs>(player_SkeletonFrameReady);
@@ -267,6 +267,7 @@ namespace KinectCE
 
 		private void Window_Closing(object sender, CancelEventArgs e)
 		{
+			engine.Dispose();
 			if (null != kinectSensor)
 			{
 				kinectSensor.Stop();

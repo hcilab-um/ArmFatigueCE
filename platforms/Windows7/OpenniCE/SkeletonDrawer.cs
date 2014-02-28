@@ -36,33 +36,33 @@ namespace OpenNICE
         return;
 
       // Render Torso
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.Head, SkeletonJoint.JointType.Neck);
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftShoulder, SkeletonJoint.JointType.Neck);
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightShoulder, SkeletonJoint.JointType.Neck);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.Head, SkeletonJoint.JointType.Neck);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftShoulder, SkeletonJoint.JointType.Neck);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightShoulder, SkeletonJoint.JointType.Neck);
 
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightShoulder, SkeletonJoint.JointType.Torso);
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftShoulder, SkeletonJoint.JointType.Torso);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightShoulder, SkeletonJoint.JointType.Torso);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftShoulder, SkeletonJoint.JointType.Torso);
 
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.Torso, SkeletonJoint.JointType.RightHip);
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.Torso, SkeletonJoint.JointType.LeftHip);
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightHip, SkeletonJoint.JointType.LeftHip);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.Torso, SkeletonJoint.JointType.RightHip);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.Torso, SkeletonJoint.JointType.LeftHip);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightHip, SkeletonJoint.JointType.LeftHip);
 
 
       // Left Arm
-      this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftShoulder, SkeletonJoint.JointType.LeftElbow);
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftElbow, SkeletonJoint.JointType.LeftHand);
+      this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftShoulder, SkeletonJoint.JointType.LeftElbow);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftElbow, SkeletonJoint.JointType.LeftHand);
 
       // Right Arm
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightShoulder, SkeletonJoint.JointType.RightElbow);
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightElbow, SkeletonJoint.JointType.RightHand);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightShoulder, SkeletonJoint.JointType.RightElbow);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightElbow, SkeletonJoint.JointType.RightHand);
 
       // Left Leg
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftHip, SkeletonJoint.JointType.LeftKnee);
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftKnee, SkeletonJoint.JointType.LeftFoot);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftHip, SkeletonJoint.JointType.LeftKnee);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.LeftKnee, SkeletonJoint.JointType.LeftFoot);
 
       // Right Leg
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightHip, SkeletonJoint.JointType.RightKnee);
-			this.DrawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightKnee, SkeletonJoint.JointType.RightFoot);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightHip, SkeletonJoint.JointType.RightKnee);
+			this.drawBone(skeleton, drawingContext, SkeletonJoint.JointType.RightKnee, SkeletonJoint.JointType.RightFoot);
 
 			// Render Joints
 			foreach (SkeletonJoint.JointType jointType in (SkeletonJoint.JointType[]) Enum.GetValues(typeof(SkeletonJoint.JointType)))
@@ -102,7 +102,7 @@ namespace OpenNICE
     /// <param name="drawingContext">drawing context to draw to</param>
     /// <param name="jointType0">joint to start drawing from</param>
     /// <param name="jointType1">joint to end drawing at</param>
-		private void DrawBone(Skeleton skeleton, DrawingContext drawingContext, SkeletonJoint.JointType jointType0, SkeletonJoint.JointType jointType1)
+		private void drawBone(Skeleton skeleton, DrawingContext drawingContext, SkeletonJoint.JointType jointType0, SkeletonJoint.JointType jointType1)
     {
 			if (skeleton.State != Skeleton.SkeletonState.Tracked)
 				return;

@@ -36,33 +36,33 @@ namespace KinectCE
         return;
 
       // Render Torso
-      this.DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
-      this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft);
-      this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderRight);
-      this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.Spine);
-      this.DrawBone(skeleton, drawingContext, JointType.Spine, JointType.HipCenter);
-      this.DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipLeft);
-      this.DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipRight);
+      this.drawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
+      this.drawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft);
+      this.drawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderRight);
+      this.drawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.Spine);
+      this.drawBone(skeleton, drawingContext, JointType.Spine, JointType.HipCenter);
+      this.drawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipLeft);
+      this.drawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipRight);
 
       // Left Arm
-      this.DrawBone(skeleton, drawingContext, JointType.ShoulderLeft, JointType.ElbowLeft);
-      this.DrawBone(skeleton, drawingContext, JointType.ElbowLeft, JointType.WristLeft);
-      this.DrawBone(skeleton, drawingContext, JointType.WristLeft, JointType.HandLeft);
+      this.drawBone(skeleton, drawingContext, JointType.ShoulderLeft, JointType.ElbowLeft);
+      this.drawBone(skeleton, drawingContext, JointType.ElbowLeft, JointType.WristLeft);
+      this.drawBone(skeleton, drawingContext, JointType.WristLeft, JointType.HandLeft);
 
       // Right Arm
-      this.DrawBone(skeleton, drawingContext, JointType.ShoulderRight, JointType.ElbowRight);
-      this.DrawBone(skeleton, drawingContext, JointType.ElbowRight, JointType.WristRight);
-      this.DrawBone(skeleton, drawingContext, JointType.WristRight, JointType.HandRight);
+      this.drawBone(skeleton, drawingContext, JointType.ShoulderRight, JointType.ElbowRight);
+      this.drawBone(skeleton, drawingContext, JointType.ElbowRight, JointType.WristRight);
+      this.drawBone(skeleton, drawingContext, JointType.WristRight, JointType.HandRight);
 
       // Left Leg
-      this.DrawBone(skeleton, drawingContext, JointType.HipLeft, JointType.KneeLeft);
-      this.DrawBone(skeleton, drawingContext, JointType.KneeLeft, JointType.AnkleLeft);
-      this.DrawBone(skeleton, drawingContext, JointType.AnkleLeft, JointType.FootLeft);
+      this.drawBone(skeleton, drawingContext, JointType.HipLeft, JointType.KneeLeft);
+      this.drawBone(skeleton, drawingContext, JointType.KneeLeft, JointType.AnkleLeft);
+      this.drawBone(skeleton, drawingContext, JointType.AnkleLeft, JointType.FootLeft);
 
       // Right Leg
-      this.DrawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
-      this.DrawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
-      this.DrawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
+      this.drawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
+      this.drawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
+      this.drawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
 
       // Render Joints
       foreach (Joint joint in skeleton.Joints)
@@ -115,7 +115,7 @@ namespace KinectCE
     /// <param name="drawingContext">drawing context to draw to</param>
     /// <param name="jointType0">joint to start drawing from</param>
     /// <param name="jointType1">joint to end drawing at</param>
-    private void DrawBone(Skeleton skeleton, DrawingContext drawingContext, JointType jointType0, JointType jointType1)
+    private void drawBone(Skeleton skeleton, DrawingContext drawingContext, JointType jointType0, JointType jointType1)
     {
       Joint joint0 = skeleton.Joints[jointType0];
       Joint joint1 = skeleton.Joints[jointType1];

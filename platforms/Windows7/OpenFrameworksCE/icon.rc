@@ -1,0 +1,8 @@
+// Icon Resource Definition
+#define MAIN_ICON                       102
+
+#if defined(_DEBUG)
+MAIN_ICON               ICON                    "C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\libs\openFrameworksCompiled\project\vs\icon_debug.ico"
+#else
+MAIN_ICON               ICON                    "C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\libs\openFrameworksCompiled\project\vs\icon.ico"
+#endif

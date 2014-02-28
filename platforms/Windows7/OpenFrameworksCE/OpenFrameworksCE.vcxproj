@@ -20,11 +20,13 @@
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -63,7 +65,8 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Program Files\Microsoft SDKs\Kinect\v1.7\inc;$(SolutionDir)\..\..\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>C:\Program Files\Microsoft SDKs\Kinect\v1.7\inc;$(SolutionDir)\..\..\include\;%(AdditionalIncludeDirectories);C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\libs;C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src</AdditionalIncludeDirectories>
       <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Link>
@@ -74,7 +77,7 @@
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Kinect10.lib;ArmFatigueCE-Debug-Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Kinect10.lib;ArmFatigueCE-$(Configuration)-$(Platform).lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files\Microsoft SDKs\Kinect\v1.7\lib\x86;$(SolutionDir)\..\..\lib\$(PlatformToolset)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AssemblyDebug>true</AssemblyDebug>
       <FixedBaseAddress>false</FixedBaseAddress>
@@ -84,12 +87,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat />
-      <AdditionalIncludeDirectories>C:\Program Files\Microsoft SDKs\Kinect\v1.7\inc;$(SolutionDir)\..\..\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\libs;C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -104,22 +107,43 @@
       <AdditionalDependencies>Kinect10.lib;ArmFatigueCE-$(Configuration)-$(Platform).lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files\Microsoft SDKs\Kinect\v1.7\lib\x86;$(SolutionDir)\..\..\lib\$(PlatformToolset)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
-    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\testApp.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxBaseGui.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxButton.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxGuiGroup.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxLabel.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxPanel.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxSlider.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxSliderGroup.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxToggle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\testApp.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxBaseGui.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxButton.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxGui.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxGuiGroup.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxLabel.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxPanel.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxSlider.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxSliderGroup.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxToggle.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\ArmText\Src\ArmFatigueCE\ArmFatigueCE-static.vcxproj">
       <Project>{48393cf9-f1c5-49eb-9508-49a2c3da6cd2}</Project>
     </ProjectReference>
-    <ProjectReference Include="C:\Program Files (x86)\OpenFrameworks\of_v0.7.4\libs\openFrameworksCompiled\project\vs2010\openframeworksLib.vcxproj">
+    <ProjectReference Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\libs\openFrameworksCompiled\project\vs\openframeworksLib.vcxproj">
       <Project>{5837595d-aca9-485c-8e76-729040ce4b0b}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/D_DEBUG %(AdditionalOptions)</AdditionalOptions>
+    </ResourceCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

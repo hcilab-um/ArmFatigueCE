@@ -182,6 +182,7 @@ namespace OpenNICE
 
 		private void Window_Closed(object sender, EventArgs e)
 		{
+			engine.Dispose();
 			kinectSensor.Dispose();
 		}
 

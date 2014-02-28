@@ -1,21 +1,50 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<ItemGroup>
-		<ClCompile Include="src\testApp.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
-		<ClCompile Include="src\main.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
-	</ItemGroup>
-	<ItemGroup>
-		<Filter Include="src">
-			<UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
-		</Filter>
-	</ItemGroup>
-	<ItemGroup>
-		<ClInclude Include="src\testApp.h">
-			<Filter>src</Filter>
-		</ClInclude>
-	</ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\testApp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxBaseGui.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxButton.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxGuiGroup.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxLabel.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxPanel.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxSlider.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxSliderGroup.cpp" />
+    <ClCompile Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxToggle.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons">
+      <UniqueIdentifier>{71834F65-F3A9-211E-73B8-DC85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxGui">
+      <UniqueIdentifier>{4F2A59AF-5F4E-704B-D067-EC13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxGui\src">
+      <UniqueIdentifier>{645E9533-4DCD-6179-1CDF-CB65}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\testApp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxBaseGui.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxButton.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxGui.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxGuiGroup.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxLabel.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxPanel.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxSlider.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxSliderGroup.h" />
+    <ClInclude Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src\ofxToggle.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc" />
+  </ItemGroup>
 </Project>
