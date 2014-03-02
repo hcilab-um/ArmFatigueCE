@@ -93,19 +93,19 @@ namespace OpenNICE
 			LeftCE = 0;
 			RightCE = 0;
 			IsEngineStart = false;
-			kinectSensor = new OpenKinect();
-			skeletonDrawer = new SkeletonDrawer(kinectSensor.SkeletonSensor);
 			InitializeComponent();
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+			kinectSensor = new OpenKinect();			
+			kinectSensor.StartColorSensor();
+			skeletonDrawer = new SkeletonDrawer(kinectSensor.SkeletonSensor);
 			kinectSensor.SkeletonSensor.OnNewData += new UserTracker.UserTrackerListenerDelegate(SkeletonSensor_OnNewData);
 		}
 
 		private void SkeletonSensor_OnNewData(UserTracker userTracker)
 		{
-
 			if (!userTracker.IsValid)
 				return;
 
@@ -182,6 +182,7 @@ namespace OpenNICE
 
 		private void Window_Closed(object sender, EventArgs e)
 		{
+			kinectSensor.SkeletonSensor.OnNewData -= new UserTracker.UserTrackerListenerDelegate(SkeletonSensor_OnNewData);
 			engine.Dispose();
 			kinectSensor.Dispose();
 		}

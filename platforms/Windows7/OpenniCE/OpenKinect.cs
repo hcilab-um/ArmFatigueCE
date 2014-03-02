@@ -37,13 +37,10 @@ namespace OpenNICE
 				HandleOpenNIError(OpenNI.Status.NoDevice);
 			kinectDevice = devices[0].OpenDevice();
 
-			//Start color Sensor
 			colorSensor = kinectDevice.CreateVideoStream(Device.SensorType.Color);
 			VideoMode[] videoModes = colorSensor.SensorInfo.GetSupportedVideoModes();
 			colorSensor.VideoMode = videoModes[1];
-			colorSensor.Start();
-			colorSensor.OnNewFrame += new VideoStream.VideoStreamNewFrame(ColorSensor_OnNewFrame);
-
+			
 			//Start Skeleton Sensor
 			HandleNiteError(NiTE.Initialize());
 			try
@@ -55,6 +52,13 @@ namespace OpenNICE
 				Console.WriteLine(ex);
 				return;
 			}
+		}
+
+		public void StartColorSensor()
+		{
+			//Start color Sensor
+			colorSensor.Start();
+			colorSensor.OnNewFrame += new VideoStream.VideoStreamNewFrame(ColorSensor_OnNewFrame);
 		}
 
 		private void ColorSensor_OnNewFrame(VideoStream vStream)
@@ -115,6 +119,7 @@ namespace OpenNICE
 
 		public void Dispose()
 		{
+			colorSensor.Stop();
 			OpenNI.Shutdown();
 			NiTE.Shutdown();
 		}
