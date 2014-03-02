@@ -13,17 +13,25 @@ void testApp::setup()
 	startButton.setup("Start", 100,50);
 	startButton.addListener(this, &testApp::startButtonClick);
 	startButton.setPosition(0, IMAGE_HEIGHT);
-	startButton.setBackgroundColor(ofColor::black);
+	startButton.setBackgroundColor(ofColor::dimGrey);
 	startButton.setTextColor(ofColor::white);
-	
+
 	stopButton.setup("Stop", 100,50);
 	stopButton.addListener(this, &testApp::stopButtonClick);
-	stopButton.setPosition(150, IMAGE_HEIGHT);
-	stopButton.setBackgroundColor(ofColor::black);
+	stopButton.setPosition(130, IMAGE_HEIGHT);
+	stopButton.setBackgroundColor(ofColor::dimGrey);
 	stopButton.setTextColor(ofColor::white);
-	labelCE.setup("CE: ", "0.00", 200, 50);
-	labelCE.setPosition(300, IMAGE_HEIGHT);
-	labelCE.setBackgroundColor(ofColor::black);
+
+	labelTime.setup("Time", "0.00 s", 150, 50);
+	labelTime.setBackgroundColor(ofColor::dimGrey);
+	labelTime.setPosition(350, IMAGE_HEIGHT);
+
+	labelCE.setup("CE", "0.00 %", 140, 50);
+	labelCE.setBackgroundColor(ofColor::dimGrey);
+	labelCE.setPosition(500, IMAGE_HEIGHT);
+
+	fatigueUpdate = ArmFatigueUpdate();
+	timeInSeconds = 0;
 }
 
 HRESULT testApp::startKinect()
@@ -77,7 +85,7 @@ HRESULT testApp::startKinect()
 	skeleton.eTrackingState = NUI_SKELETON_NOT_TRACKED;
 	lastUpdate = -1;
 	colorText.allocate(IMAGE_WIDTH, IMAGE_HEIGHT, GL_RGB);
-	startEngine = false;
+	isEngineStarted = false;
 	return hr;
 }
 
@@ -129,12 +137,15 @@ void testApp::processSkeleton()
 		}
 	}
 
-	if(skeleton.eTrackingState == NUI_SKELETON_TRACKED && startEngine)
+	if(skeleton.eTrackingState == NUI_SKELETON_TRACKED && isEngineStarted)
 	{
 		double deltaTimeMilliseconds = (currentTimeMilliseconds - lastUpdate);
 		if (lastUpdate == -1)
 			deltaTimeMilliseconds = 0;
 		lastUpdate = currentTimeMilliseconds;
+
+		timeInSeconds += deltaTimeMilliseconds/1000;
+		labelTime = ofToString(timeInSeconds, 2) + " s";
 
 		SkeletonData measuredArms = SkeletonData();
 		measuredArms.RightShoulderCms = convert(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT]);
@@ -147,8 +158,7 @@ void testApp::processSkeleton()
 		measuredArms.LeftWristCms			= convert(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_WRIST_LEFT]);
 		measuredArms.LeftHandCms			= convert(skeleton.SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT]);
 
-		ArmFatigueUpdate update = engineCE->ProcessNewSkeletonData(measuredArms, deltaTimeMilliseconds / 1000.00);
-		labelCE = ofToString(update.RightArm.ConsumedEndurance, 2);
+		fatigueUpdate = engineCE->ProcessNewSkeletonData(measuredArms, deltaTimeMilliseconds / 1000.00);
 	}
 
 }
@@ -195,6 +205,14 @@ void testApp::drawSkeleton(const NUI_SKELETON_DATA & skel)
   drawBone(skel, NUI_SKELETON_POSITION_HIP_RIGHT, NUI_SKELETON_POSITION_KNEE_RIGHT);
   drawBone(skel, NUI_SKELETON_POSITION_KNEE_RIGHT, NUI_SKELETON_POSITION_ANKLE_RIGHT);
   drawBone(skel, NUI_SKELETON_POSITION_ANKLE_RIGHT, NUI_SKELETON_POSITION_FOOT_RIGHT);
+	
+	if(isEngineStarted)
+	{
+		//draw circle to represent ArmStrength
+		ofSetColor(ofColor::red);
+		ofPoint shoulderRight = skeletonToScreen(skel.SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT], IMAGE_WIDTH, IMAGE_HEIGHT);
+		ofEllipse(shoulderRight, fatigueUpdate.RightArm.ArmStrength, fatigueUpdate.RightArm.ArmStrength);
+	}
 }
 
 void testApp::drawBone(const NUI_SKELETON_DATA & skel, NUI_SKELETON_POSITION_INDEX joint0, NUI_SKELETON_POSITION_INDEX joint1)
@@ -226,13 +244,17 @@ ofPoint testApp::skeletonToScreen(Vector4 skeletonPoint, const int width, const 
 
 void testApp::startButtonClick()
 {
-	startEngine = true;
+	if(isEngineStarted)
+		return;
 	engineCE->Reset();
+	fatigueUpdate = ArmFatigueUpdate();
+	timeInSeconds = 0;
+	isEngineStarted = true;
 }
 
 void testApp::stopButtonClick()
 {
-	startEngine = false;
+	isEngineStarted = false;
 }
 
 //--------------------------------------------------------------
@@ -244,6 +266,10 @@ void testApp::update()
 		processColor();
 	if ( WAIT_OBJECT_0 == WaitForSingleObject(skeletonEvent, 0) )
 		processSkeleton();
+	
+	labelTime = ofToString(timeInSeconds, 2) + " s";
+	labelCE = ofToString(fatigueUpdate.RightArm.ConsumedEndurance, 2) + " %";
+
 }
 
 void testApp::stopKinect()
@@ -285,11 +311,11 @@ void testApp::draw()
 	ofSetColor(ofColor::green);
 	ofSetLineWidth(SKELETON_STROKE);
 	drawSkeleton(skeleton);
-	ofSetColor(ofColor::black);
+	ofSetColor(ofColor::dimGray);
 	ofRect(0, IMAGE_HEIGHT, 0, IMAGE_WIDTH, 50);
 	startButton.draw();
 	stopButton.draw();
-
+	labelTime.draw();
 	labelCE.draw();
 }		
 

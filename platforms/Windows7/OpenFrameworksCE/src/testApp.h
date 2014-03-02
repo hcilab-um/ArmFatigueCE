@@ -33,10 +33,13 @@ private:
 	INuiSensor* pKinectSensor;
 	NUI_SKELETON_DATA skeleton;
 	FatigueEngine *engineCE;
-	bool startEngine;
+	ArmFatigueUpdate fatigueUpdate;
+
+	bool isEngineStarted;
 	ofTexture colorText;
 
 	long lastUpdate;
+	double timeInSeconds;
 
 	HRESULT startKinect();
 	void stopKinect();
@@ -56,7 +59,7 @@ public:
 	ofxButton startButton;
 	ofxButton stopButton;
 	ofxLabel labelCE;
-	ofxPanel gui;
+	ofxLabel labelTime;
 	
 	testApp(ofAppGlutWindow * window);
 	

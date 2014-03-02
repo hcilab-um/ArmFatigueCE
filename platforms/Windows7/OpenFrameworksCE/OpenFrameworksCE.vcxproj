@@ -92,7 +92,7 @@
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat />
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\libs;C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Microsoft SDKs\Kinect\v1.7\inc;$(SolutionDir)\..\..\include\;C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\libs;C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\addons\ofxGui\src;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
