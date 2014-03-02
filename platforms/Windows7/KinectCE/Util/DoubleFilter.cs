@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace KinectCE.Util
+namespace CEWorkbench.Util
 {
 	public class DoubleFilter
 	{

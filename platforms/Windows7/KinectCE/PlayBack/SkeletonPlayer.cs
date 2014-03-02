@@ -8,7 +8,7 @@ using Microsoft.Kinect;
 using System.ComponentModel;
 using System.Windows.Threading;
 
-namespace KinectCE.Playback
+namespace CEWorkbench.Playback
 {
 
 	public class SkeletonPlayer : INotifyPropertyChanged

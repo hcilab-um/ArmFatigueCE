@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Kinect;
 
-namespace KinectCE.Util
+namespace CEWorkbench.Util
 {
 
   public class SkeletonFilter

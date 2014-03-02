@@ -10,7 +10,7 @@ using System.Runtime.Serialization;
 using Microsoft.Kinect;
 using WrapperCE.InterOp;
 
-namespace KinectCE.Playback
+namespace CEWorkbench.Playback
 {
 
   public class SkeletonRecorder : INotifyPropertyChanged

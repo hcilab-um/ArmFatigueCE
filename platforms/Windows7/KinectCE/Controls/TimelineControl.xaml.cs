@@ -15,9 +15,9 @@ using WrapperCE.InterOp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using KinectCE.Fatigue;
+using CEWorkbench.Fatigue;
 
-namespace KinectCE.Controls
+namespace CEWorkbench.Controls
 {
 	/// <summary>
 	/// Interaction logic for TimelineControl.xaml

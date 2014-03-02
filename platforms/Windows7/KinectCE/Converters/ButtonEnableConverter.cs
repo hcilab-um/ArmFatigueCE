@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Data;
 using System.Windows;
 
-namespace KinectCE.Converters
+namespace CEWorkbench.Converters
 {
 	public class ButtonEnableConverter : IMultiValueConverter
 	{

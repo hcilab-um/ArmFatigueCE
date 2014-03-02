@@ -8,7 +8,7 @@ using System.Windows;
 using System.Diagnostics;
 
 
-namespace KinectCE
+namespace CEWorkbench
 {
 
   class SkeletonDrawer

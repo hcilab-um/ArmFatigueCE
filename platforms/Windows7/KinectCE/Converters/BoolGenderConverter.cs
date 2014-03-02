@@ -6,7 +6,7 @@ using System.Windows.Data;
 using System.Windows;
 using WrapperCE.InterOp;
 
-namespace KinectCE.Converters
+namespace CEWorkbench.Converters
 {
 	public class BooleanGenderConverter : IValueConverter
 	{

@@ -8,12 +8,12 @@ using log4net.Config;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("KinectCE")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Consumed Endurance (CE) Workbench - 1.0 beta")]
+[assembly: AssemblyDescription("A software workbench to calculate Consumed Endurance (CE), an arm fatigue metric for mid-air interactions")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("KinectCE")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyCompany("HCI lab - University of Manitoba")]
+[assembly: AssemblyProduct("CEWorkbench")]
+[assembly: AssemblyCopyright("Copyright © 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

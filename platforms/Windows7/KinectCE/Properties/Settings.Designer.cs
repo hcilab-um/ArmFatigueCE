@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace KinectCE.Properties {
+namespace CEWorkbench.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -68,6 +68,18 @@ namespace KinectCE.Properties {
             }
             set {
                 this["AutoStartThreshold"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15")]
+        public double AutoStopThreshold {
+            get {
+                return ((double)(this["AutoStopThreshold"]));
+            }
+            set {
+                this["AutoStopThreshold"] = value;
             }
         }
     }

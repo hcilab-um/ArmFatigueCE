@@ -6,7 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.IO;
 
-namespace KinectCE
+namespace CEWorkbench
 {
   public partial class App : Application
   {

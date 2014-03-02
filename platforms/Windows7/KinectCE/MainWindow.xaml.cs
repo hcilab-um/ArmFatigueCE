@@ -14,25 +14,26 @@ using System.Windows.Shapes;
 using Microsoft.Kinect;
 using System.ComponentModel;
 using System.Windows.Media.Effects;
-using KinectCE.Playback;
-using KinectCE.Properties;
+using CEWorkbench.Playback;
+using CEWorkbench.Properties;
 using WrapperCE.InterOp;
 using System.Collections.ObjectModel;
-using KinectCE.Controls;
+using CEWorkbench.Controls;
 using System.IO;
 using log4net.Appender;
 using log4net.Config;
 using log4net;
-using KinectCE.Fatigue;
-using KinectCE.Util;
+using CEWorkbench.Fatigue;
+using CEWorkbench.Util;
 
-namespace KinectCE
+namespace CEWorkbench
 {
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
 		private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainWindow));
 
 		#region Private Variable
+
 		private const double TORQUE_MODIFIER = 2d;
 		private KinectSensor kinectSensor = null;
 		private SkeletonRecorder recorder;
@@ -55,6 +56,7 @@ namespace KinectCE
 		private string recordPath;
 		private Arm arm;
 		private UserGender gender;
+
 		#endregion
 
 		#region Property
@@ -64,6 +66,7 @@ namespace KinectCE
 		public ObservableCollection<FatigueInfo> FatigueInfoCollection { get; set; }
 		
 		public SkeletonFilter SkeletonFilter { get; set; }
+
 		public DoubleFilter DoubleFilter { get; set; }
 
 		public bool IsKinectConnected
@@ -165,6 +168,7 @@ namespace KinectCE
 				OnPropertyChanged("Gender");
 			}
 		}
+
 		#endregion
 
 		private EventHandler playbackHandler;
@@ -176,6 +180,7 @@ namespace KinectCE
 			RecordPath = Environment.CurrentDirectory;
 			Gender = UserGender.Male;
 			Arm = Arm.RightArm;
+
 			IsAutoStart = false;
 			FatigueInfoCollection = new ObservableCollection<FatigueInfo>();
 			SkeletonFilter = new SkeletonFilter(Settings.Default.SkeletonBufferSize);
@@ -395,9 +400,10 @@ namespace KinectCE
 		private void AutoMeasure(ArmData data)
 		{
 			double triggerStrength = DoubleFilter.FilterData(data.ArmStrength);
+
 			if (!Recorder.IsRecording && triggerStrength >= Settings.Default.AutoStartThreshold)
 				BtStartMeasure_Click(null, null);
-			else if (Recorder.IsRecording && triggerStrength < Settings.Default.AutoStartThreshold)
+			else if (Recorder.IsRecording && triggerStrength < Settings.Default.AutoStopThreshold)
 				BtStopMeasure_Click(null, null);
 		}
 
@@ -474,7 +480,7 @@ namespace KinectCE
 
 			if (timeLineList.Count == 0)
 			{
-				MessageBox.Show("No Fatigue Data for Export.");
+				MessageBox.Show("No fatigue data is avaiable to export.");
 				return;
 			}
 
@@ -503,11 +509,17 @@ namespace KinectCE
 
 		private void BtSetting_Click(object sender, RoutedEventArgs e)
 		{
+			//Stops any current measurement before showing the settings screen.
+			// This is in case any settings, particularly gender, are  changed.
+			BtStopMeasure_Click(this, null);
+
 			SettingW = new SettingWindow() { RecordPath = RecordPath, Gender = Gender, Arm = Arm };
 			SettingW.ShowDialog();
+
 			Gender = SettingW.Gender;
 			Arm = SettingW.Arm;
 			RecordPath = SettingW.RecordPath;
+
 			engine.SetGender(Gender);
 		}
 
@@ -518,4 +530,5 @@ namespace KinectCE
 		}
 
 	}
+
 }

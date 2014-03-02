@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Data;
 
-namespace KinectCE.Converters
+namespace CEWorkbench.Converters
 {
 	public class MinusConverter : IValueConverter
 	{

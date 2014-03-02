@@ -5,7 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using WrapperCE.InterOp;
 
-namespace KinectCE.Fatigue
+namespace CEWorkbench.Fatigue
 {
 	public class ArmData : INotifyPropertyChanged
 	{

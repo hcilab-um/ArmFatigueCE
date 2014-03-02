@@ -16,17 +16,20 @@ using WrapperCE.InterOp;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-namespace KinectCE
+namespace CEWorkbench
 {
 	/// <summary>
 	/// Interaction logic for SettingWindow.xaml
 	/// </summary>
 	public partial class SettingWindow : Window, INotifyPropertyChanged
 	{
+
 		#region Private Value
+
 		private string recordPath;
 		private Arm arm;
 		private UserGender gender;
+
 		#endregion
 
 		public string RecordPath
@@ -77,9 +80,10 @@ namespace KinectCE
 
 		private void btChangeDirectory_Click(object sender, RoutedEventArgs e)
 		{
-			var dialog = new FolderBrowserDialog();
+			FolderBrowserDialog dialog = new FolderBrowserDialog();
 			DialogResult result = dialog.ShowDialog();
-			RecordPath = dialog.SelectedPath;
+			if(result == System.Windows.Forms.DialogResult.OK)
+				RecordPath = dialog.SelectedPath;
 		}
 
 		private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)

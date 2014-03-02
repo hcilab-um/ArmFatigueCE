@@ -6,7 +6,7 @@ using System.Windows.Data;
 using WrapperCE.InterOp;
 using System.Windows;
 
-namespace KinectCE.Converters
+namespace CEWorkbench.Converters
 {
 	public class BooleanArmConverter : IValueConverter
 	{
