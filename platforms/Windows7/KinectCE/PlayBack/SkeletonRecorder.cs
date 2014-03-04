@@ -123,7 +123,7 @@ namespace CEWorkbench.Playback
       IsRecording = false;
       writer.Flush();
       writer.Close();
-
+			writer.Dispose();
       if (saveFile && FramesRecorded != 0)
       {
         String newFileName = folderPath + @"\" + qualifiedName + ".kr";

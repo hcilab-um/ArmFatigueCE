@@ -38,8 +38,7 @@ namespace OpenNICE
 			kinectDevice = devices[0].OpenDevice();
 
 			colorSensor = kinectDevice.CreateVideoStream(Device.SensorType.Color);
-			VideoMode[] videoModes = colorSensor.SensorInfo.GetSupportedVideoModes();
-			colorSensor.VideoMode = videoModes[1];
+			colorSensor.VideoMode = colorSensor.SensorInfo.GetSupportedVideoModes()[1];
 			
 			//Start Skeleton Sensor
 			HandleNiteError(NiTE.Initialize());
@@ -50,7 +49,6 @@ namespace OpenNICE
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex);
-				return;
 			}
 		}
 
@@ -86,13 +84,11 @@ namespace OpenNICE
 					if (colorFrame == null || !colorFrame.IsValid)
 						return null;
 
-					var width = colorFrame.FrameSize.Width;
-					var height = colorFrame.FrameSize.Height;
 					if (colorBitmap == null)
-						colorBitmap = new System.Windows.Media.Imaging.WriteableBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Rgb24, null);
+						colorBitmap = new System.Windows.Media.Imaging.WriteableBitmap(colorFrame.FrameSize.Width, colorFrame.FrameSize.Height, 96, 96, System.Windows.Media.PixelFormats.Rgb24, null);
 
 					colorBitmap.Lock();
-					colorBitmap.WritePixels(new System.Windows.Int32Rect(0, 0, width, height), colorFrame.Data, colorFrame.DataSize, colorFrame.DataStrideBytes);
+					colorBitmap.WritePixels(new System.Windows.Int32Rect(0, 0, colorFrame.FrameSize.Width, colorFrame.FrameSize.Height), colorFrame.Data, colorFrame.DataSize, colorFrame.DataStrideBytes);
 					colorBitmap.Unlock();
 
 					colorFrame.Dispose();

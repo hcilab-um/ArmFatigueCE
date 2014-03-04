@@ -272,7 +272,6 @@ namespace CEWorkbench
 
 		private void Window_Closing(object sender, CancelEventArgs e)
 		{
-			engine.Dispose();
 			if (null != kinectSensor)
 			{
 				kinectSensor.Stop();
@@ -280,7 +279,7 @@ namespace CEWorkbench
 			}
 
 			this.ColorImageReady -= MainWindow_ColorImageReady;
-
+			engine.Dispose();
 			Recorder.Stop(false, true, "", UserGender.Male);
 		}
 
@@ -443,7 +442,10 @@ namespace CEWorkbench
 		private void BtStopMeasure_Click(object sender, RoutedEventArgs e)
 		{
 			if (PlayBackFromFile)
+			{
+				MessageBox.Show("Can not stop when playing fatigue data");
 				return;
+			}
 
 			String qualifiedName = String.Format("{0}-{1}-{2}", CurrentFatigueInfo.DateTime.ToString("MMddyy-HHmmss-fff"),
 																						CurrentFatigueInfo.Gender.ToString().ToLower(), currentFatigueInfo.SelectedArm);
@@ -484,14 +486,9 @@ namespace CEWorkbench
 				return;
 			}
 
-			XmlConfigurator.Configure();
-			var hierarchy = (log4net.Repository.Hierarchy.Hierarchy)LogManager.GetRepository();
-			RollingFileAppender appender = (RollingFileAppender)hierarchy.Root.Appenders[0];
-
-			for (int i = 0; i < timeLineList.Count; i++)
-				logger.Info(timeLineList[i].GetEffortLog());
 			Microsoft.Win32.SaveFileDialog dialog = new Microsoft.Win32.SaveFileDialog();
 			dialog.InitialDirectory = Environment.CurrentDirectory;
+			dialog.FileName = "capture-log";
 			dialog.DefaultExt = ".csv";
 			dialog.Filter = "Text documents (.csv)|*.csv";
 
@@ -499,27 +496,38 @@ namespace CEWorkbench
 
 			if (result == true)
 			{
+				XmlConfigurator.Configure();
+				var hierarchy = (log4net.Repository.Hierarchy.Hierarchy)LogManager.GetRepository();
+				RollingFileAppender appender = (RollingFileAppender)hierarchy.Root.Appenders[0];
+				for (int i = 0; i < timeLineList.Count; i++)
+					logger.Info(timeLineList[i].GetEffortLog());
 				string filename = dialog.FileName;
+				if (appender.File.Equals(filename))
+					return;
 				File.Delete(filename);
 				File.Move(appender.File, filename);
 			}
-			else
-				File.Delete(appender.File);
 		}
 
 		private void BtSetting_Click(object sender, RoutedEventArgs e)
 		{
+			if (PlayBackFromFile)
+			{
+				MessageBox.Show("Can not change setting when playing fatigue data");
+				return;
+			}
+
 			//Stops any current measurement before showing the settings screen.
 			// This is in case any settings, particularly gender, are  changed.
+			IsAutoStart = false;
 			BtStopMeasure_Click(this, null);
-
+			
 			SettingW = new SettingWindow() { RecordPath = RecordPath, Gender = Gender, Arm = Arm };
 			SettingW.ShowDialog();
 
 			Gender = SettingW.Gender;
 			Arm = SettingW.Arm;
 			RecordPath = SettingW.RecordPath;
-
 			engine.SetGender(Gender);
 		}
 

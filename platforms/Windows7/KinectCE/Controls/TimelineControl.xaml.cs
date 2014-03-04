@@ -122,37 +122,28 @@ namespace CEWorkbench.Controls
 				ConsumeEndurance = fatigueInfo.LeftData.ConsumedEndurance;
 			else
 				ConsumeEndurance = fatigueInfo.RightData.ConsumedEndurance;
-
-			//Shrink the graph if needed
+			
+			//Shrink the polyline if needed
+			double totalTimeFactor = 1;
 			if (TotalTimeInSeconds > LenghtInSeconds)
+				totalTimeFactor = 1.5;
+			double maxValueFactor = 1;
+			if (ConsumeEndurance > MaxValue)
+				maxValueFactor = 1.5;
+			for (int i = 0; i < plotGraphRight.Points.Count; i++)
 			{
-				double newLengthInSeconds = LenghtInSeconds * 1.5;
-				for (int i = 0; i < plotGraphRight.Points.Count; i++)
+				plotGraphRight.Points[i] = new Point()
 				{
-					plotGraphRight.Points[i] = new Point()
-					{
-						X = plotGraphRight.Points[i].X * LenghtInSeconds / newLengthInSeconds,
-						Y = plotGraphRight.Points[i].Y
-					};
-				}
-				LenghtInSeconds = newLengthInSeconds;
+					X = plotGraphRight.Points[i].X / totalTimeFactor,
+					Y = plotGraphRight.Points[i].Y / maxValueFactor
+				};
 			}
 
-			if (ConsumeEndurance > MaxValue)
-			{
-				double newMaxValue = MaxValue * 1.5;
-				for (int i = 0; i < plotGraphRight.Points.Count; i++)
-				{
-					plotGraphRight.Points[i] = new Point()
-					{
-						X = plotGraphRight.Points[i].X,
-						Y = plotGraphRight.Points[i].Y * MaxValue / newMaxValue
-					};
-				}
-				MaxValue = newMaxValue;
-			}
+			LenghtInSeconds *= totalTimeFactor;
+			MaxValue *= maxValueFactor;
 
 			TimePlotValue = TotalTimeInSeconds * (cGraphContent.Width) / LenghtInSeconds;
+			plotGraphRight.Points.Add(new Point(TimePlotValue, ConsumeEndurance * (cGraphContent.Height) / MaxValue));
 
 			FatigueInfo newFatigueInfo = new FatigueInfo()
 			{
@@ -163,11 +154,7 @@ namespace CEWorkbench.Controls
 				LeftData = new ArmData(fatigueInfo.LeftData),
 				RightData = new ArmData(fatigueInfo.RightData)
 			};
-
 			fatigueInfoList.Add(newFatigueInfo);
-
-			Point newPoint = new Point(TimePlotValue, ConsumeEndurance * (cGraphContent.Height) / MaxValue);
-			plotGraphRight.Points.Add(newPoint);
 		}
 
 		private void BtDeleteClick(object sender, RoutedEventArgs e)
@@ -216,27 +203,17 @@ namespace CEWorkbench.Controls
 
 			var selectedFatigue = fatigueInfoList.OrderBy(fatigue => Math.Abs(fatigue.TotalTimeInSeconds - timeInSecond)).First();
 			string averageEndurance = "Infinity";
+			ArmData armData = selectedFatigue.RightData;
+			if (selectedFatigue.SelectedArm == Arm.LeftArm)
+				armData = selectedFatigue.LeftData;
 
-			if (selectedFatigue.SelectedArm == Arm.RightArm)
-			{
-				if (selectedFatigue.RightData.AvgEndurance < 1000)
-					averageEndurance = selectedFatigue.RightData.AvgEndurance.ToString("F2");
-				polyLine.ToolTip = string.Format("CE: {0} %\nTime: {1} sec\nAvg Strength: {2} %\nAvg Endurance: {3} sec",
-																	selectedFatigue.RightData.ConsumedEndurance.ToString("F2"),
+			if (armData.AvgEndurance < 3000)
+				averageEndurance = armData.AvgEndurance.ToString("F2");
+			polyLine.ToolTip = string.Format("CE: {0} %\nTime: {1} sec\nAvg Strength: {2} %\nAvg Endurance: {3} sec",
+																	armData.ConsumedEndurance.ToString("F2"),
 																	selectedFatigue.TotalTimeInSeconds.ToString("F2"),
-																	selectedFatigue.RightData.ArmStrength.ToString("F2"),
+																	armData.ArmStrength.ToString("F2"),
 																	averageEndurance);
-			}
-			else
-			{
-				if (selectedFatigue.LeftData.AvgEndurance < 1000)
-					averageEndurance = selectedFatigue.LeftData.AvgEndurance.ToString("F2");
-				polyLine.ToolTip = string.Format("CE: {0} %\nTime: {1} sec\nAvg Strength: {2} %\nAvg Endurance: {3} sec",
-																	selectedFatigue.LeftData.ConsumedEndurance.ToString("F2"),
-																	selectedFatigue.TotalTimeInSeconds.ToString("F2"),
-																	selectedFatigue.LeftData.ArmStrength.ToString("F2"),
-																	averageEndurance);
-			}
 		}
 
 		public string GetEffortLog()

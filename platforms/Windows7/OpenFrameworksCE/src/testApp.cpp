@@ -297,7 +297,6 @@ void testApp::stopKinect()
 void testApp::exit()
 {
 	stopKinect();
-
 	startButton.removeListener(this, &testApp::startButtonClick);
 	stopButton.removeListener(this, &testApp::stopButtonClick);
 }
