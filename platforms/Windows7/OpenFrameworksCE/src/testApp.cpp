@@ -249,6 +249,7 @@ void testApp::startButtonClick()
 	engineCE->Reset();
 	fatigueUpdate = ArmFatigueUpdate();
 	timeInSeconds = 0;
+	lastUpdate = -1;
 	isEngineStarted = true;
 }
 

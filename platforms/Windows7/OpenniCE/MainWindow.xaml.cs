@@ -194,7 +194,8 @@ namespace OpenNICE
 			{
 				dc.DrawRectangle(brush, new Pen(Brushes.Black, 0.5), new Rect(0, 0, kinectSensor.FrameWidth, kinectSensor.FrameHeight));
 				skeletonDrawer.DrawSkeleton(skeleton, dc);
-				skeletonDrawer.DrawCirlce(skeleton, NiTEWrapper.SkeletonJoint.JointType.RightShoulder, dc, armFatigueUpdate.RightArm.ArmStrength / TORQUE_MODIFIER);
+				if(IsEngineStart)
+					skeletonDrawer.DrawCirlce(skeleton, NiTEWrapper.SkeletonJoint.JointType.RightShoulder, dc, armFatigueUpdate.RightArm.ArmStrength / TORQUE_MODIFIER);
 			}
 
 			DrawingImage dImageSource = new DrawingImage(dGroup);
