@@ -136,9 +136,6 @@
     <ProjectReference Include="..\..\..\..\ArmText\Src\ArmFatigueCE\ArmFatigueCE-static.vcxproj">
       <Project>{48393cf9-f1c5-49eb-9508-49a2c3da6cd2}</Project>
     </ProjectReference>
-    <ProjectReference Include="C:\Program Files (x86)\OpenFrameworks\of_v0.8.0\libs\openFrameworksCompiled\project\vs\openframeworksLib.vcxproj">
-      <Project>{5837595d-aca9-485c-8e76-729040ce4b0b}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc">

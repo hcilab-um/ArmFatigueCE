@@ -181,12 +181,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WrapperCE\WrapperCE.vcxproj">
-      <Project>{1873A84D-73E1-4667-BB0A-4D0003F83C44}</Project>
-      <Name>WrapperCE</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
